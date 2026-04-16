@@ -1,0 +1,54 @@
+# Lint, test, typecheck on MRs and on production/development branches.
+# Docker build + push to GitLab Container Registry only on those branches.
+#
+# Branches: production → prod site image tag; development → dev site image tag.
+# Registry image: $CI_REGISTRY_IMAGE:<branch> and :sha-<short>
+
+workflow:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == "production"
+    - if: $CI_COMMIT_BRANCH == "development"
+
+default:
+  image: oven/bun:1.3-alpine
+  interruptible: true
+
+stages:
+  - lint
+  - test
+  - docker
+
+variables:
+  DOCKER_TLS_CERTDIR: ""
+  DOCKER_HOST: tcp://docker:2375
+
+lint:
+  stage: lint
+  script:
+    - bun install --frozen-lockfile
+    - bun run lint
+
+test:
+  stage: test
+  script:
+    - bun install --frozen-lockfile
+    - bun test
+    - bun run typecheck
+
+docker_release:
+  stage: docker
+  image: docker:27-cli
+  services:
+    - name: docker:27-dind
+      alias: docker
+  needs: [lint, test]
+  rules:
+    - if: $CI_COMMIT_BRANCH == "production"
+    - if: $CI_COMMIT_BRANCH == "development"
+  before_script:
+    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" "$CI_REGISTRY"
+  script:
+    - docker build -t "$CI_REGISTRY_IMAGE:$CI_COMMIT_BRANCH" -t "$CI_REGISTRY_IMAGE:sha-$CI_COMMIT_SHORT_SHA" .
+    - docker push "$CI_REGISTRY_IMAGE:$CI_COMMIT_BRANCH"
+    - docker push "$CI_REGISTRY_IMAGE:sha-$CI_COMMIT_SHORT_SHA"
