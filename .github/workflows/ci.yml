@@ -1,11 +1,16 @@
-# Lint, test, typecheck, and Docker build on every PR.
-# On push to `production` or `development`, also push images to ghcr.io.
+# - Push / PR → lint + test only (catches broken code before it ships).
+# - Published GitHub Release → build + push Docker image to ghcr.io.
 #
-# Self-hosted runner: Git + Docker Engine (Buildx). Runner user must be able to
-# run `docker`. Bun comes from oven-sh/setup-bun.
+# Images are tagged:
+#   :<release tag>     e.g. v0.1.0 or v0.0.1-dev
+#   :sha-<full commit>
+#   :latest            only when the release target branch is `production`
+#   :latest-dev        only when the release target branch is `development`
 #
-# Required for pushes: default GITHUB_TOKEN with packages:write (enabled below).
-# Image: ghcr.io/<owner>/<repo lowercase>:<branch> and :sha-<short>
+# Create a Release from the GitHub UI (targeting `development` or `production`),
+# publish it, then pull e.g. docker pull ghcr.io/owner/playwolf.net:v0.0.1-dev
+#
+# Self-hosted runner: Git + Docker (Buildx). Bun via oven-sh/setup-bun.
 
 name: CI
 
@@ -15,16 +20,16 @@ on:
   pull_request:
     branches: [production, development]
   workflow_dispatch:
+  release:
+    types: [published]
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref || github.event.release.tag_name || github.run_id }}
   cancel-in-progress: true
 
 permissions:
   contents: read
   packages: write
-  # Note: avoid Buildx `cache-to: type=gha` on self-hosted — it hits GitHub’s cache
-  # API; outages return HTML and break the build with JSON parse errors.
 
 env:
   REGISTRY: ghcr.io
@@ -35,6 +40,8 @@ jobs:
     runs-on: self-hosted
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name == 'release' && github.event.release.tag_name || github.ref }}
 
       - uses: oven-sh/setup-bun@v2
         with:
@@ -51,6 +58,8 @@ jobs:
     runs-on: self-hosted
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name == 'release' && github.event.release.tag_name || github.ref }}
 
       - uses: oven-sh/setup-bun@v2
         with:
@@ -66,11 +75,14 @@ jobs:
         run: bun run typecheck
 
   docker:
-    name: Docker
+    name: Docker (release only)
     runs-on: self-hosted
     needs: [lint, test]
+    if: github.event_name == 'release'
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.release.tag_name }}
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -82,18 +94,36 @@ jobs:
           echo "name=${{ env.REGISTRY }}/${lower}" >> "$GITHUB_OUTPUT"
 
       - name: Log in to GHCR
-        if: github.event_name == 'push'
         uses: docker/login-action@v3
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build (and push on branch push)
+      - name: Image tags (version, sha, latest / latest-dev)
+        id: tags
+        env:
+          IMG: ${{ steps.image.outputs.name }}
+          REL: ${{ github.event.release.tag_name }}
+          SHA: ${{ github.sha }}
+          TARGET: ${{ github.event.release.target_commitish }}
+        run: |
+          {
+            echo "list<<EOF"
+            echo "${IMG}:${REL}"
+            echo "${IMG}:sha-${SHA}"
+            if [ "$TARGET" = "production" ]; then
+              echo "${IMG}:latest"
+            fi
+            if [ "$TARGET" = "development" ]; then
+              echo "${IMG}:latest-dev"
+            fi
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Build and push
         uses: docker/build-push-action@v6
         with:
           context: .
-          push: ${{ github.event_name == 'push' }}
-          tags: |
-            ${{ steps.image.outputs.name }}:${{ github.ref_name }}
-            ${{ steps.image.outputs.name }}:sha-${{ github.sha }}
+          push: true
+          tags: ${{ steps.tags.outputs.list }}
