@@ -1,0 +1,5 @@
+# Default: development stack (GHCR image tagged :latest-dev by CI).
+# Production: docker compose -f docker-compose.prod.yml up -d
+
+include:
+  - docker-compose.dev.yml
