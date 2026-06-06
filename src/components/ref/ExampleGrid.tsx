@@ -44,14 +44,25 @@ export function ExampleGrid({
         <ul className="grid grid-cols-2 gap-4 sm:grid-cols-3">
           {examples.map((example) => {
             const detailHref = `${basePath}/${example.slug}`;
+            const thumbSizes = "(max-width: 640px) 50vw, 33vw";
             const thumb = (
-              <Image
-                src={example.src}
-                alt={example.title}
-                fill
-                sizes="(max-width: 640px) 50vw, 33vw"
-                className="object-cover"
-              />
+              <>
+                <Image
+                  src={example.src}
+                  alt=""
+                  aria-hidden
+                  fill
+                  sizes={thumbSizes}
+                  className="scale-110 object-cover blur-2xl"
+                />
+                <Image
+                  src={example.src}
+                  alt={example.title}
+                  fill
+                  sizes={thumbSizes}
+                  className="relative z-10 object-contain"
+                />
+              </>
             );
 
             return (
