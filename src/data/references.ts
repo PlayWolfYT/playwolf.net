@@ -1,16 +1,34 @@
+import type { StaticImageData } from "next/image";
+
+import nsfwRefSheet from "@/assets/art/nsfw/reference-sheet.jpg";
+import backshots from "@/assets/art/nsfw/examples/backshots.png";
+import cocoBackview from "@/assets/art/nsfw/examples/coco_backview.png";
+import originalCharacterArt from "@/assets/art/nsfw/examples/original-character-art.png";
+import steppiesDeastratit from "@/assets/art/nsfw/examples/steppies_deastratit.PNG";
+import wybeHalloween from "@/assets/art/nsfw/examples/wybe_halloween.png";
+import ychFriendHand from "@/assets/art/nsfw/examples/ych_friend_hand.jpg";
+import sfwRefSheet from "@/assets/art/sfw/reference-sheet.jpg";
+import kissCamTaire from "@/assets/art/sfw/examples/kiss_cam_taire.png";
+import maw from "@/assets/art/sfw/examples/maw.jpg";
+import playwolfPawbsYch from "@/assets/art/sfw/examples/playwolf_pawbs_ych.png";
+import sillyPlay from "@/assets/art/sfw/examples/silly_play.png";
+import velvetTaire from "@/assets/art/sfw/examples/velvet_taire.PNG";
+
 /**
  * Reference / art data. Edit this file directly to add reference sheets or
  * examples — TypeScript provides type-checking and autocomplete for every
  * field.
  *
- * Image `src` values are paths under `public/` (e.g. `/examples/foo.png`).
+ * Image `src` values are static imports from `src/assets/art/` — add the file,
+ * import it at the top of this file, and reference the binding below.
+ * `next build` fails if the import path is wrong or the file is missing.
  *
  * Full example entry (every field is optional except slug/title/src/nsfw):
  *
  *   {
  *     slug: "fluffy-by-someartist",
  *     title: "Fluffy",
- *     src: "/examples/fluffy.png",
+ *     src: fluffyImage,
  *     nsfw: false,
  *     artist: {
  *       name: "SomeArtist",
@@ -116,8 +134,8 @@ export type Example<T extends string = string> = {
   slug: ValidateSlug<T>;
   /** Human-friendly title shown in the UI and embeds */
   title: string;
-  /** Path under `public/`, e.g. `/nsfw-reference.png` */
-  src: string;
+  /** Static import from `src/assets/art/` */
+  src: StaticImageData;
   /** When true, hidden from the SFW grid and gated behind the blur reveal */
   nsfw: boolean;
   /** Optional crediting info shown in a bar below the full image */
@@ -128,7 +146,7 @@ export type RefSheetKey = "sfw" | "nsfw";
 
 export type RefSheet = {
   title: string;
-  src: string;
+  src: StaticImageData;
   description?: string;
   /** When true, the sheet is gated behind the blur reveal */
   nsfw: boolean;
@@ -290,14 +308,14 @@ const artists = {
 export const refSheets: Record<RefSheetKey, RefSheet> = {
   sfw: {
     title: "SFW Reference Sheet",
-    src: "/art/sfw/reference-sheet.jpg",
+    src: sfwRefSheet,
     description: "Official SFW reference sheet.",
     nsfw: false,
     artist: artists.Deathlight,
   },
   nsfw: {
     title: "NSFW Reference Sheet",
-    src: "/art/nsfw/reference-sheet.jpg",
+    src: nsfwRefSheet,
     description: "Official NSFW reference sheet (18+).",
     nsfw: true,
     artist: artists.Deathlight,
@@ -319,34 +337,34 @@ export const examples: Example[] = defineExamples([
   {
     slug: "maw",
     title: "Maw Shot",
-    src: "/art/sfw/examples/maw.jpg",
+    src: maw,
     nsfw: false,
     artist: artists.Deathlight,
   },
   {
     slug: "pawbs-ych",
     title: "Pawbs YCH",
-    src: "/art/sfw/examples/playwolf_pawbs_ych.png",
+    src: playwolfPawbsYch,
     nsfw: false,
     artist: artists.HaruClearing,
   },
   {
     slug: "silly",
     title: "Silly",
-    src: "/art/sfw/examples/silly_play.png",
+    src: sillyPlay,
     nsfw: false,
   },
   {
     slug: "lifted-w-taire",
     title: "Lifted (with Taire)",
-    src: "/art/sfw/examples/velvet_taire.png",
+    src: velvetTaire,
     nsfw: false,
     artist: artists.Velvet,
   },
   {
     slug: "kiss-cam-w-taire",
     title: "Kiss Cam (With Taire)",
-    src: "/art/sfw/examples/kiss_cam_taire.png",
+    src: kissCamTaire,
     nsfw: false,
     artist: artists.Sir_Burnt,
   },
@@ -355,42 +373,42 @@ export const examples: Example[] = defineExamples([
   {
     slug: "original-character-art",
     title: "Original Character Art",
-    src: "/art/nsfw/examples/original-character-art.png",
+    src: originalCharacterArt,
     nsfw: true,
     artist: artists.Deathlight,
   },
   {
     slug: "backview",
     title: "Back View",
-    src: "/art/nsfw/examples/coco_backview.png",
+    src: cocoBackview,
     nsfw: true,
     artist: artists.CocoStinks,
   },
   {
     slug: "steppies",
     title: "Steppies~",
-    src: "/art/nsfw/examples/steppies_deastratit.png",
+    src: steppiesDeastratit,
     nsfw: true,
     artist: artists.Deastratit,
   },
   {
     slug: "backshots",
     title: "Backshots",
-    src: "/art/nsfw/examples/backshots.png",
+    src: backshots,
     nsfw: true,
     artist: artists.masitadearte,
   },
   {
     slug: "halloween",
     title: "Halloween Mummie",
-    src: "/art/nsfw/examples/wybe_halloween.png",
+    src: wybeHalloween,
     nsfw: true,
     artist: artists.Wybe,
   },
   {
     slug: "friendly-hands",
     title: "Friendly Hands YCH",
-    src: "/art/nsfw/examples/ych_friend_hand.jpg",
+    src: ychFriendHand,
     nsfw: true,
     artist: artists.LapSnep,
   },

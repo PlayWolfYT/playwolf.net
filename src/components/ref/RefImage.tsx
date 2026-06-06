@@ -1,12 +1,11 @@
-import Image from "next/image";
+import Image, { type StaticImageData } from "next/image";
 import type { Artist } from "@/lib/references";
-import { getImageDimensions } from "@/lib/embed";
 import { ArtistBar } from "@/components/ref/ArtistBar";
 import { BackButton } from "@/components/ref/BackButton";
 import { NsfwReveal } from "@/components/ref/NsfwReveal";
 
 type RefImageProps = {
-  src: string;
+  src: StaticImageData;
   alt: string;
   title: string;
   nsfw?: boolean;
@@ -21,7 +20,7 @@ type RefImageProps = {
  * flag (the blur is a CSS-only overlay), so direct links and crawlers always
  * receive the unblurred asset.
  */
-export async function RefImage({
+export function RefImage({
   src,
   alt,
   title,
@@ -29,16 +28,12 @@ export async function RefImage({
   description,
   artist,
 }: RefImageProps) {
-  const dimensions = await getImageDimensions(src);
-  const width = dimensions?.width ?? 1200;
-  const height = dimensions?.height ?? 1500;
-
   const image = (
     <Image
       src={src}
       alt={alt}
-      width={width}
-      height={height}
+      width={src.width}
+      height={src.height}
       priority
       sizes="(max-width: 768px) 100vw, 768px"
       className="h-auto w-full"
@@ -72,7 +67,7 @@ export async function RefImage({
 
       <div className="mt-6 flex flex-col items-center gap-3">
         <a
-          href={src}
+          href={src.src}
           target="_blank"
           rel="noreferrer"
           className="inline-flex min-h-11 items-center justify-center rounded-full border border-glow-500/40 bg-glow-500/10 px-6 text-sm font-medium text-glow-400 shadow-glow-sm transition hover:border-glow-500/60 hover:bg-glow-500/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-glow-500"
