@@ -5,7 +5,7 @@ import { refSheets } from "@/lib/references";
 
 const sheet = refSheets.sfw;
 
-export async function generateMetadata(): Promise<Metadata> {
+export function generateMetadata(): Metadata {
   return buildImageMetadata({
     title: sheet.title,
     src: sheet.src,

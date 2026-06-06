@@ -1,14 +1,5 @@
-import path from "node:path";
-import { readFile } from "node:fs/promises";
-import { imageSize } from "image-size";
 import type { Metadata } from "next";
-
-export type ImageDimensions = {
-  width: number;
-  height: number;
-  /** OG mime type, e.g. `image/jpeg` */
-  type: string;
-};
+import type { StaticImageData } from "next/image";
 
 const MIME_BY_EXT: Record<string, string> = {
   jpg: "image/jpeg",
@@ -24,29 +15,9 @@ function mimeFor(src: string): string {
   return MIME_BY_EXT[ext] ?? "image/jpeg";
 }
 
-/**
- * Read intrinsic dimensions for an asset stored under `public/`.
- * `src` is a public-relative path like `/reference-sheet.jpg`.
- * Returns `null` if the file can't be read or measured.
- */
-export async function getImageDimensions(
-  src: string,
-): Promise<ImageDimensions | null> {
-  try {
-    const filePath = path.join(process.cwd(), "public", src.replace(/^\//, ""));
-    const buffer = await readFile(filePath);
-    const { width, height } = imageSize(buffer);
-    if (!width || !height) return null;
-    return { width, height, type: mimeFor(src) };
-  } catch {
-    return null;
-  }
-}
-
 type BuildImageMetadataArgs = {
   title: string;
-  /** Public-relative path, e.g. `/reference-sheet.jpg` */
-  src: string;
+  src: StaticImageData;
   alt: string;
   description?: string;
   /** Canonical page path, e.g. `/ref/sfw` */
@@ -60,24 +31,22 @@ type BuildImageMetadataArgs = {
  * `summary_large_image` makes Discord render the large image rather than a
  * small thumbnail. Always point `src` at the real (unblurred) asset.
  */
-export async function buildImageMetadata({
+export function buildImageMetadata({
   title,
   src,
   alt,
   description,
   pagePath,
-}: BuildImageMetadataArgs): Promise<Metadata> {
-  const dimensions = await getImageDimensions(src);
+}: BuildImageMetadataArgs): Metadata {
+  const imageUrl = src.src;
 
-  const image = dimensions
-    ? {
-        url: src,
-        width: dimensions.width,
-        height: dimensions.height,
-        type: dimensions.type,
-        alt,
-      }
-    : { url: src, alt };
+  const image = {
+    url: imageUrl,
+    width: src.width,
+    height: src.height,
+    type: mimeFor(imageUrl),
+    alt,
+  };
 
   return {
     title,
@@ -93,7 +62,7 @@ export async function buildImageMetadata({
       card: "summary_large_image",
       title,
       description,
-      images: [src],
+      images: [imageUrl],
     },
   };
 }
