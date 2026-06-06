@@ -1,5 +1,6 @@
 import type { Artist, SocialEntry } from "@/lib/references";
 import {
+  BlueskyIcon,
   EmailIcon,
   FurAffinityIcon,
   InstagramIcon,
@@ -25,6 +26,7 @@ const ICON_CLASS = "h-[18px] w-[18px]";
 
 type Platform =
   | "twitter"
+  | "bluesky"
   | "instagram"
   | "furaffinity"
   | "vgen"
@@ -38,6 +40,7 @@ type Platform =
 /** Platforms whose inferred handle reads naturally with an `@` prefix. */
 const AT_PREFIXED: ReadonlySet<Platform> = new Set([
   "twitter",
+  "bluesky",
   "instagram",
   "telegram",
 ]);
@@ -99,6 +102,15 @@ function buildLinks(artist: Artist): SocialLink[] {
       socials.twitter,
       <XIcon className={ICON_CLASS} />,
       "hover:text-white",
+    );
+  }
+  if (socials.bluesky) {
+    add(
+      "bluesky",
+      "Bluesky",
+      socials.bluesky,
+      <BlueskyIcon className={ICON_CLASS} />,
+      "hover:text-[#1185FE]",
     );
   }
   if (socials.instagram) {
@@ -183,14 +195,23 @@ function buildLinks(artist: Artist): SocialLink[] {
     );
   }
   if (socials.website) {
-    add(
-      "website",
-      "Website",
-      socials.website,
-      <GlobeIcon className={ICON_CLASS} />,
-      "hover:text-glow-400",
-      { href: normalize(socials.website).url },
-    );
+    const entries = Array.isArray(socials.website)
+      ? socials.website
+      : [socials.website];
+    entries.forEach((entry, index) => {
+      add(
+        "website",
+        "Website",
+        entry,
+        <GlobeIcon className={ICON_CLASS} />,
+        "hover:text-glow-400",
+        {
+          key: `website-${index}`,
+          href: normalize(entry).url,
+          fallback: entries.length > 1 ? `${index + 1}` : undefined,
+        },
+      );
+    });
   }
 
   return links;

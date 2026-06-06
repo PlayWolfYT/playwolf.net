@@ -17,6 +17,7 @@
  *       socials: {
  *         // A plain URL: the handle is inferred from it (-> "X (Twitter) (@someartist)").
  *         twitter: "https://x.com/someartist",
+ *         bluesky: "https://bsky.app/profile/someartist.bsky.social",
  *         // ...or { url, description } to label it explicitly in the tooltip.
  *         instagram: { url: "https://instagram.com/someartist", description: "main" },
  *         furaffinity: "https://www.furaffinity.net/user/someartist",
@@ -27,6 +28,10 @@
  *         telegram: [
  *           { url: "https://t.me/abc", description: "private" },
  *           { url: "https://t.me/abc_art", description: "Art Channel" },
+ *         ],
+ *         website: [
+ *           { url: "https://someartist.carrd.co", description: "Link Directory" },
+ *           { url: "https://someartist.com", description: "Portfolio" },
  *         ],
  *         email: "someartist@example.com",
  *       },
@@ -44,10 +49,11 @@ export type SocialEntry = string | { url: string; description?: string };
 
 /**
  * Artist social links. Every field is optional — only provided ones render.
- * `telegram` may list multiple entries.
+ * `telegram` and `website` may list multiple entries.
  */
 export type ArtistSocials = {
   twitter?: SocialEntry;
+  bluesky?: SocialEntry;
   instagram?: SocialEntry;
   furaffinity?: SocialEntry;
   vgen?: SocialEntry;
@@ -56,7 +62,7 @@ export type ArtistSocials = {
   trello?: SocialEntry;
   telegram?: SocialEntry[];
   email?: SocialEntry;
-  website?: SocialEntry;
+  website?: SocialEntry | SocialEntry[];
 };
 
 export type Artist = {
@@ -64,9 +70,50 @@ export type Artist = {
   socials?: ArtistSocials;
 };
 
-export type Example = {
+type AlphabetLower =
+  | "a"
+  | "b"
+  | "c"
+  | "d"
+  | "e"
+  | "f"
+  | "g"
+  | "h"
+  | "i"
+  | "j"
+  | "k"
+  | "l"
+  | "m"
+  | "n"
+  | "o"
+  | "p"
+  | "q"
+  | "r"
+  | "s"
+  | "t"
+  | "u"
+  | "v"
+  | "w"
+  | "x"
+  | "y"
+  | "z";
+type Digits = "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9";
+type ValidSlugChar = AlphabetLower | Digits | "-";
+
+/**
+ * Recursively checks if a string contains only lowercase letters, digits, or hyphens.
+ */
+type ValidateSlug<S extends string, Original extends string = S> = S extends ""
+  ? Original
+  : S extends `${infer Char}${infer Rest}`
+    ? Char extends ValidSlugChar
+      ? ValidateSlug<Rest, Original>
+      : never // Fails validation if an invalid character (like a space or uppercase) is found
+    : never;
+
+export type Example<T extends string = string> = {
   /** URL-safe identifier used in `/ref/examples/[slug]` routes */
-  slug: string;
+  slug: ValidateSlug<T>;
   /** Human-friendly title shown in the UI and embeds */
   title: string;
   /** Path under `public/`, e.g. `/nsfw-reference.png` */
@@ -92,7 +139,7 @@ export type RefSheet = {
 /*
 ===================== ARTISTS =====================
 */
-const artists: Record<string, Artist> = {
+const artists = {
   Deathlight: {
     name: "Deathlight_K",
     socials: {
@@ -111,7 +158,129 @@ const artists: Record<string, Artist> = {
       },
     },
   },
-} as const;
+  Sir_Burnt: {
+    name: "Sir Burnt",
+    socials: {
+      instagram: "https://www.instagram.com/Sir_burnt",
+      twitter: "https://x.com/Sir_Burnt",
+      bluesky: "https://bsky.app/profile/sirburnt.bsky.social",
+      telegram: ["https://t.me/sirburnt"],
+      vgen: "https://vgen.co/Sir_Burnt",
+      website: {
+        url: "https://sirburnt.carrd.co",
+        description: "Link Directory",
+      },
+    },
+  },
+  HaruClearing: {
+    name: "Haru Clearing (Narwillt)",
+    socials: {
+      telegram: ["https://t.me/HaruClearingNarwillt"],
+      twitter: "https://x.com/Narwillt",
+      bluesky: "https://bsky.app/profile/narwilltharu.bsky.social",
+      trello: {
+        url: "https://trello.com/b/bI07yJNY/harus-queue",
+        description: "Commission Queue",
+      },
+      furaffinity: "https://www.furaffinity.net/user/narwillt",
+      website: {
+        url: "https://harusclearing.carrd.co",
+        description: "Link Directory",
+      },
+    },
+  },
+  Velvet: {
+    name: "Velvet",
+    socials: {
+      twitter: "https://x.com/Velvetbun16",
+      telegram: [
+        {
+          url: "https://t.me/Velvetbun16",
+          description: "Velvetbun16",
+        },
+        {
+          url: "https://t.me/Velvetbunart",
+          description: "Art Channel",
+        },
+      ],
+    },
+  },
+  masitadearte: {
+    name: "masitadearte",
+    socials: {
+      vgen: "https://vgen.co/masitadearte",
+      instagram: "https://www.instagram.com/masita_arts/",
+      twitter: "https://x.com/masitadearte",
+      website: {
+        url: "https://www.deviantart.com/masitadearte",
+        description: "DeviantArt",
+      },
+    },
+  },
+  CocoStinks: {
+    name: "CocoStinks",
+    socials: {
+      twitter: "https://x.com/CocoStinks",
+      telegram: [
+        {
+          url: "https://t.me/CocoSkunk",
+          description: "@CocoSkunk",
+        },
+        {
+          url: "https://t.me/CocoStinks",
+          description: "Art Channel",
+        },
+      ],
+      website: [
+        {
+          url: "https://cocostinks.carrd.co",
+          description: "Link Directory",
+        },
+        {
+          url: "https://dsc.gg/cocostinks",
+          description: "Discord Server",
+        },
+      ],
+    },
+  },
+  Deastratit: {
+    name: "Deastratit",
+    socials: {
+      twitter: "https://x.com/deastratit",
+      bluesky: "https://bsky.app/profile/deastratit.bsky.social",
+      telegram: [
+        {
+          url: "https://t.me/deastratitUwU",
+          description: "Art Channel",
+        },
+      ],
+      furaffinity: "https://www.furaffinity.net/user/deastratit/",
+      website: {
+        url: "https://www.deviantart.com/deastratit",
+        description: "DeviantArt",
+      },
+    },
+  },
+  Wybe: {
+    name: "Wybe",
+    socials: {
+      instagram: "https://www.instagram.com/wybeborne/",
+      twitter: "https://x.com/wybe_borne",
+      website: {
+        url: "https://wybeborne.carrd.co",
+        description: "Link Directory",
+      },
+    },
+  },
+  LapSnep: {
+    name: "Emmy / LapSnep",
+    socials: {
+      vgen: "https://vgen.co/LapSnep",
+      twitter: "https://x.com/Jeff_artsk",
+      telegram: ["https://t.me/jeff_artsk"],
+    },
+  },
+} satisfies Record<string, Artist>;
 
 /*
 ===================== REFERENCES =====================
@@ -139,8 +308,50 @@ export const refSheets: Record<RefSheetKey, RefSheet> = {
 ===================== EXAMPLES =====================
 */
 
+// Helper function to enforce inline slug validation
+const defineExamples = <const T extends Example<any>[]>(
+  arr: T & { [K in keyof T]: Example<T[K]["slug"]> },
+) => arr;
+
 /** Art examples surfaced at `/ref/examples` (SFW) and `/ref/examples/nsfw`. */
-export const examples: Example[] = [
+export const examples: Example[] = defineExamples([
+  // SFW Examples
+  {
+    slug: "maw",
+    title: "Maw Shot",
+    src: "/art/sfw/examples/maw.jpg",
+    nsfw: false,
+    artist: artists.Deathlight,
+  },
+  {
+    slug: "pawbs-ych",
+    title: "Pawbs YCH",
+    src: "/art/sfw/examples/playwolf_pawbs_ych.png",
+    nsfw: false,
+    artist: artists.HaruClearing,
+  },
+  {
+    slug: "silly",
+    title: "Silly",
+    src: "/art/sfw/examples/silly_play.png",
+    nsfw: false,
+  },
+  {
+    slug: "lifted-w-taire",
+    title: "Lifted (with Taire)",
+    src: "/art/sfw/examples/velvet_taire.png",
+    nsfw: false,
+    artist: artists.Velvet,
+  },
+  {
+    slug: "kiss-cam-w-taire",
+    title: "Kiss Cam (With Taire)",
+    src: "/art/sfw/examples/kiss_cam_taire.png",
+    nsfw: false,
+    artist: artists.Sir_Burnt,
+  },
+
+  // NSFW Examples
   {
     slug: "original-character-art",
     title: "Original Character Art",
@@ -148,4 +359,39 @@ export const examples: Example[] = [
     nsfw: true,
     artist: artists.Deathlight,
   },
-];
+  {
+    slug: "backview",
+    title: "Back View",
+    src: "/art/nsfw/examples/coco_backview.png",
+    nsfw: true,
+    artist: artists.CocoStinks,
+  },
+  {
+    slug: "steppies",
+    title: "Steppies~",
+    src: "/art/nsfw/examples/steppies_deastratit.png",
+    nsfw: true,
+    artist: artists.Deastratit,
+  },
+  {
+    slug: "backshots",
+    title: "Backshots",
+    src: "/art/nsfw/examples/backshots.png",
+    nsfw: true,
+    artist: artists.masitadearte,
+  },
+  {
+    slug: "halloween",
+    title: "Halloween Mummie",
+    src: "/art/nsfw/examples/wybe_halloween.png",
+    nsfw: true,
+    artist: artists.Wybe,
+  },
+  {
+    slug: "friendly-hands",
+    title: "Friendly Hands YCH",
+    src: "/art/nsfw/examples/ych_friend_hand.jpg",
+    nsfw: true,
+    artist: artists.LapSnep,
+  },
+]);
