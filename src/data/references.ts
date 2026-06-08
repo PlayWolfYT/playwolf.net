@@ -13,6 +13,7 @@ import maw from "@/assets/art/sfw/examples/maw.jpg";
 import playwolfPawbsYch from "@/assets/art/sfw/examples/playwolf_pawbs_ych.png";
 import sillyPlay from "@/assets/art/sfw/examples/silly_play.png";
 import velvetTaire from "@/assets/art/sfw/examples/velvet_taire.PNG";
+import hugTaire from "@/assets/art/sfw/examples/hug_taire.png";
 
 /**
  * Reference / art data. Edit this file directly to add reference sheets or
@@ -298,6 +299,18 @@ const artists = {
       telegram: ["https://t.me/jeff_artsk"],
     },
   },
+  meteormutt: {
+    name: "meteormutt",
+    socials: {
+      instagram: "https://www.instagram.com/meteor_mutt/",
+      twitter: "https://x.com/meteormutt",
+      bluesky: "https://bsky.app/profile/meteormutt.bsky.social",
+      website: {
+        url: "https://meteormutt.carrd.co",
+        description: "Link Directory",
+      },
+    },
+  },
 } satisfies Record<string, Artist>;
 
 /*
@@ -355,6 +368,13 @@ export const examples: Example[] = defineExamples([
     nsfw: false,
   },
   {
+    slug: "hug-taire",
+    title: "Hug (with Taire)",
+    src: hugTaire,
+    nsfw: false,
+    artist: artists.Sir_Burnt,
+  },
+  {
     slug: "lifted-w-taire",
     title: "Lifted (with Taire)",
     src: velvetTaire,
@@ -366,7 +386,7 @@ export const examples: Example[] = defineExamples([
     title: "Kiss Cam (With Taire)",
     src: kissCamTaire,
     nsfw: false,
-    artist: artists.Sir_Burnt,
+    artist: artists.meteormutt,
   },
 
   // NSFW Examples
