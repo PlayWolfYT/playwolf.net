@@ -1,11 +1,13 @@
 import type { Artist, SocialEntry } from "@/lib/references";
 import {
   BlueskyIcon,
+  BoostyIcon,
   EmailIcon,
   FurAffinityIcon,
   InstagramIcon,
   KofiIcon,
   LinktreeIcon,
+  PatreonIcon,
   TelegramIcon,
   GlobeIcon,
   TrelloIcon,
@@ -32,6 +34,8 @@ type Platform =
   | "vgen"
   | "linktree"
   | "kofi"
+  | "patreon"
+  | "boosty"
   | "trello"
   | "telegram"
   | "email"
@@ -158,6 +162,24 @@ function buildLinks(artist: Artist): SocialLink[] {
       "hover:text-[#FF5E5B]",
     );
   }
+  if (socials.patreon) {
+    add(
+      "patreon",
+      "Patreon",
+      socials.patreon,
+      <PatreonIcon className={ICON_CLASS} />,
+      "hover:text-[#FF424D]",
+    );
+  }
+  if (socials.boosty) {
+    add(
+      "boosty",
+      "Boosty",
+      socials.boosty,
+      <BoostyIcon className={ICON_CLASS} />,
+      "hover:text-[#F15F2C]",
+    );
+  }
   if (socials.trello) {
     add(
       "trello",
@@ -217,11 +239,16 @@ function buildLinks(artist: Artist): SocialLink[] {
   return links;
 }
 
+/**
+ * Credit bar for a piece of artwork. Styled to sit flush against the bottom of
+ * the image inside the same card — hence the divider on top and rounding only
+ * on the bottom corners.
+ */
 export function ArtistBar({ artist }: { artist: Artist }) {
   const links = buildLinks(artist);
 
   return (
-    <div className="flex flex-col items-center justify-between gap-4 rounded-2xl border border-white/[0.12] bg-gradient-to-br from-void-lift to-void-panel px-5 py-4 shadow-glow-sm sm:flex-row">
+    <div className="flex flex-col items-center justify-between gap-4 rounded-b-3xl border-t border-white/[0.12] bg-gradient-to-br from-void-lift to-void-panel px-5 py-4 sm:flex-row">
       <div className="flex items-center gap-3 text-center sm:text-left">
         <span className="font-mono text-[0.65rem] uppercase tracking-[0.2em] text-glow-500">
           Artist

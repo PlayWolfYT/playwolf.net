@@ -2,31 +2,11 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { useGlobalNsfw } from "@/components/ref/nsfw-state";
 
-const STORAGE_KEY = "nsfw-revealed";
-const REVEAL_EVENT = "nsfw-reveal";
+type IconProps = { className?: string };
 
-function readRevealed(): boolean {
-  if (typeof window === "undefined") return false;
-  try {
-    return window.localStorage.getItem(STORAGE_KEY) === "1";
-  } catch {
-    return false;
-  }
-}
-
-/** Persist reveal state and notify every other mounted instance (and tab). */
-function setRevealedStored(value: boolean): void {
-  try {
-    if (value) window.localStorage.setItem(STORAGE_KEY, "1");
-    else window.localStorage.removeItem(STORAGE_KEY);
-  } catch {
-    /* storage may be unavailable (private mode); event still syncs this tab */
-  }
-  window.dispatchEvent(new CustomEvent(REVEAL_EVENT));
-}
-
-function EyeIcon() {
+export function EyeIcon({ className = "h-4 w-4" }: IconProps) {
   return (
     <svg
       viewBox="0 0 24 24"
@@ -35,7 +15,7 @@ function EyeIcon() {
       strokeWidth="2"
       strokeLinecap="round"
       strokeLinejoin="round"
-      className="h-4 w-4"
+      className={className}
       aria-hidden
     >
       <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z" />
@@ -44,7 +24,7 @@ function EyeIcon() {
   );
 }
 
-function EyeOffIcon() {
+export function EyeOffIcon({ className = "h-4 w-4" }: IconProps) {
   return (
     <svg
       viewBox="0 0 24 24"
@@ -53,7 +33,7 @@ function EyeOffIcon() {
       strokeWidth="2"
       strokeLinecap="round"
       strokeLinejoin="round"
-      className="h-4 w-4"
+      className={className}
       aria-hidden
     >
       <path d="M3 3l18 18" />
@@ -75,34 +55,27 @@ type NsfwRevealProps = {
 /**
  * Client-side blur gate for NSFW media. The wrapped image is always rendered
  * with its real `src`, so crawlers/OG embeds receive the unblurred asset — the
- * blur here is a CSS-only overlay. Once revealed, the choice is remembered in
- * `localStorage` and broadcast so every instance unblurs together; the eye
- * toggle can re-hide them all.
+ * blur here is a CSS-only overlay.
+ *
+ * Two layers decide whether this image is blurred: the persisted global switch
+ * (see `nsfw-state.ts`, driven by the header toggle) and an ephemeral local
+ * override that applies to this image only. Flipping the global switch in
+ * either direction drops the override, so the master switch always wins.
  *
  * Click behavior with `href`: while blurred, clicking reveals (no navigation);
  * once revealed, clicking navigates to `href`.
  */
 export function NsfwReveal({ children, variant = "full", href }: NsfwRevealProps) {
-  // Start hidden on both server and first client render to avoid hydration
-  // mismatch; reconcile with stored state in the effect below.
-  const [revealed, setRevealed] = useState(false);
+  const { revealed: globalRevealed, version } = useGlobalNsfw();
+  // `null` means "follow the global switch". Component state only, so the
+  // override is dropped on navigation and reload.
+  const [override, setOverride] = useState<boolean | null>(null);
 
   useEffect(() => {
-    setRevealed(readRevealed());
+    setOverride(null);
+  }, [version]);
 
-    const sync = () => setRevealed(readRevealed());
-    const onStorage = (event: StorageEvent) => {
-      if (event.key === STORAGE_KEY) sync();
-    };
-
-    window.addEventListener(REVEAL_EVENT, sync);
-    window.addEventListener("storage", onStorage);
-    return () => {
-      window.removeEventListener(REVEAL_EVENT, sync);
-      window.removeEventListener("storage", onStorage);
-    };
-  }, []);
-
+  const revealed = override ?? globalRevealed;
   const isThumb = variant === "thumb";
 
   return (
@@ -115,10 +88,10 @@ export function NsfwReveal({ children, variant = "full", href }: NsfwRevealProps
         {children}
       </div>
 
-      {/* Show/hide blur toggle */}
+      {/* Show/hide blur toggle — this image only */}
       <button
         type="button"
-        onClick={() => setRevealedStored(!revealed)}
+        onClick={() => setOverride(!revealed)}
         aria-label={revealed ? "Hide NSFW content" : "Reveal NSFW content (18+)"}
         aria-pressed={revealed}
         title={revealed ? "Hide" : "Reveal (18+)"}
@@ -139,7 +112,7 @@ export function NsfwReveal({ children, variant = "full", href }: NsfwRevealProps
       ) : (
         <button
           type="button"
-          onClick={() => setRevealedStored(true)}
+          onClick={() => setOverride(true)}
           aria-label="Reveal NSFW content. You must be 18 or older."
           className={`absolute inset-0 z-10 flex flex-col items-center justify-center gap-2 bg-void/55 text-center transition hover:bg-void/40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-glow-500 ${
             isThumb ? "px-3" : "px-6"

@@ -1,5 +1,27 @@
 import type { Metadata } from "next";
 import type { StaticImageData } from "next/image";
+import { isValidElement, type ReactNode } from "react";
+
+function collectText(node: ReactNode): string {
+  if (node == null || typeof node === "boolean") return "";
+  if (typeof node === "string" || typeof node === "number") {
+    return String(node);
+  }
+  if (Array.isArray(node)) return node.map(collectText).join("");
+  if (isValidElement<{ children?: ReactNode }>(node)) {
+    return collectText(node.props.children);
+  }
+  return "";
+}
+
+/**
+ * Flatten a JSX description down to the plain text it renders (tags
+ * stripped, whitespace collapsed) for use in meta/OG descriptions.
+ */
+export function reactNodeToText(node: ReactNode): string | undefined {
+  const text = collectText(node).replace(/\s+/g, " ").trim();
+  return text || undefined;
+}
 
 const MIME_BY_EXT: Record<string, string> = {
   jpg: "image/jpeg",

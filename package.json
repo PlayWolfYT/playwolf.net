@@ -13,9 +13,11 @@
   },
   "dependencies": {
     "image-size": "^2.0.2",
+    "lucide-react": "^1.27.0",
     "next": "^15.5.15",
     "react": "^19.2.5",
-    "react-dom": "^19.2.5"
+    "react-dom": "^19.2.5",
+    "react-icons": "^5.7.0"
   },
   "devDependencies": {
     "@types/node": "^22.19.17",

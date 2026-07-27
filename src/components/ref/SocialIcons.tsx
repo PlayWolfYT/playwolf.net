@@ -116,6 +116,14 @@ export function KofiIcon({ className }: IconProps) {
   return <MaskIcon src="/icons/kofi.svg" className={className} />;
 }
 
+export function PatreonIcon({ className }: IconProps) {
+  return <MaskIcon src="/icons/patreon.svg" className={className} />;
+}
+
+export function BoostyIcon({ className }: IconProps) {
+  return <MaskIcon src="/icons/boosty.svg" className={className} />;
+}
+
 export function TrelloIcon({ className }: IconProps) {
   return <MaskIcon src="/icons/trello.svg" className={className} />;
 }
