@@ -1,18 +1,22 @@
-import Image, { type StaticImageData } from "next/image";
+import type { StaticImageData } from "next/image";
 import type { Artist } from "@/lib/references";
-import { ArtistBar } from "@/components/ref/ArtistBar";
+import { ArtworkCard } from "@/components/ref/ArtworkCard";
 import { BackButton } from "@/components/ref/BackButton";
-import { NsfwReveal } from "@/components/ref/NsfwReveal";
 
 type RefImageProps = {
   src: StaticImageData;
   alt: string;
-  title: string;
+  /** When omitted, no header is rendered (page owns the heading). */
+  title?: string;
   nsfw?: boolean;
   /** Optional note shown under the title */
   description?: string;
   /** Optional crediting info shown in a bar below the image */
   artist?: Artist;
+  /** When false, omit the back button (page owns navigation). Defaults to true. */
+  showBackButton?: boolean;
+  /** Fallback for the back button when there is no history */
+  backHref?: string;
 };
 
 /**
@@ -27,43 +31,29 @@ export function RefImage({
   nsfw = false,
   description,
   artist,
+  showBackButton = true,
+  backHref = "/ref",
 }: RefImageProps) {
-  const image = (
-    <Image
-      src={src}
-      alt={alt}
-      width={src.width}
-      height={src.height}
-      priority
-      sizes="(max-width: 768px) 100vw, 768px"
-      className="h-auto w-full"
-    />
-  );
+  const hasHeader = Boolean(title || description);
 
   return (
     <section className="w-full">
-      <header className="mb-6 text-center">
-        <h1 className="font-display text-2xl font-semibold tracking-tight text-parchment sm:text-3xl">
-          {title}
-        </h1>
-        {description ? (
-          <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-parchment-muted">
-            {description}
-          </p>
-        ) : null}
-      </header>
-
-      <div className="relative overflow-hidden rounded-3xl border border-white/[0.07] bg-gradient-to-br from-void-lift/90 to-void-panel/70 p-px shadow-glow-sm">
-        <div className="overflow-hidden rounded-[calc(1.5rem-1px)]">
-          {nsfw ? <NsfwReveal>{image}</NsfwReveal> : image}
-        </div>
-      </div>
-
-      {artist ? (
-        <div className="mt-4">
-          <ArtistBar artist={artist} />
-        </div>
+      {hasHeader ? (
+        <header className="mb-6 text-center">
+          {title ? (
+            <h1 className="font-display text-2xl font-semibold tracking-tight text-parchment sm:text-3xl">
+              {title}
+            </h1>
+          ) : null}
+          {description ? (
+            <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-parchment-muted">
+              {description}
+            </p>
+          ) : null}
+        </header>
       ) : null}
+
+      <ArtworkCard src={src} alt={alt} nsfw={nsfw} artist={artist} priority />
 
       <div className="mt-6 flex flex-col items-center gap-3">
         <a
@@ -74,7 +64,7 @@ export function RefImage({
         >
           Open full image
         </a>
-        <BackButton />
+        {showBackButton ? <BackButton fallbackHref={backHref} /> : null}
       </div>
     </section>
   );

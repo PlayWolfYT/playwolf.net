@@ -4,6 +4,15 @@
 
 :root {
   color-scheme: dark;
+
+  /* Default accent ramp — the original electric cyan. Overridden per
+     character profile by RefThemeShell (values are "R G B" triplets,
+     consumed as `rgb(var(--accent-N) / alpha)` in tailwind.config.ts). */
+  --accent-300: 138 217 255;
+  --accent-400: 92 204 255;
+  --accent-500: 58 190 249;
+  --accent-600: 26 166 235;
+  --accent-700: 11 125 189;
 }
 
 body {

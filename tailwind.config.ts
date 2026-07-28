@@ -17,13 +17,14 @@ const config: Config = {
           panel: "#15151a",
           line: "#1f1f26",
         },
-        /** Electric cyan from reference (eyes, clips, studs) */
+        /** Accent ramp — cyan by default (see globals.css), re-themed per
+         *  character profile via the `--accent-*` CSS variables. */
         glow: {
-          300: "#8ad9ff",
-          400: "#5cccff",
-          500: "#3abef9",
-          600: "#1aa6eb",
-          700: "#0b7dbd",
+          300: "rgb(var(--accent-300) / <alpha-value>)",
+          400: "rgb(var(--accent-400) / <alpha-value>)",
+          500: "rgb(var(--accent-500) / <alpha-value>)",
+          600: "rgb(var(--accent-600) / <alpha-value>)",
+          700: "rgb(var(--accent-700) / <alpha-value>)",
         },
         /** Warm off-white / ivory — hair highlights in reference */
         parchment: {
@@ -43,16 +44,17 @@ const config: Config = {
         mono: ["var(--font-geist-mono)", "ui-monospace", "monospace"],
       },
       boxShadow: {
-        "glow-sm": "0 0 24px -4px rgba(58, 190, 249, 0.45)",
-        "glow-md": "0 0 48px -8px rgba(58, 190, 249, 0.5)",
-        "glow-lg": "0 0 80px -12px rgba(58, 190, 249, 0.55)",
+        "glow-sm": "0 0 24px -4px rgb(var(--accent-500) / 0.45)",
+        "glow-md": "0 0 48px -8px rgb(var(--accent-500) / 0.5)",
+        "glow-lg": "0 0 80px -12px rgb(var(--accent-500) / 0.55)",
         "inner-glow":
-          "inset 0 1px 0 0 rgba(255,255,255,0.06), inset 0 0 40px -20px rgba(58, 190, 249, 0.12)",
+          "inset 0 1px 0 0 rgba(255,255,255,0.06), inset 0 0 40px -20px rgb(var(--accent-500) / 0.12)",
       },
       animation: {
         "slow-pulse": "slow-pulse 5s ease-in-out infinite",
         drift: "drift 20s ease-in-out infinite",
         twinkle: "twinkle 3s ease-in-out infinite",
+        shimmer: "shimmer 2.2s ease-in-out infinite",
       },
       keyframes: {
         "slow-pulse": {
@@ -68,12 +70,20 @@ const config: Config = {
           "0%, 100%": { opacity: "0.5", transform: "scale(1)" },
           "50%": { opacity: "1", transform: "scale(1.15)" },
         },
+        shimmer: {
+          "0%": { transform: "translateX(-100%)" },
+          "100%": { transform: "translateX(100%)" },
+        },
       },
       backgroundImage: {
+        /** Accent-tinted line grid so the backdrop pattern follows the theme */
         "grid-soft":
-          "linear-gradient(to right, rgba(255,255,255,0.035) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.035) 1px, transparent 1px)",
+          "linear-gradient(to right, rgb(var(--accent-500) / 0.07) 1px, transparent 1px), linear-gradient(to bottom, rgb(var(--accent-500) / 0.07) 1px, transparent 1px)",
         "rim-cyan":
-          "radial-gradient(ellipse 80% 50% at 50% -20%, rgba(58, 190, 249, 0.22), transparent 55%)",
+          "radial-gradient(ellipse 80% 50% at 50% -20%, rgb(var(--accent-500) / 0.22), transparent 55%)",
+        /** Diagonal accent-tinted band swept across skeletons by `animate-shimmer` */
+        shimmer:
+          "linear-gradient(105deg, transparent 40%, rgb(var(--accent-500) / 0.08) 50%, transparent 60%)",
       },
     },
   },

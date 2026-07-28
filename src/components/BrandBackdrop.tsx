@@ -9,7 +9,7 @@ export function BrandBackdrop({ density = "full" }: BrandBackdropProps) {
   return (
     <>
       <div
-        className="pointer-events-none absolute inset-0 bg-[size:56px_56px] bg-grid-soft opacity-60"
+        className="pointer-events-none absolute inset-0 bg-[size:56px_56px] bg-grid-soft opacity-90"
         aria-hidden
       />
       <div
@@ -17,7 +17,7 @@ export function BrandBackdrop({ density = "full" }: BrandBackdropProps) {
         aria-hidden
       />
       <div
-        className={`pointer-events-none absolute rounded-full bg-glow-500/20 blur-[100px] animate-drift ${
+        className={`pointer-events-none absolute rounded-full bg-glow-500/25 blur-[100px] animate-drift ${
           isFull
             ? "-left-40 top-1/4 h-[min(90vw,520px)] w-[min(90vw,520px)]"
             : "left-1/2 top-[28%] h-[min(85vw,400px)] w-[min(85vw,400px)] -translate-x-1/2"
@@ -25,7 +25,7 @@ export function BrandBackdrop({ density = "full" }: BrandBackdropProps) {
         aria-hidden
       />
       <div
-        className={`pointer-events-none absolute rounded-full bg-glow-600/15 blur-[88px] animate-slow-pulse ${
+        className={`pointer-events-none absolute rounded-full bg-glow-600/20 blur-[88px] animate-slow-pulse ${
           isFull ? "-right-32 bottom-0 h-[420px] w-[420px]" : "right-[10%] bottom-[12%] h-64 w-64"
         }`}
         aria-hidden
@@ -34,9 +34,9 @@ export function BrandBackdrop({ density = "full" }: BrandBackdropProps) {
         className="pointer-events-none absolute inset-x-0 bottom-0 h-[45%] bg-gradient-to-t from-void via-void-soft/90 to-transparent"
         aria-hidden
       />
-      {/* Soft coral wash — cheek-tone from reference, very subtle */}
+      {/* Soft accent wash — very subtle, follows the active profile theme */}
       <div
-        className="pointer-events-none absolute -bottom-32 left-1/2 h-64 w-[min(100vw,480px)] -translate-x-1/2 rounded-full bg-coral-soft/[0.07] blur-[100px]"
+        className="pointer-events-none absolute -bottom-32 left-1/2 h-64 w-[min(100vw,480px)] -translate-x-1/2 rounded-full bg-glow-400/10 blur-[100px]"
         aria-hidden
       />
     </>
