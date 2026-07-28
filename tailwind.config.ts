@@ -55,6 +55,8 @@ const config: Config = {
         drift: "drift 20s ease-in-out infinite",
         twinkle: "twinkle 3s ease-in-out infinite",
         shimmer: "shimmer 2.2s ease-in-out infinite",
+        /** Left-to-right fill used as the quote pacing bar */
+        tick: "tick 5s linear infinite",
       },
       keyframes: {
         "slow-pulse": {
@@ -73,6 +75,10 @@ const config: Config = {
         shimmer: {
           "0%": { transform: "translateX(-100%)" },
           "100%": { transform: "translateX(100%)" },
+        },
+        tick: {
+          "0%": { transform: "scaleX(0)" },
+          "100%": { transform: "scaleX(1)" },
         },
       },
       backgroundImage: {

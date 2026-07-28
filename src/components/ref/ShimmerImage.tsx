@@ -12,7 +12,7 @@ import { useEffect, useRef, useState } from "react";
  * The overlay is absolutely positioned, so callers must provide a positioned
  * (`relative`) ancestor that matches the image bounds.
  */
-export function ShimmerImage({ alt, onLoad, ...props }: ImageProps) {
+export function ShimmerImage({ alt, onLoad, loading, ...props }: ImageProps) {
   const ref = useRef<HTMLImageElement>(null);
   const [loaded, setLoaded] = useState(false);
 
@@ -28,6 +28,9 @@ export function ShimmerImage({ alt, onLoad, ...props }: ImageProps) {
         {...props}
         alt={alt}
         ref={ref}
+        // Default to lazy so gallery/overview art does not contend with
+        // first paint; callers can still opt into eager via `loading`.
+        loading={loading ?? "lazy"}
         onLoad={(event) => {
           setLoaded(true);
           onLoad?.(event);

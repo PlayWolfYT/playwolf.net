@@ -7,6 +7,7 @@ import {
   getMainArt,
   getProfile,
   getProfileParams,
+  getSheetImage,
   isProfileKey,
 } from "@/lib/references";
 
@@ -33,10 +34,8 @@ export async function generateMetadata({
     ? `${character.name} · ${profile.label} (18+) · playwolf.net`
     : `${character.name} · playwolf.net`;
 
-  // No sheet yet — fall back to the character's main art for the embed.
-  const embedImage = profile.sheet
-    ? { src: profile.sheet.src, alt: profile.sheet.title }
-    : getMainArt(character);
+  // Prefer the profile sheet image; WIP placeholders fall back to main art.
+  const embedImage = getSheetImage(profile.sheet) ?? getMainArt(character);
 
   const description = reactNodeToText(profile.description);
 
@@ -65,7 +64,5 @@ export default async function ProfilePage({ params }: PageProps) {
   const character = getCharacter(characterSlug);
   if (!character || !character.profiles[profileParam]) notFound();
 
-  return (
-    <CharacterProfiles character={character} activeProfile={profileParam} />
-  );
+  return <CharacterProfiles character={character} />;
 }

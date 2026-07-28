@@ -10,7 +10,6 @@ type ArtworkCardProps = {
   nsfw?: boolean;
   /** Rendered flush against the bottom of the image, inside the same card */
   artist?: Artist;
-  priority?: boolean;
 };
 
 /**
@@ -35,7 +34,6 @@ export function ArtworkCard({
   alt,
   nsfw = false,
   artist,
-  priority = false,
 }: ArtworkCardProps) {
   const frame = frameFor(src);
 
@@ -48,7 +46,6 @@ export function ArtworkCard({
       // Next only generates blurDataURL for lowercase image extensions;
       // some assets are .PNG, so fall back to no placeholder for those.
       placeholder={src.blurDataURL ? "blur" : "empty"}
-      priority={priority}
       sizes={`(max-width: ${frame.px}px) 100vw, ${frame.px}px`}
       className="h-auto w-full"
     />

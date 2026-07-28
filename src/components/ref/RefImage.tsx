@@ -53,7 +53,7 @@ export function RefImage({
         </header>
       ) : null}
 
-      <ArtworkCard src={src} alt={alt} nsfw={nsfw} artist={artist} priority />
+      <ArtworkCard src={src} alt={alt} nsfw={nsfw} artist={artist} />
 
       <div className="mt-6 flex flex-col items-center gap-3">
         <a
