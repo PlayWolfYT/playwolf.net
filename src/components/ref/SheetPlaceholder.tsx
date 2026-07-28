@@ -108,8 +108,8 @@ function scatterSlots(count: number, ratio: number, random: () => number) {
  * Driven entirely by `sheet.wip`: `icons` (components imported straight from
  * `lucide-react` / `react-icons`), `iconCount`, `gradient` (hex list blended
  * across the frame to tint the scatter and title), `badge`, `subtitle`,
- * `quotes`, `interval`, `progress` and `aspect`. Without a `gradient` the
- * scatter follows the active profile accent.
+ * `quotes`, `interval` and `aspect`. Without a `gradient` the scatter follows
+ * the active profile accent.
  */
 export function SheetPlaceholder({ sheet }: SheetPlaceholderProps) {
   const {
@@ -121,7 +121,6 @@ export function SheetPlaceholder({ sheet }: SheetPlaceholderProps) {
     gradient,
     interval,
     aspect,
-    progress,
   } = resolveWipOptions(sheet);
 
   const stops = gradient.map(hexToRgb);
@@ -321,7 +320,6 @@ export function SheetPlaceholder({ sheet }: SheetPlaceholderProps) {
                 <WipQuoteCycler
                   quotes={quotes}
                   interval={interval}
-                  progress={progress}
                 />
               </div>
             </div>

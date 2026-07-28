@@ -1,5 +1,6 @@
 import { ArtworkCard } from "@/components/ref/ArtworkCard";
 import { ExampleGrid } from "@/components/ref/ExampleGrid";
+import { OpenImageLink } from "@/components/ref/OpenImageLink";
 import { RevealAllToggle } from "@/components/ref/RevealAllToggle";
 import { SheetPlaceholder } from "@/components/ref/SheetPlaceholder";
 import {
@@ -36,12 +37,17 @@ export function ProfileView({
       {sheet && isWipSheet(sheet) ? (
         <SheetPlaceholder sheet={sheet} />
       ) : sheet && isImageSheet(sheet) ? (
-        <ArtworkCard
-          src={sheet.src}
-          alt={sheet.title}
-          nsfw={isNsfw}
-          artist={sheet.artist}
-        />
+        <>
+          <ArtworkCard
+            src={sheet.src}
+            alt={sheet.title}
+            nsfw={isNsfw}
+            artist={sheet.artist}
+          />
+          <div className="mt-6 flex justify-center">
+            <OpenImageLink src={sheet.src} />
+          </div>
+        </>
       ) : null}
 
       {profile.description ? (
