@@ -6,7 +6,12 @@ import type {
   Profile,
   ProfileKey,
   RefSheet,
+  RefSheetImage,
+  RefSheetWip,
+  RefSheetWipOptions,
 } from "@/data/types";
+import type { StaticImageData } from "next/image";
+import { isImageSheet } from "@/lib/sheet-wip";
 
 export type {
   Artist,
@@ -16,8 +21,24 @@ export type {
   Profile,
   ProfileKey,
   RefSheet,
+  RefSheetImage,
+  RefSheetWip,
+  RefSheetWipOptions,
   SocialEntry,
+  WipAspect,
+  WipIcon,
 } from "@/data/types";
+
+export {
+  DEFAULT_WIP_ICONS,
+  DEFAULT_WIP_INTERVAL,
+  DEFAULT_WIP_QUOTES,
+  NSFW_WIP_QUOTES,
+  getSheetImage,
+  isImageSheet,
+  isWipSheet,
+  resolveWipOptions,
+} from "@/lib/sheet-wip";
 
 export const PROFILE_KEYS: ProfileKey[] = ["sfw", "nsfw"];
 
@@ -61,12 +82,13 @@ export function getExample(
 
 /**
  * Hero image for overview cards and character embeds.
- * Falls back to the first available reference sheet when `mainArt` is
- * omitted; `undefined` when the character has no art at all yet.
+ * Falls back to the first available *image* reference sheet when `mainArt`
+ * is omitted (WIP placeholders are skipped); `undefined` when the character
+ * has no art at all yet.
  */
 export function getMainArt(character: Character):
   | {
-      src: RefSheet["src"];
+      src: StaticImageData;
       alt: string;
       artist?: Artist;
     }
@@ -81,7 +103,7 @@ export function getMainArt(character: Character):
 
   for (const key of PROFILE_KEYS) {
     const sheet = character.profiles[key]?.sheet;
-    if (sheet) {
+    if (sheet && isImageSheet(sheet)) {
       return { src: sheet.src, alt: sheet.title, artist: sheet.artist };
     }
   }

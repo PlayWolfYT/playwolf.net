@@ -1,15 +1,20 @@
 import { ArtworkCard } from "@/components/ref/ArtworkCard";
 import { ExampleGrid } from "@/components/ref/ExampleGrid";
+import { OpenImageLink } from "@/components/ref/OpenImageLink";
 import { RevealAllToggle } from "@/components/ref/RevealAllToggle";
-import type { Profile, ProfileKey } from "@/lib/references";
+import { SheetPlaceholder } from "@/components/ref/SheetPlaceholder";
+import {
+  isImageSheet,
+  isWipSheet,
+  type Profile,
+  type ProfileKey,
+} from "@/lib/references";
 
 type ProfileViewProps = {
   profile: Profile;
   profileKey: ProfileKey;
   /** Route prefix for example detail links, e.g. `/ref/playwuff/sfw` */
   basePath: string;
-  /** Prioritise the sheet image load (the panel is visible on first paint) */
-  priority?: boolean;
 };
 
 /**
@@ -23,20 +28,26 @@ export function ProfileView({
   profile,
   profileKey,
   basePath,
-  priority = false,
 }: ProfileViewProps) {
   const isNsfw = profileKey === "nsfw";
+  const sheet = profile.sheet;
 
   return (
     <div className="w-full">
-      {profile.sheet ? (
-        <ArtworkCard
-          src={profile.sheet.src}
-          alt={profile.sheet.title}
-          nsfw={isNsfw}
-          artist={profile.sheet.artist}
-          priority={priority}
-        />
+      {sheet && isWipSheet(sheet) ? (
+        <SheetPlaceholder sheet={sheet} />
+      ) : sheet && isImageSheet(sheet) ? (
+        <>
+          <ArtworkCard
+            src={sheet.src}
+            alt={sheet.title}
+            nsfw={isNsfw}
+            artist={sheet.artist}
+          />
+          <div className="mt-6 flex justify-center">
+            <OpenImageLink src={sheet.src} />
+          </div>
+        </>
       ) : null}
 
       {profile.description ? (

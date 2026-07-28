@@ -2,6 +2,7 @@ import type { StaticImageData } from "next/image";
 import type { Artist } from "@/lib/references";
 import { ArtworkCard } from "@/components/ref/ArtworkCard";
 import { BackButton } from "@/components/ref/BackButton";
+import { OpenImageLink } from "@/components/ref/OpenImageLink";
 
 type RefImageProps = {
   src: StaticImageData;
@@ -53,17 +54,10 @@ export function RefImage({
         </header>
       ) : null}
 
-      <ArtworkCard src={src} alt={alt} nsfw={nsfw} artist={artist} priority />
+      <ArtworkCard src={src} alt={alt} nsfw={nsfw} artist={artist} />
 
       <div className="mt-6 flex flex-col items-center gap-3">
-        <a
-          href={src.src}
-          target="_blank"
-          rel="noreferrer"
-          className="inline-flex min-h-11 items-center justify-center rounded-full border border-glow-500/40 bg-glow-500/10 px-6 text-sm font-medium text-glow-400 shadow-glow-sm transition hover:border-glow-500/60 hover:bg-glow-500/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-glow-500"
-        >
-          Open full image
-        </a>
+        <OpenImageLink src={src} />
         {showBackButton ? <BackButton fallbackHref={backHref} /> : null}
       </div>
     </section>

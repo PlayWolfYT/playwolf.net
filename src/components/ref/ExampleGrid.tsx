@@ -58,7 +58,7 @@ export function ExampleGrid({
           </p>
         </div>
       ) : (
-        <ul className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6">
+        <ul className="flex w-full flex-wrap justify-center gap-4">
           {examples.map((example) => {
             const detailHref = `${basePath}/${example.slug}`;
             const thumbSizes =
@@ -70,6 +70,7 @@ export function ExampleGrid({
                   alt=""
                   aria-hidden
                   fill
+                  loading="lazy"
                   placeholder={example.src.blurDataURL ? "blur" : "empty"}
                   sizes={thumbSizes}
                   className="scale-110 object-cover blur-2xl"
@@ -78,6 +79,7 @@ export function ExampleGrid({
                   src={example.src}
                   alt={example.title}
                   fill
+                  loading="lazy"
                   placeholder={example.src.blurDataURL ? "blur" : "empty"}
                   sizes={thumbSizes}
                   className="relative z-10 object-contain"
@@ -86,7 +88,10 @@ export function ExampleGrid({
             );
 
             return (
-              <li key={example.slug}>
+              <li
+                key={example.slug}
+                className="w-[calc((100%-1rem)/2)] sm:w-[calc((100%-2rem)/3)] lg:w-[calc((100%-3rem)/4)] xl:w-[calc((100%-4rem)/5)] 2xl:w-[calc((100%-5rem)/6)]"
+              >
                 <div className="group overflow-hidden rounded-2xl border border-white/[0.07] bg-void-lift/60 shadow-glow-sm transition focus-within:border-glow-500/40 hover:border-glow-500/40">
                   <div className="relative aspect-square w-full overflow-hidden">
                     {nsfw ? (

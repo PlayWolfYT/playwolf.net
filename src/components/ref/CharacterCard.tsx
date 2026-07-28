@@ -32,7 +32,6 @@ export function CharacterCard({ character }: CharacterCardProps) {
               src={mainArt.src}
               alt={mainArt.alt}
               fill
-              priority
               placeholder={mainArt.src.blurDataURL ? "blur" : "empty"}
               sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 340px"
               className="object-cover object-top transition duration-500 group-hover:scale-105"

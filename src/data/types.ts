@@ -1,5 +1,5 @@
 import type { StaticImageData } from "next/image";
-import type { ReactNode } from "react";
+import type { ComponentType, CSSProperties, ReactNode } from "react";
 
 /**
  * A single social link: either a plain URL (the handle is inferred from it),
@@ -100,13 +100,74 @@ export type Example<T extends string = string> = {
   artist?: Artist;
 };
 
-export type RefSheet = {
+/**
+ * Any icon component — import straight from `lucide-react`, `react-icons`, or
+ * point at a local SVG wrapper. Only `className`, `style` and `strokeWidth`
+ * are ever passed, which every one of those sets accepts.
+ */
+export type WipIcon = ComponentType<{
+  className?: string;
+  style?: CSSProperties;
+  strokeWidth?: number | string;
+}>;
+
+/** Stage proportions for the WIP placeholder frame. */
+export type WipAspect = "4/3" | "3/2" | "16/9" | "1/1";
+
+/** Extra knobs for a WIP / coming-soon reference sheet placeholder. */
+export type RefSheetWipOptions = {
+  /** Badge text on the top tab. Defaults to `"WIP"`. */
+  badge?: string;
+  /** Status line under the random quote. */
+  subtitle?: string;
+  /**
+   * Quote pool — picks fade between each other at random.
+   * Falls back to the built-in list when omitted / empty.
+   */
+  quotes?: readonly string[];
+  /**
+   * Icons scattered across the backdrop, e.g.
+   * `icons: [Pencil, Flame, GiDragonHead]`.
+   */
+  icons?: readonly WipIcon[];
+  /** Roughly how many icons to scatter. Defaults to `42`. */
+  iconCount?: number;
+  /**
+   * Hex colours blended left-to-right across the frame; every scattered icon
+   * (and the title) picks up the colour at its position. Falls back to the
+   * profile accent when omitted.
+   */
+  gradient?: readonly string[];
+  /** Milliseconds between quote swaps. Defaults to `5000`. */
+  interval?: number;
+  /** Completion 0–100 — swaps the pacing bar for a determinate one. */
+  progress?: number;
+  /** Frame proportions. Defaults to `"4/3"`. */
+  aspect?: WipAspect;
+};
+
+export type RefSheetImage = {
   title: string;
   src: StaticImageData;
   description?: string;
   /** Optional crediting info shown in a bar below the sheet */
   artist?: Artist;
+  wip?: undefined;
 };
+
+/**
+ * Placeholder sheet shown while the real reference art is still being made.
+ * Set `wip: true` for defaults, or pass an options object to customise the
+ * badge, subtitle, and quote pool.
+ */
+export type RefSheetWip = {
+  title: string;
+  wip: true | RefSheetWipOptions;
+  description?: string;
+  artist?: Artist;
+};
+
+export type RefSheet = RefSheetImage | RefSheetWip;
 
 /**
  * One full character profile (SFW or After Dark): its own description,
@@ -127,7 +188,8 @@ export type Profile = {
    * flattens it back to plain text via `reactNodeToText`.
    */
   description?: ReactNode;
-  /** Reference sheet — omit if none exists yet (the panel just skips it) */
+  /** Reference sheet — omit if none exists yet (the panel just skips it).
+   *  Use `{ title, wip: true }` (or `wip: { … }`) for a stylish placeholder. */
   sheet?: RefSheet;
   examples: Example[];
 };

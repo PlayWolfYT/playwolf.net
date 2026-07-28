@@ -19,9 +19,9 @@ export type AccentVars = {
   "--accent-700": string;
 };
 
-type Rgb = [number, number, number];
+export type Rgb = [number, number, number];
 
-function hexToRgb(hex: string): Rgb {
+export function hexToRgb(hex: string): Rgb {
   const value = hex.replace("#", "");
   const full =
     value.length === 3

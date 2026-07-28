@@ -46,10 +46,5 @@ export default async function CharacterPage({ params }: PageProps) {
   const character = getCharacter(characterSlug);
   if (!character) notFound();
 
-  return (
-    <CharacterProfiles
-      character={character}
-      activeProfile={getDefaultProfileKey(character)}
-    />
-  );
+  return <CharacterProfiles character={character} />;
 }

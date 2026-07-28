@@ -7,15 +7,12 @@ import { ProfileView } from "@/components/ref/ProfileView";
 import {
   PROFILE_KEYS,
   type Character,
-  type ProfileKey,
 } from "@/lib/references";
 import Link from "next/link";
 import { BackArrow } from "./BackArrow";
 
 type CharacterProfilesProps = {
   character: Character;
-  /** Profile shown on first render (from the route) */
-  activeProfile: ProfileKey;
 };
 
 /**
@@ -23,10 +20,7 @@ type CharacterProfilesProps = {
  * sticky profile switcher plus every profile panel (all server-rendered,
  * toggled client-side without a page load).
  */
-export function CharacterProfiles({
-  character,
-  activeProfile,
-}: CharacterProfilesProps) {
+export function CharacterProfiles({ character }: CharacterProfilesProps) {
   const panels: ProfilePanel[] = PROFILE_KEYS.flatMap((key) => {
     const profile = character.profiles[key];
     if (!profile) return [];
@@ -44,7 +38,6 @@ export function CharacterProfiles({
             profile={profile}
             profileKey={key}
             basePath={`/ref/${character.slug}/${key}`}
-            priority={key === activeProfile}
           />
         ),
       },

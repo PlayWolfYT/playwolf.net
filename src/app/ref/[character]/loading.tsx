@@ -31,12 +31,12 @@ export default function CharacterLoading() {
       {/* Artwork frame */}
       <SkeletonBlock className="mx-auto aspect-[4/3] w-full max-w-4xl rounded-3xl border border-white/[0.07] bg-white/[0.04]" />
 
-      {/* Example grid */}
-      <div className="mt-14 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6">
+      {/* Example grid — flex-wrap mirrors ExampleGrid so incomplete rows stay centred */}
+      <div className="mt-14 flex w-full flex-wrap justify-center gap-4">
         {Array.from({ length: 6 }).map((_, index) => (
           <SkeletonBlock
             key={index}
-            className="aspect-square rounded-2xl border border-white/[0.07] bg-white/[0.04]"
+            className="aspect-square w-[calc((100%-1rem)/2)] rounded-2xl border border-white/[0.07] bg-white/[0.04] sm:w-[calc((100%-2rem)/3)] lg:w-[calc((100%-3rem)/4)] xl:w-[calc((100%-4rem)/5)] 2xl:w-[calc((100%-5rem)/6)]"
           />
         ))}
       </div>
