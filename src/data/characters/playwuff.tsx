@@ -9,7 +9,7 @@ import kissCamTaire from "@/assets/art/playwuff/sfw/examples/kiss_cam_taire.png"
 import maw from "@/assets/art/playwuff/sfw/examples/maw.jpg";
 import playwolfPawbsYch from "@/assets/art/playwuff/sfw/examples/playwolf_pawbs_ych.png";
 import sillyPlay from "@/assets/art/playwuff/sfw/examples/silly_play.png";
-import velvetTaire from "@/assets/art/playwuff/sfw/examples/velvet_taire.PNG";
+import velvetTaire from "@/assets/art/playwuff/sfw/examples/velvet_taire.png";
 import hugTaire from "@/assets/art/playwuff/sfw/examples/hug_taire.png";
 import sillyPan from "@/assets/art/playwuff/sfw/examples/silly_pan.jpg";
 
@@ -18,7 +18,7 @@ import nsfwRefSheet from "@/assets/art/playwuff/nsfw/reference-sheet.jpg";
 import backshots from "@/assets/art/playwuff/nsfw/examples/backshots.png";
 import cocoBackview from "@/assets/art/playwuff/nsfw/examples/coco_backview.png";
 import originalCharacterArt from "@/assets/art/playwuff/nsfw/examples/original-character-art.png";
-import steppiesDeastratit from "@/assets/art/playwuff/nsfw/examples/steppies_deastratit.PNG";
+import steppiesDeastratit from "@/assets/art/playwuff/nsfw/examples/steppies_deastratit.png";
 import wybeHalloween from "@/assets/art/playwuff/nsfw/examples/wybe_halloween.png";
 import ychFriendHand from "@/assets/art/playwuff/nsfw/examples/ych_friend_hand.jpg";
 import beachBlowie from "@/assets/art/playwuff/nsfw/examples/beach_blowie.png";
