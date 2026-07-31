@@ -31,6 +31,11 @@ COPY --from=builder /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
+# Created here so the compose volume mounted over it inherits this ownership.
+# Without it Docker seeds a root-owned directory and the image optimizer
+# silently fails to cache anything.
+RUN mkdir -p /app/.next/cache && chown -R nextjs:nodejs /app/.next
+
 USER nextjs
 
 EXPOSE 3000

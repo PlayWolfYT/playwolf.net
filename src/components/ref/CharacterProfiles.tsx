@@ -1,45 +1,39 @@
-import { BackButton } from "@/components/ref/BackButton";
-import {
-  ProfileSwitcher,
-  type ProfilePanel,
-} from "@/components/ref/ProfileSwitcher";
+import { ProfileSwitcher, type ProfileTab } from "@/components/ref/ProfileSwitcher";
 import { ProfileView } from "@/components/ref/ProfileView";
-import {
-  PROFILE_KEYS,
-  type Character,
-} from "@/lib/references";
+import { PROFILE_KEYS, type Character, type ProfileKey } from "@/lib/content";
 import Link from "next/link";
 import { BackArrow } from "./BackArrow";
 
 type CharacterProfilesProps = {
   character: Character;
+  /** Profile this route should render — only this panel is in the HTML. */
+  activeProfile: ProfileKey;
 };
 
 /**
  * Shared body of `/ref/<character>` and `/ref/<character>/<profile>`: the
- * sticky profile switcher plus every profile panel (all server-rendered,
- * toggled client-side without a page load).
+ * sticky profile switcher plus the active profile only (real navigation
+ * between SFW / After Dark — no hidden sibling panels).
  */
-export function CharacterProfiles({ character }: CharacterProfilesProps) {
-  const panels: ProfilePanel[] = PROFILE_KEYS.flatMap((key) => {
-    const profile = character.profiles[key];
-    if (!profile) return [];
+export function CharacterProfiles({
+  character,
+  activeProfile,
+}: CharacterProfilesProps) {
+  const profile = character.profiles[activeProfile];
+  if (!profile) return null;
+
+  const tabs: ProfileTab[] = PROFILE_KEYS.flatMap((key) => {
+    const candidate = character.profiles[key];
+    if (!candidate) return [];
 
     const isNsfw = key === "nsfw";
     return [
       {
         key,
-        label: profile.label,
+        label: candidate.label,
         badge: isNsfw ? "18+" : undefined,
         // SFW's canonical URL is the bare character page.
         href: isNsfw ? `/ref/${character.slug}/nsfw` : `/ref/${character.slug}`,
-        content: (
-          <ProfileView
-            profile={profile}
-            profileKey={key}
-            basePath={`/ref/${character.slug}/${key}`}
-          />
-        ),
       },
     ];
   });
@@ -49,7 +43,13 @@ export function CharacterProfiles({ character }: CharacterProfilesProps) {
       <ProfileSwitcher
         characterName={character.name}
         species={character.species}
-        panels={panels}
+        tabs={tabs}
+      />
+
+      <ProfileView
+        profile={profile}
+        profileKey={activeProfile}
+        basePath={`/ref/${character.slug}/${activeProfile}`}
       />
 
       <div className="mt-14 flex justify-center">

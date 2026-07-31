@@ -1,12 +1,13 @@
-import type { StaticImageData } from "next/image";
-import type { Artist } from "@/lib/references";
+import type { Artist, ImageRef } from "@/lib/content";
 import { ArtworkCard } from "@/components/ref/ArtworkCard";
 import { BackButton } from "@/components/ref/BackButton";
 import { OpenImageLink } from "@/components/ref/OpenImageLink";
 
 type RefImageProps = {
-  src: StaticImageData;
+  src: ImageRef;
   alt: string;
+  /** Rendered between the artwork and its actions — credits, chips, notes. */
+  children?: React.ReactNode;
   /** When omitted, no header is rendered (page owns the heading). */
   title?: string;
   nsfw?: boolean;
@@ -28,6 +29,7 @@ type RefImageProps = {
 export function RefImage({
   src,
   alt,
+  children,
   title,
   nsfw = false,
   description,
@@ -57,7 +59,8 @@ export function RefImage({
       <ArtworkCard src={src} alt={alt} nsfw={nsfw} artist={artist} />
 
       <div className="mt-6 flex flex-col items-center gap-3">
-        <OpenImageLink src={src} />
+        {children}
+        <OpenImageLink image={src} />
         {showBackButton ? <BackButton fallbackHref={backHref} /> : null}
       </div>
     </section>

@@ -1,0 +1,32 @@
+/* Admin-only styles. Kept separate from the frontend's Tailwind sheet so
+   Payload's own design tokens stay intact.
+
+   The keyframes below back the inline `animation` declarations that
+   `TextStateFeature` writes for the rich-text effects (see
+   `src/lib/text-effects.ts`); without them the editor preview would be static
+   while the published page animates. */
+
+@keyframes fx-rainbow {
+  from {
+    background-position: 0% 50%;
+  }
+  to {
+    background-position: 200% 50%;
+  }
+}
+
+@keyframes fx-shake {
+  0%,
+  100% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+  25% {
+    transform: translate(-0.04em, 0.03em) rotate(-1.2deg);
+  }
+  50% {
+    transform: translate(0.03em, -0.04em) rotate(1deg);
+  }
+  75% {
+    transform: translate(0.04em, 0.03em) rotate(-0.6deg);
+  }
+}

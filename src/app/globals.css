@@ -18,3 +18,78 @@
 body {
   @apply min-h-screen bg-void antialiased text-parchment;
 }
+
+/* The decoration on this site is almost entirely motion — drifting nebulae,
+   twinkling specks, shimmering skeletons, shaking text. Rather than audit each
+   one, honour the OS switch globally: one iteration is enough to leave every
+   animation at its final frame, which is a sensible resting state for all of
+   them. `!important` is required to beat Tailwind's utility classes. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* --- Rich-text effects ---------------------------------------------------
+   One class per entry in `src/lib/text-effects.ts`. The Lexical toolbar can
+   only apply effects that exist there, so nothing can reach the page without
+   a matching rule below. */
+
+@keyframes fx-rainbow {
+  from {
+    background-position: 0% 50%;
+  }
+  to {
+    background-position: 200% 50%;
+  }
+}
+
+@keyframes fx-shake {
+  0%,
+  100% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+  25% {
+    transform: translate(-0.04em, 0.03em) rotate(-1.2deg);
+  }
+  50% {
+    transform: translate(0.03em, -0.04em) rotate(1deg);
+  }
+  75% {
+    transform: translate(0.04em, 0.03em) rotate(-0.6deg);
+  }
+}
+
+.fx-rainbow {
+  background-image: linear-gradient(
+    90deg,
+    #ff5f6d,
+    #ffc371,
+    #47e891,
+    #5cccff,
+    #b47cff,
+    #ff5f6d
+  );
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: fx-rainbow 6s linear infinite;
+}
+
+.fx-shake {
+  display: inline-block;
+  animation: fx-shake 0.5s ease-in-out infinite;
+}
+
+.fx-glow {
+  color: rgb(var(--accent-300));
+  text-shadow:
+    0 0 6px rgb(var(--accent-400) / 0.75),
+    0 0 18px rgb(var(--accent-500) / 0.45);
+}

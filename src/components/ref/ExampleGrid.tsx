@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
-import type { Example } from "@/lib/references";
+import type { Example } from "@/lib/content";
+import { placeholderFor } from "@/lib/content";
 import { BackButton } from "@/components/ref/BackButton";
 import { NsfwReveal } from "@/components/ref/NsfwReveal";
 import { ShimmerImage } from "@/components/ref/ShimmerImage";
@@ -71,7 +72,7 @@ export function ExampleGrid({
                   aria-hidden
                   fill
                   loading="lazy"
-                  placeholder={example.src.blurDataURL ? "blur" : "empty"}
+                  placeholder={placeholderFor(example.src)}
                   sizes={thumbSizes}
                   className="scale-110 object-cover blur-2xl"
                 />
@@ -80,11 +81,19 @@ export function ExampleGrid({
                   alt={example.title}
                   fill
                   loading="lazy"
-                  placeholder={example.src.blurDataURL ? "blur" : "empty"}
+                  placeholder={placeholderFor(example.src)}
                   sizes={thumbSizes}
                   className="relative z-10 object-contain"
                 />
               </>
+            );
+
+            const card =
+              "overflow-hidden rounded-2xl border border-white/[0.07] bg-void-lift/60 shadow-glow-sm transition hover:border-glow-500/40";
+            const caption = (
+              <p className="truncate px-3 py-2.5 text-sm font-medium text-parchment">
+                {example.title}
+              </p>
             );
 
             return (
@@ -92,31 +101,37 @@ export function ExampleGrid({
                 key={example.slug}
                 className="w-[calc((100%-1rem)/2)] sm:w-[calc((100%-2rem)/3)] lg:w-[calc((100%-3rem)/4)] xl:w-[calc((100%-4rem)/5)] 2xl:w-[calc((100%-5rem)/6)]"
               >
-                <div className="group overflow-hidden rounded-2xl border border-white/[0.07] bg-void-lift/60 shadow-glow-sm transition focus-within:border-glow-500/40 hover:border-glow-500/40">
-                  <div className="relative aspect-square w-full overflow-hidden">
-                    {nsfw ? (
+                {/* One link per card, not one per region: the thumbnail and the
+                    caption go to the same place, and two adjacent links with the
+                    same destination is noise for anyone using a screen reader.
+                    The blur gate is the exception — its reveal button cannot sit
+                    inside an anchor, so there the caption carries the link and
+                    the image's own click layer is hidden from assistive tech. */}
+                {nsfw ? (
+                  <div className={`${card} focus-within:border-glow-500/40`}>
+                    <div className="relative aspect-square w-full overflow-hidden">
                       <NsfwReveal variant="thumb" href={detailHref}>
                         {thumb}
                       </NsfwReveal>
-                    ) : (
-                      <Link
-                        href={detailHref}
-                        aria-label={example.title}
-                        className="relative block h-full w-full focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-glow-500"
-                      >
-                        {thumb}
-                      </Link>
-                    )}
+                    </div>
+                    <Link
+                      href={detailHref}
+                      className="block focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-glow-500"
+                    >
+                      {caption}
+                    </Link>
                   </div>
+                ) : (
                   <Link
                     href={detailHref}
-                    className="block px-3 py-2.5 focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-glow-500"
+                    className={`block ${card} focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-glow-500`}
                   >
-                    <p className="truncate text-sm font-medium text-parchment">
-                      {example.title}
-                    </p>
+                    <div className="relative aspect-square w-full overflow-hidden">
+                      {thumb}
+                    </div>
+                    {caption}
                   </Link>
-                </div>
+                )}
               </li>
             );
           })}

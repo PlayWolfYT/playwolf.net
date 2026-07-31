@@ -12,10 +12,7 @@ export function BrandBackdrop({ density = "full" }: BrandBackdropProps) {
         className="pointer-events-none absolute inset-0 bg-[size:56px_56px] bg-grid-soft opacity-90"
         aria-hidden
       />
-      <div
-        className="pointer-events-none absolute inset-0 bg-rim-cyan"
-        aria-hidden
-      />
+      <div className="pointer-events-none absolute inset-0 bg-rim-cyan" aria-hidden />
       <div
         className={`pointer-events-none absolute rounded-full bg-glow-500/25 blur-[100px] animate-drift ${
           isFull
@@ -26,7 +23,9 @@ export function BrandBackdrop({ density = "full" }: BrandBackdropProps) {
       />
       <div
         className={`pointer-events-none absolute rounded-full bg-glow-600/20 blur-[88px] animate-slow-pulse ${
-          isFull ? "-right-32 bottom-0 h-[420px] w-[420px]" : "right-[10%] bottom-[12%] h-64 w-64"
+          isFull
+            ? "-right-32 bottom-0 h-[420px] w-[420px]"
+            : "right-[10%] bottom-[12%] h-64 w-64"
         }`}
         aria-hidden
       />
@@ -46,12 +45,7 @@ export function BrandBackdrop({ density = "full" }: BrandBackdropProps) {
 /** Tiny four-point star — accessory geometry from reference art */
 export function SparkStar({ className }: { className?: string }) {
   return (
-    <svg
-      className={className}
-      viewBox="0 0 24 24"
-      fill="currentColor"
-      aria-hidden
-    >
+    <svg className={className} viewBox="0 0 24 24" fill="currentColor" aria-hidden>
       <path d="M12 1.5l1.8 5.5h5.7l-4.6 3.4 1.8 5.5-4.7-3.4-4.7 3.4 1.8-5.5-4.6-3.4h5.7L12 1.5z" />
     </svg>
   );

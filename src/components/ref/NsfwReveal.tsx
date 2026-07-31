@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useGlobalNsfw } from "@/components/ref/nsfw-state";
 
 type IconProps = { className?: string };
@@ -48,7 +48,12 @@ type NsfwRevealProps = {
   children: React.ReactNode;
   /** Tightens the rounding/overlay padding for grid thumbnails */
   variant?: "full" | "thumb";
-  /** When set, the (revealed) image links here; clicks while blurred reveal instead of navigating */
+  /**
+   * When set, the (revealed) image links here; clicks while blurred reveal
+   * instead of navigating. The link is a mouse affordance only — callers are
+   * expected to offer the same destination as a real, focusable link elsewhere,
+   * so exposing this one too would just duplicate it in the accessibility tree.
+   */
   href?: string;
 };
 
@@ -67,15 +72,16 @@ type NsfwRevealProps = {
  */
 export function NsfwReveal({ children, variant = "full", href }: NsfwRevealProps) {
   const { revealed: globalRevealed, version } = useGlobalNsfw();
-  // `null` means "follow the global switch". Component state only, so the
-  // override is dropped on navigation and reload.
-  const [override, setOverride] = useState<boolean | null>(null);
+  // Local override is scoped to the global `version` it was set against.
+  // When the master switch flips, `version` changes and the override is
+  // ignored — no effect needed to clear it.
+  const [override, setOverride] = useState<{
+    version: number;
+    value: boolean;
+  } | null>(null);
 
-  useEffect(() => {
-    setOverride(null);
-  }, [version]);
-
-  const revealed = override ?? globalRevealed;
+  const revealed =
+    override && override.version === version ? override.value : globalRevealed;
   const isThumb = variant === "thumb";
 
   return (
@@ -91,7 +97,7 @@ export function NsfwReveal({ children, variant = "full", href }: NsfwRevealProps
       {/* Show/hide blur toggle — this image only */}
       <button
         type="button"
-        onClick={() => setOverride(!revealed)}
+        onClick={() => setOverride({ version, value: !revealed })}
         aria-label={revealed ? "Hide NSFW content" : "Reveal NSFW content (18+)"}
         aria-pressed={revealed}
         title={revealed ? "Hide" : "Reveal (18+)"}
@@ -105,14 +111,15 @@ export function NsfwReveal({ children, variant = "full", href }: NsfwRevealProps
         href ? (
           <Link
             href={href}
-            aria-label="View image"
+            aria-hidden
+            tabIndex={-1}
             className="absolute inset-0 z-10"
           />
         ) : null
       ) : (
         <button
           type="button"
-          onClick={() => setOverride(true)}
+          onClick={() => setOverride({ version, value: true })}
           aria-label="Reveal NSFW content. You must be 18 or older."
           className={`absolute inset-0 z-10 flex flex-col items-center justify-center gap-2 bg-void/55 text-center transition hover:bg-void/40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-glow-500 ${
             isThumb ? "px-3" : "px-6"

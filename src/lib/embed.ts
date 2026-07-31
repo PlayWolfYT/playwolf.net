@@ -1,27 +1,6 @@
 import type { Metadata } from "next";
-import type { StaticImageData } from "next/image";
-import { isValidElement, type ReactNode } from "react";
 
-function collectText(node: ReactNode): string {
-  if (node == null || typeof node === "boolean") return "";
-  if (typeof node === "string" || typeof node === "number") {
-    return String(node);
-  }
-  if (Array.isArray(node)) return node.map(collectText).join("");
-  if (isValidElement<{ children?: ReactNode }>(node)) {
-    return collectText(node.props.children);
-  }
-  return "";
-}
-
-/**
- * Flatten a JSX description down to the plain text it renders (tags
- * stripped, whitespace collapsed) for use in meta/OG descriptions.
- */
-export function reactNodeToText(node: ReactNode): string | undefined {
-  const text = collectText(node).replace(/\s+/g, " ").trim();
-  return text || undefined;
-}
+import type { ImageRef } from "@/lib/content";
 
 const MIME_BY_EXT: Record<string, string> = {
   jpg: "image/jpeg",
@@ -33,40 +12,41 @@ const MIME_BY_EXT: Record<string, string> = {
 };
 
 function mimeFor(src: string): string {
-  const ext = src.split(".").pop()?.toLowerCase() ?? "";
+  const ext = src.split("?")[0].split(".").pop()?.toLowerCase() ?? "";
   return MIME_BY_EXT[ext] ?? "image/jpeg";
 }
 
 type BuildImageMetadataArgs = {
   title: string;
-  src: StaticImageData;
+  image: ImageRef;
   alt: string;
   description?: string;
-  /** Canonical page path, e.g. `/ref/sfw` */
+  /** Canonical page path, e.g. `/ref/playwuff/sfw` */
   pagePath?: string;
 };
 
 /**
  * Build Next `Metadata` that forces a full-size image preview in
- * Discord/Telegram. Combined with `metadataBase` (set in the root layout),
- * the `og:image`/`twitter:image` URLs resolve to absolute paths, and
- * `summary_large_image` makes Discord render the large image rather than a
- * small thumbnail. Always point `src` at the real (unblurred) asset.
+ * Discord/Telegram. Combined with `metadataBase` (set in the root layout) the
+ * `og:image` URL resolves to an absolute one, and `summary_large_image` makes
+ * Discord render the large image rather than a small thumbnail.
+ *
+ * Embeds get the bounded derivative rather than the original: chat clients
+ * refuse to inline very large files, and a reference sheet original can be
+ * tens of megabytes.
  */
 export function buildImageMetadata({
   title,
-  src,
+  image,
   alt,
   description,
   pagePath,
 }: BuildImageMetadataArgs): Metadata {
-  const imageUrl = src.src;
-
-  const image = {
-    url: imageUrl,
-    width: src.width,
-    height: src.height,
-    type: mimeFor(imageUrl),
+  const preview = {
+    url: image.src,
+    width: image.width,
+    height: image.height,
+    type: mimeFor(image.src),
     alt,
   };
 
@@ -78,13 +58,13 @@ export function buildImageMetadata({
       title,
       description,
       url: pagePath,
-      images: [image],
+      images: [preview],
     },
     twitter: {
       card: "summary_large_image",
       title,
       description,
-      images: [imageUrl],
+      images: [image.src],
     },
   };
 }

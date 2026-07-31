@@ -1,14 +1,42 @@
-import type { CSSProperties } from "react";
+import type { ComponentType, CSSProperties } from "react";
+import dynamicIconImports from "lucide-react/dynamicIconImports";
 import { SparkStar } from "@/components/BrandBackdrop";
 import { ArtistBar } from "@/components/ref/ArtistBar";
 import { WipQuoteCycler } from "@/components/ref/WipQuoteCycler";
 import { hexToRgb, type Rgb } from "@/lib/accent";
-import type { RefSheetWip, WipIcon } from "@/lib/references";
-import { resolveWipOptions } from "@/lib/sheet-wip";
+import type { RefSheetWip, WipIconName } from "@/lib/content";
 
 type SheetPlaceholderProps = {
   sheet: RefSheetWip;
 };
+
+type IconComponent = ComponentType<{
+  className?: string;
+  strokeWidth?: number | string;
+}>;
+
+/**
+ * Resolves the picked icon names to components here on the server rather than
+ * with lucide's `DynamicIcon`, which loads in an effect — the whole backdrop
+ * would pop in after hydration. Only the handful of distinct names a sheet
+ * actually uses gets imported.
+ */
+async function loadIcons(names: WipIconName[]): Promise<Record<string, IconComponent>> {
+  const imports = dynamicIconImports as Record<
+    string,
+    (() => Promise<{ default: IconComponent }>) | undefined
+  >;
+
+  const entries = await Promise.all(
+    [...new Set(names)].map(async (name) => {
+      const load = imports[name];
+      if (!load) return null;
+      return [name, (await load()).default] as const;
+    }),
+  );
+
+  return Object.fromEntries(entries.filter((entry) => entry !== null));
+}
 
 /** Deterministic PRNG (mulberry32) — same scatter on server and client. */
 function mulberry32(seed: number) {
@@ -45,7 +73,7 @@ function sampleGradient(stops: Rgb[], t: number): Rgb {
   ) as Rgb;
 }
 
-type Speck = { Icon: WipIcon; style: CSSProperties; twinkle: boolean };
+type Speck = { name: WipIconName; style: CSSProperties; twinkle: boolean };
 type Dust = { style: CSSProperties; twinkle: boolean };
 
 /**
@@ -111,26 +139,18 @@ function scatterSlots(count: number, ratio: number, random: () => number) {
  * `quotes`, `interval` and `aspect`. Without a `gradient` the scatter follows
  * the active profile accent.
  */
-export function SheetPlaceholder({ sheet }: SheetPlaceholderProps) {
-  const {
-    badge,
-    subtitle,
-    quotes,
-    icons,
-    iconCount,
-    gradient,
-    interval,
-    aspect,
-  } = resolveWipOptions(sheet);
+export async function SheetPlaceholder({ sheet }: SheetPlaceholderProps) {
+  const { badge, subtitle, quotes, icons, iconCount, gradient, interval, aspect } =
+    sheet.wip;
+
+  const iconComponents = await loadIcons(icons);
+  const usable = icons.filter((name) => name in iconComponents);
 
   const stops = gradient.map(hexToRgb);
   const tinted = stops.length > 0;
   const colourAt = tinted
     ? (x: number, y: number) => {
-        const [r, g, b] = sampleGradient(
-          stops,
-          (x / 100) * 0.7 + (y / 100) * 0.3,
-        );
+        const [r, g, b] = sampleGradient(stops, (x / 100) * 0.7 + (y / 100) * 0.3);
         return `rgb(${r} ${g} ${b})`;
       }
     : undefined;
@@ -142,26 +162,28 @@ export function SheetPlaceholder({ sheet }: SheetPlaceholderProps) {
   const [frameWidth, frameHeight] = aspect.split("/").map(Number);
   const ratio = frameWidth / frameHeight;
 
-  const specks: Speck[] = scatterSlots(iconCount, ratio, random).map(
-    ({ x, y }) => {
-      const size = ICON_MIN_PCT + random() * (ICON_MAX_PCT - ICON_MIN_PCT);
+  const specks: Speck[] = scatterSlots(
+    usable.length > 0 ? iconCount : 0,
+    ratio,
+    random,
+  ).map(({ x, y }) => {
+    const size = ICON_MIN_PCT + random() * (ICON_MAX_PCT - ICON_MIN_PCT);
 
-      return {
-        Icon: icons[Math.floor(random() * icons.length)],
-        twinkle: random() < 0.4,
-        style: {
-          left: axis(x, size / 2),
-          top: axis(y, (size / 2) * ratio),
-          width: `${size.toFixed(3)}%`,
-          aspectRatio: "1",
-          opacity: 0.16 + random() * 0.28,
-          color: colourAt?.(x * 100, y * 100),
-          transform: `translate(-50%, -50%) rotate(${Math.round(-32 + random() * 64)}deg)`,
-          animationDelay: `${(random() * 3).toFixed(2)}s`,
-        },
-      };
-    },
-  );
+    return {
+      name: usable[Math.floor(random() * usable.length)],
+      twinkle: random() < 0.4,
+      style: {
+        left: axis(x, size / 2),
+        top: axis(y, (size / 2) * ratio),
+        width: `${size.toFixed(3)}%`,
+        aspectRatio: "1",
+        opacity: 0.16 + random() * 0.28,
+        color: colourAt?.(x * 100, y * 100),
+        transform: `translate(-50%, -50%) rotate(${Math.round(-32 + random() * 64)}deg)`,
+        animationDelay: `${(random() * 3).toFixed(2)}s`,
+      },
+    };
+  });
 
   const dust: Dust[] = scatterSlots(34, ratio, random).map(({ x, y }) => {
     const size = DUST_MIN_PCT + random() * (DUST_MAX_PCT - DUST_MIN_PCT);
@@ -233,17 +255,20 @@ export function SheetPlaceholder({ sheet }: SheetPlaceholderProps) {
                 />
               ))}
 
-              {specks.map(({ Icon, style, twinkle }, position) => (
-                <span
-                  key={`speck-${position}`}
-                  className={`absolute block ${tinted ? "" : "text-glow-500"} ${
-                    twinkle ? "animate-twinkle" : ""
-                  }`}
-                  style={style}
-                >
-                  <Icon className="h-full w-full" strokeWidth={1.5} />
-                </span>
-              ))}
+              {specks.map(({ name, style, twinkle }, position) => {
+                const Icon = iconComponents[name];
+                return (
+                  <span
+                    key={`speck-${position}`}
+                    className={`absolute block ${tinted ? "" : "text-glow-500"} ${
+                      twinkle ? "animate-twinkle" : ""
+                    }`}
+                    style={style}
+                  >
+                    <Icon className="h-full w-full" strokeWidth={1.5} />
+                  </span>
+                );
+              })}
             </div>
 
             {/* Soft pool behind the copy */}
@@ -317,10 +342,7 @@ export function SheetPlaceholder({ sheet }: SheetPlaceholderProps) {
               </p>
 
               <div className="mt-5 flex flex-col items-center">
-                <WipQuoteCycler
-                  quotes={quotes}
-                  interval={interval}
-                />
+                <WipQuoteCycler quotes={quotes} interval={interval} />
               </div>
             </div>
           </div>

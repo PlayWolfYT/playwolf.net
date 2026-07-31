@@ -1,5 +1,5 @@
-# Web + Postgres + Redis. Web builds from this directory (`docker compose up --build`).
-# On one host, use different Portainer stack names so dev/prod get separate volumes.
+# Web + Postgres + Garage. Web builds from this directory (`docker compose up --build`).
+# On one host, use different stack names so dev/prod get separate volumes.
 
 services:
   web:
@@ -12,23 +12,34 @@ services:
       - "${WEB_PORT:-3000}:3000"
     environment:
       NODE_ENV: production
-      MAINTENANCE_MODE: ${MAINTENANCE_MODE:-false}
       NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-https://playwolf.net}
       DATABASE_URL: postgresql://${POSTGRES_USER:-playwolf}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-playwolf}
-      REDIS_URL: redis://redis:6379
+      PAYLOAD_SECRET: ${PAYLOAD_SECRET:?Set PAYLOAD_SECRET in your environment}
+      # Garage is reachable only on the internal network; the browser never
+      # talks to it directly, it goes through Payload's own media route.
+      S3_ENDPOINT: http://garage:3900
+      S3_REGION: ${S3_REGION:-garage}
+      S3_BUCKET: ${S3_BUCKET:-playwolf-media}
+      S3_ACCESS_KEY_ID: ${S3_ACCESS_KEY_ID:?Set S3_ACCESS_KEY_ID from `garage key create`}
+      S3_SECRET_ACCESS_KEY: ${S3_SECRET_ACCESS_KEY:?Set S3_SECRET_ACCESS_KEY from `garage key create`}
+      # Both empty means no tracker is rendered at all. Read per request, so
+      # turning analytics on is a restart rather than a rebuild.
+      UMAMI_SCRIPT_URL: ${UMAMI_SCRIPT_URL:-}
+      UMAMI_WEBSITE_ID: ${UMAMI_WEBSITE_ID:-}
+    volumes:
+      # Optimized image variants. Re-encoding every derivative on each deploy
+      # is the difference between a warm site and a slow one for the first few
+      # minutes, so this outlives the container.
+      - next_cache:/app/.next/cache
     depends_on:
       db:
         condition: service_healthy
-      redis:
-        condition: service_healthy
+      garage:
+        condition: service_started
     networks:
       - internal
     healthcheck:
-      test:
-        [
-          "CMD-SHELL",
-          "wget -q --spider http://127.0.0.1:3000/ || exit 1",
-        ]
+      test: ["CMD-SHELL", "wget -q --spider http://127.0.0.1:3000/ || exit 1"]
       interval: 30s
       timeout: 5s
       retries: 3
@@ -56,19 +67,80 @@ services:
     networks:
       - internal
 
-  redis:
-    image: redis:7-alpine
-    restart: unless-stopped
-    command: redis-server --appendonly yes
-    volumes:
-      - redis_data:/data
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 5s
-      timeout: 3s
-      retries: 5
+  # Umami keeps its own schema, so it gets its own database inside the same
+  # Postgres instance. Postgres' `docker-entrypoint-initdb.d` scripts only run
+  # against an empty data directory, which is no help on a volume that already
+  # exists, so this runs on every start instead and is a no-op once the database
+  # is there. Exits as soon as it is done.
+  db-init:
+    image: postgres:16-alpine
+    restart: "no"
+    environment:
+      PGHOST: db
+      PGUSER: ${POSTGRES_USER:-playwolf}
+      PGPASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in your environment}
+      PGDATABASE: ${POSTGRES_DB:-playwolf}
+      UMAMI_DB: ${UMAMI_DB:-umami}
+    # `$$` escapes compose's own interpolation so the shell expands these.
+    command:
+      - sh
+      - -c
+      - psql -tAc "SELECT 1 FROM pg_database WHERE datname = '$$UMAMI_DB'" | grep -q 1 || createdb -O "$$PGUSER" "$$UMAMI_DB"
+    depends_on:
+      db:
+        condition: service_healthy
     networks:
       - internal
+
+  # S3-compatible storage for artwork originals and their derivatives.
+  # Deliberately not published to the host: only `web` and, during backups,
+  # rclone on the VM need to reach it.
+  garage:
+    image: dxflrs/garage:v2.3.0
+    restart: unless-stopped
+    environment:
+      GARAGE_RPC_SECRET: ${GARAGE_RPC_SECRET:?Set GARAGE_RPC_SECRET to 32 random hex bytes}
+    volumes:
+      - ./docker/garage.toml:/etc/garage.toml:ro
+      - garage_meta:/var/lib/garage/meta
+      - garage_data:/var/lib/garage/data
+    healthcheck:
+      # The image ships only the static binary — no shell — so this cannot be a
+      # CMD-SHELL test. `web` waits on service_started rather than this, since a
+      # node that has no layout yet is up but not yet usable.
+      test: ["CMD", "/garage", "status"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - internal
+
+  # Self-hosted, cookie-free analytics. Nothing else depends on it, and the site
+  # renders no tracker until UMAMI_SCRIPT_URL/UMAMI_WEBSITE_ID are set, so it is
+  # harmless to have running before it is pointed at.
+  umami:
+    image: ghcr.io/umami-software/umami:3.2.0
+    restart: unless-stopped
+    init: true
+    ports:
+      - "${UMAMI_PORT:-3001}:3000"
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-playwolf}:${POSTGRES_PASSWORD}@db:5432/${UMAMI_DB:-umami}
+      APP_SECRET: ${UMAMI_APP_SECRET:?Set UMAMI_APP_SECRET to sign Umami sessions}
+    depends_on:
+      db:
+        condition: service_healthy
+      db-init:
+        condition: service_completed_successfully
+    networks:
+      - internal
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:3000/api/heartbeat || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
 
 networks:
   internal:
@@ -76,4 +148,6 @@ networks:
 
 volumes:
   postgres_data:
-  redis_data:
+  garage_meta:
+  garage_data:
+  next_cache:

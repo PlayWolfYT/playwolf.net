@@ -1,8 +1,8 @@
 import Link from "next/link";
 import { ShimmerImage } from "@/components/ref/ShimmerImage";
 import { accentVars } from "@/lib/accent";
-import type { Character } from "@/lib/references";
-import { getMainArt } from "@/lib/references";
+import type { Character } from "@/lib/content";
+import { getMainArt, placeholderFor } from "@/lib/content";
 
 type CharacterCardProps = {
   character: Character;
@@ -13,8 +13,7 @@ export function CharacterCard({ character }: CharacterCardProps) {
   const href = `/ref/${character.slug}`;
   // Tint the card with the character's accent (SFW preferred) so the
   // overview hints at each character's colour before their page is opened.
-  const accent = (character.profiles.sfw ?? character.profiles.nsfw)
-    ?.accentColor;
+  const accent = (character.profiles.sfw ?? character.profiles.nsfw)?.accentColor;
 
   return (
     <Link
@@ -32,7 +31,7 @@ export function CharacterCard({ character }: CharacterCardProps) {
               src={mainArt.src}
               alt={mainArt.alt}
               fill
-              placeholder={mainArt.src.blurDataURL ? "blur" : "empty"}
+              placeholder={placeholderFor(mainArt.src)}
               sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 340px"
               className="object-cover object-top transition duration-500 group-hover:scale-105"
             />
