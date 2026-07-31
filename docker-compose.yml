@@ -54,8 +54,6 @@ services:
       POSTGRES_DB: ${POSTGRES_DB:-playwolf}
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      # Runs once, when the data directory is first created.
-      - ./docker/postgres-init:/docker-entrypoint-initdb.d:ro
     healthcheck:
       test:
         [
@@ -66,6 +64,31 @@ services:
       timeout: 5s
       retries: 10
       start_period: 10s
+    networks:
+      - internal
+
+  # Umami keeps its own schema, so it gets its own database inside the same
+  # Postgres instance. Postgres' `docker-entrypoint-initdb.d` scripts only run
+  # against an empty data directory, which is no help on a volume that already
+  # exists, so this runs on every start instead and is a no-op once the database
+  # is there. Exits as soon as it is done.
+  db-init:
+    image: postgres:16-alpine
+    restart: "no"
+    environment:
+      PGHOST: db
+      PGUSER: ${POSTGRES_USER:-playwolf}
+      PGPASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in your environment}
+      PGDATABASE: ${POSTGRES_DB:-playwolf}
+      UMAMI_DB: ${UMAMI_DB:-umami}
+    # `$$` escapes compose's own interpolation so the shell expands these.
+    command:
+      - sh
+      - -c
+      - psql -tAc "SELECT 1 FROM pg_database WHERE datname = '$$UMAMI_DB'" | grep -q 1 || createdb -O "$$PGUSER" "$$UMAMI_DB"
+    depends_on:
+      db:
+        condition: service_healthy
     networks:
       - internal
 
@@ -93,22 +116,23 @@ services:
     networks:
       - internal
 
-  # Self-hosted, cookie-free analytics. Opt-in: start it with
-  # `docker compose --profile analytics up -d`. Nothing else depends on it, and
-  # the site renders no tracker until UMAMI_SCRIPT_URL/UMAMI_WEBSITE_ID are set.
+  # Self-hosted, cookie-free analytics. Nothing else depends on it, and the site
+  # renders no tracker until UMAMI_SCRIPT_URL/UMAMI_WEBSITE_ID are set, so it is
+  # harmless to have running before it is pointed at.
   umami:
     image: ghcr.io/umami-software/umami:3.2.0
-    profiles: ["analytics"]
     restart: unless-stopped
     init: true
     ports:
       - "${UMAMI_PORT:-3001}:3000"
     environment:
       DATABASE_URL: postgresql://${POSTGRES_USER:-playwolf}:${POSTGRES_PASSWORD}@db:5432/${UMAMI_DB:-umami}
-      APP_SECRET: ${UMAMI_APP_SECRET:?Set UMAMI_APP_SECRET when running the analytics profile}
+      APP_SECRET: ${UMAMI_APP_SECRET:?Set UMAMI_APP_SECRET to sign Umami sessions}
     depends_on:
       db:
         condition: service_healthy
+      db-init:
+        condition: service_completed_successfully
     networks:
       - internal
     healthcheck:
