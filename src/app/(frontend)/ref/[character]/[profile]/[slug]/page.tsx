@@ -51,8 +51,7 @@ export default async function ExamplePage({ params }: PageProps) {
         src={example.src}
         alt={example.title}
         title={example.title}
-        nsfw={isNsfw}
-        description={isNsfw ? "18+ content. Click to reveal." : undefined}
+        description={isNsfw ? "18+ content." : undefined}
         artist={example.artist}
         backHref={backHref}
       >

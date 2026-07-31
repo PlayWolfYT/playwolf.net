@@ -10,7 +10,6 @@ type RefImageProps = {
   children?: React.ReactNode;
   /** When omitted, no header is rendered (page owns the heading). */
   title?: string;
-  nsfw?: boolean;
   /** Optional note shown under the title */
   description?: string;
   /** Optional crediting info shown in a bar below the image */
@@ -21,17 +20,12 @@ type RefImageProps = {
   backHref?: string;
 };
 
-/**
- * Full-view single image embed. Renders the real `src` regardless of the NSFW
- * flag (the blur is a CSS-only overlay), so direct links and crawlers always
- * receive the unblurred asset.
- */
+/** Full-view single image embed. */
 export function RefImage({
   src,
   alt,
   children,
   title,
-  nsfw = false,
   description,
   artist,
   showBackButton = true,
@@ -56,7 +50,7 @@ export function RefImage({
         </header>
       ) : null}
 
-      <ArtworkCard src={src} alt={alt} nsfw={nsfw} artist={artist} />
+      <ArtworkCard src={src} alt={alt} artist={artist} />
 
       <div className="mt-6 flex flex-col items-center gap-3">
         {children}

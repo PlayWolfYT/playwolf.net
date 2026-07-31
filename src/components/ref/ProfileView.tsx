@@ -1,7 +1,6 @@
 import { ArtworkCard } from "@/components/ref/ArtworkCard";
 import { ExampleGrid } from "@/components/ref/ExampleGrid";
 import { OpenImageLink } from "@/components/ref/OpenImageLink";
-import { RevealAllToggle } from "@/components/ref/RevealAllToggle";
 import { SheetPlaceholder } from "@/components/ref/SheetPlaceholder";
 import { RichTextContent } from "@/lib/rich-text";
 import { isImageSheet, isWipSheet, type Profile, type ProfileKey } from "@/lib/content";
@@ -17,8 +16,9 @@ type ProfileViewProps = {
  * One full profile panel: reference sheet, description, and example gallery.
  * The description sits below the artwork so the sheet starts at the same
  * vertical position in every profile (no layout shift when switching).
- * The After Dark panel keeps every image blur-gated and adds a
- * "Reveal all" master switch above the gallery.
+ *
+ * After Dark artwork is shown as-is: reaching this route at all means the 18+
+ * warning has been accepted (see `NsfwConsentProvider`).
  */
 export function ProfileView({ profile, profileKey, basePath }: ProfileViewProps) {
   const isNsfw = profileKey === "nsfw";
@@ -30,12 +30,7 @@ export function ProfileView({ profile, profileKey, basePath }: ProfileViewProps)
         <SheetPlaceholder sheet={sheet} />
       ) : sheet && isImageSheet(sheet) ? (
         <>
-          <ArtworkCard
-            src={sheet.src}
-            alt={sheet.title}
-            nsfw={isNsfw}
-            artist={sheet.artist}
-          />
+          <ArtworkCard src={sheet.src} alt={sheet.title} artist={sheet.artist} />
           <div className="mt-6 flex justify-center">
             <OpenImageLink image={sheet.src} />
           </div>
@@ -55,18 +50,11 @@ export function ProfileView({ profile, profileKey, basePath }: ProfileViewProps)
       ) : null}
 
       <div className="mt-14">
-        {isNsfw ? (
-          <div className="mb-8 flex justify-center">
-            <RevealAllToggle />
-          </div>
-        ) : null}
-
         <ExampleGrid
           examples={profile.examples}
           basePath={basePath}
-          nsfw={isNsfw}
           title="Examples"
-          description={isNsfw ? "18+ content. Click any image to reveal." : undefined}
+          description={isNsfw ? "18+ content." : undefined}
           showBackButton={false}
         />
       </div>

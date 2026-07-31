@@ -3,6 +3,7 @@
 import { useId, useRef } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import { useNsfwConsent } from "@/components/site/NsfwConsent";
 import { isProfileKey, type ProfileKey } from "@/lib/content";
 
 export type ProfileTab = {
@@ -42,6 +43,7 @@ export function ProfileSwitcher({
 }: ProfileSwitcherProps) {
   const pathname = usePathname();
   const router = useRouter();
+  const { confirmNsfw } = useNsfwConsent();
   const baseId = useId();
   const tabRefs = useRef<Partial<Record<ProfileKey, HTMLAnchorElement | null>>>({});
 
@@ -50,8 +52,11 @@ export function ProfileSwitcher({
   const pathKey = keyFromPathname(pathname);
   const active = tabs.some((tab) => tab.key === pathKey) ? pathKey : tabs[0].key;
 
-  const switchTo = (tab: ProfileTab) => {
+  // Arrow keys move between tabs without a click, so the 18+ warning has to be
+  // asked for here as well — the provider's click gate never sees these.
+  const switchTo = async (tab: ProfileTab) => {
     if (tab.key === active) return;
+    if (tab.key === "nsfw" && !(await confirmNsfw())) return;
     router.push(tab.href, { scroll: false });
   };
 
@@ -60,7 +65,7 @@ export function ProfileSwitcher({
     if (delta === 0) return;
     event.preventDefault();
     const next = tabs[(index + delta + tabs.length) % tabs.length];
-    switchTo(next);
+    void switchTo(next);
     tabRefs.current[next.key]?.focus();
   };
 

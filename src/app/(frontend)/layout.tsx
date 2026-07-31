@@ -1,8 +1,11 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono, Outfit } from "next/font/google";
+import { cookies } from "next/headers";
 import { MaintenanceScreen } from "@/components/MaintenanceScreen";
 import { Analytics } from "@/components/site/Analytics";
+import { NsfwConsentProvider } from "@/components/site/NsfwConsent";
 import { SkipToContent } from "@/components/site/SkipToContent";
+import { NSFW_CONSENT_COOKIE } from "@/lib/nsfw";
 import { getSiteSettings } from "@/lib/references";
 import "../globals.css";
 
@@ -81,7 +84,11 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const { maintenanceMode, maintenanceMessage } = await getSiteSettings();
+  const [{ maintenanceMode, maintenanceMessage }, cookieStore] = await Promise.all([
+    getSiteSettings(),
+    cookies(),
+  ]);
+  const nsfwConsent = cookieStore.get(NSFW_CONSENT_COOKIE)?.value === "1";
 
   return (
     <html lang="en" className="scroll-smooth" suppressHydrationWarning>
@@ -92,11 +99,11 @@ export default async function RootLayout({
         {maintenanceMode ? (
           <MaintenanceScreen message={maintenanceMessage} />
         ) : (
-          <>
+          <NsfwConsentProvider initialConsent={nsfwConsent}>
             <SkipToContent />
             {children}
             <Analytics />
-          </>
+          </NsfwConsentProvider>
         )}
       </body>
     </html>

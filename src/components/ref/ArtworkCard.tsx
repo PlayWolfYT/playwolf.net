@@ -1,13 +1,11 @@
 import type { Artist, ImageRef } from "@/lib/content";
 import { placeholderFor } from "@/lib/content";
 import { ArtistBar } from "@/components/ref/ArtistBar";
-import { NsfwReveal } from "@/components/ref/NsfwReveal";
 import { ShimmerImage } from "@/components/ref/ShimmerImage";
 
 type ArtworkCardProps = {
   src: ImageRef;
   alt: string;
-  nsfw?: boolean;
   /** Rendered flush against the bottom of the image, inside the same card */
   artist?: Artist;
   /**
@@ -30,18 +28,8 @@ function frameFor(src: ImageRef): { className: string; px: number } {
   return { className: "max-w-2xl", px: 672 };
 }
 
-/**
- * Single piece of artwork with its credit bar attached to the same card. The
- * real `src` is always rendered (the NSFW blur is a CSS-only overlay), so
- * direct links and crawlers receive the unblurred asset.
- */
-export function ArtworkCard({
-  src,
-  alt,
-  nsfw = false,
-  artist,
-  fit = "page",
-}: ArtworkCardProps) {
+/** Single piece of artwork with its credit bar attached to the same card. */
+export function ArtworkCard({ src, alt, artist, fit = "page" }: ArtworkCardProps) {
   const frame = frameFor(src);
   const bounded = fit === "viewport";
 
@@ -68,7 +56,7 @@ export function ArtworkCard({
       <div
         className={`relative overflow-hidden rounded-t-3xl ${artist ? "" : "rounded-b-3xl"}`}
       >
-        {nsfw ? <NsfwReveal>{image}</NsfwReveal> : image}
+        {image}
       </div>
 
       {artist ? (

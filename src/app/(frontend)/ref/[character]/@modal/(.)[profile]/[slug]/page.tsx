@@ -45,7 +45,6 @@ export default async function ExampleModal({ params }: PageProps) {
       <ArtworkCard
         src={example.src}
         alt={example.title}
-        nsfw={profileParam === "nsfw"}
         artist={example.artist}
         fit="viewport"
       />

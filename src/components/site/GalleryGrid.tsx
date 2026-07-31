@@ -2,7 +2,6 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { placeholderFor, type GalleryItem } from "@/lib/content";
-import { NsfwReveal } from "@/components/ref/NsfwReveal";
 import { ShimmerImage } from "@/components/ref/ShimmerImage";
 
 const THUMB_SIZES =
@@ -62,31 +61,15 @@ export function GalleryGrid({ items }: { items: GalleryItem[] }) {
             key={`${character.slug}-${profile}-${example.slug}`}
             className="w-[calc((100%-1rem)/2)] sm:w-[calc((100%-2rem)/3)] lg:w-[calc((100%-3rem)/4)] xl:w-[calc((100%-4rem)/5)] 2xl:w-[calc((100%-5rem)/6)]"
           >
-            {profile === "nsfw" ? (
-              <div className={`${CARD_CLASS} focus-within:border-glow-500/40`}>
-                <div className="relative aspect-square w-full overflow-hidden">
-                  <NsfwReveal variant="thumb" href={href}>
-                    {thumb}
-                  </NsfwReveal>
-                </div>
-                <Link
-                  href={href}
-                  className="block focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-glow-500"
-                >
-                  {caption}
-                </Link>
+            <Link
+              href={href}
+              className={`block ${CARD_CLASS} focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-glow-500`}
+            >
+              <div className="relative aspect-square w-full overflow-hidden">
+                {thumb}
               </div>
-            ) : (
-              <Link
-                href={href}
-                className={`block ${CARD_CLASS} focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-glow-500`}
-              >
-                <div className="relative aspect-square w-full overflow-hidden">
-                  {thumb}
-                </div>
-                {caption}
-              </Link>
-            )}
+              {caption}
+            </Link>
           </li>
         );
       })}

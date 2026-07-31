@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { CharacterProfiles } from "@/components/ref/CharacterProfiles";
 import { buildImageMetadata } from "@/lib/embed";
 import { richTextToPlainText } from "@/lib/rich-text";
@@ -29,17 +29,18 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   });
 }
 
-/** Canonical character page — the SFW profile is active by default
- *  (falls back to NSFW for characters without an SFW profile). */
+/** Canonical home of a character's SFW profile. */
 export default async function CharacterPage({ params }: PageProps) {
   const { character: characterSlug } = await params;
   const character = await getCharacter(characterSlug);
   if (!character) notFound();
 
-  return (
-    <CharacterProfiles
-      character={character}
-      activeProfile={getDefaultProfileKey(character)}
-    />
-  );
+  // A character with no SFW profile is sent to the explicit After Dark URL
+  // rather than served 18+ artwork from an address that doesn't say so — the
+  // warning gate reads the route to decide when to ask.
+  if (getDefaultProfileKey(character) === "nsfw") {
+    redirect(`/ref/${character.slug}/nsfw`);
+  }
+
+  return <CharacterProfiles character={character} activeProfile="sfw" />;
 }
