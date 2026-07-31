@@ -1,0 +1,26 @@
+# Single-node Garage holding the media bucket.
+#
+# This file only configures the daemon. A fresh node serves nothing until a
+# layout is assigned and a bucket and key exist — see section 7 of
+# docs/DEPLOYMENT.md for that one-time bootstrap.
+
+metadata_dir = "/var/lib/garage/meta"
+data_dir = "/var/lib/garage/data"
+db_engine = "lmdb"
+
+# One node keeping one copy. Garage refuses to start if this disagrees with the
+# applied layout, so changing it later means re-running the layout commands.
+replication_factor = 1
+
+rpc_bind_addr = "[::]:3901"
+rpc_public_addr = "garage:3901"
+# rpc_secret is supplied as GARAGE_RPC_SECRET; it must never live in this file.
+
+[s3_api]
+s3_region = "garage"
+api_bind_addr = "[::]:3900"
+# No root_domain on purpose: Payload and rclone both address buckets path-style,
+# which is all Garage supports.
+
+[admin]
+api_bind_addr = "[::]:3903"

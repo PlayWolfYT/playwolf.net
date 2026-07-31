@@ -23,11 +23,7 @@ export function RevealAllToggle() {
           : "border-white/10 bg-void-lift/70 text-parchment-muted hover:border-white/25 hover:text-parchment"
       }`}
     >
-      {revealed ? (
-        <EyeOffIcon className="h-4 w-4" />
-      ) : (
-        <EyeIcon className="h-4 w-4" />
-      )}
+      {revealed ? <EyeOffIcon className="h-4 w-4" /> : <EyeIcon className="h-4 w-4" />}
       {revealed ? "Hide all" : "Reveal all"}
       <span
         className={`rounded-full border px-1.5 py-px font-mono text-[0.6rem] tracking-[0.1em] ${

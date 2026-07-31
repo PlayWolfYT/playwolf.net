@@ -16,10 +16,7 @@ const FADE_MS = 500;
  * over each interval. Split out of `SheetPlaceholder` so the placeholder can
  * stay a server component (it receives icon components as props).
  */
-export function WipQuoteCycler({
-  quotes,
-  interval,
-}: WipQuoteCyclerProps) {
+export function WipQuoteCycler({ quotes, interval }: WipQuoteCyclerProps) {
   const [index, setIndex] = useState(0);
   const [cycle, setCycle] = useState(0);
   const [visible, setVisible] = useState(false);
@@ -32,9 +29,12 @@ export function WipQuoteCycler({
     let cancelled = false;
     let fadeTimer: ReturnType<typeof setTimeout> | undefined;
 
-    setIndex(Math.floor(Math.random() * quotes.length));
+    // Defer the first pick so hydration stays deterministic (index 0,
+    // faded out) and we avoid synchronous setState in the effect body.
     const showTimer = setTimeout(() => {
-      if (!cancelled) setVisible(true);
+      if (cancelled) return;
+      setIndex(Math.floor(Math.random() * quotes.length));
+      setVisible(true);
     }, 40);
 
     const cycleTimer = setInterval(() => {

@@ -1,6 +1,10 @@
 import { BrandBackdrop, SparkStar } from "@/components/BrandBackdrop";
 
-export function MaintenanceScreen() {
+/**
+ * `message` comes from the `siteSettings` global, so the reason for the outage
+ * can be changed without a deploy. Blank falls back to the standing copy.
+ */
+export function MaintenanceScreen({ message }: { message?: string }) {
   return (
     <main className="relative isolate flex min-h-screen flex-col items-center justify-center overflow-hidden bg-void px-6 py-16">
       <BrandBackdrop density="full" />
@@ -37,12 +41,21 @@ export function MaintenanceScreen() {
                 in development
               </span>
             </h1>
-            <p className="mx-auto mt-6 max-w-md text-center text-base leading-relaxed text-parchment-muted">
-              The website is still currently in development as I dont have much time to work on it.
-            </p>
-            <p className="mx-auto mt-6 max-w-md text-center text-base leading-relaxed text-parchment-muted">
-              Please check back again later~
-            </p>
+            {message ? (
+              <p className="mx-auto mt-6 max-w-md whitespace-pre-line text-center text-base leading-relaxed text-parchment-muted">
+                {message}
+              </p>
+            ) : (
+              <>
+                <p className="mx-auto mt-6 max-w-md text-center text-base leading-relaxed text-parchment-muted">
+                  The website is still currently in development as I dont have much time
+                  to work on it.
+                </p>
+                <p className="mx-auto mt-6 max-w-md text-center text-base leading-relaxed text-parchment-muted">
+                  Please check back again later~
+                </p>
+              </>
+            )}
             <div className="mx-auto mt-10 h-px max-w-xs bg-gradient-to-r from-transparent via-glow-500/55 to-transparent" />
           </div>
         </div>

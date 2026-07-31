@@ -1,15 +1,21 @@
-import type { StaticImageData } from "next/image";
-import type { Artist } from "@/lib/references";
+import type { Artist, ImageRef } from "@/lib/content";
+import { placeholderFor } from "@/lib/content";
 import { ArtistBar } from "@/components/ref/ArtistBar";
 import { NsfwReveal } from "@/components/ref/NsfwReveal";
 import { ShimmerImage } from "@/components/ref/ShimmerImage";
 
 type ArtworkCardProps = {
-  src: StaticImageData;
+  src: ImageRef;
   alt: string;
   nsfw?: boolean;
   /** Rendered flush against the bottom of the image, inside the same card */
   artist?: Artist;
+  /**
+   * `"page"` lets a tall piece run past the fold, which is what a page is for.
+   * `"viewport"` keeps the whole card on screen instead — the lightbox has
+   * nowhere to scroll to.
+   */
+  fit?: "page" | "viewport";
 };
 
 /**
@@ -17,7 +23,7 @@ type ArtworkCardProps = {
  * so wide reference sheets can use the room a near-full-width page offers
  * while tall pieces don't end up taller than the viewport.
  */
-function frameFor(src: StaticImageData): { className: string; px: number } {
+function frameFor(src: ImageRef): { className: string; px: number } {
   const ratio = src.width / src.height;
   if (ratio >= 1.3) return { className: "max-w-6xl", px: 1152 };
   if (ratio >= 0.85) return { className: "max-w-4xl", px: 896 };
@@ -34,8 +40,10 @@ export function ArtworkCard({
   alt,
   nsfw = false,
   artist,
+  fit = "page",
 }: ArtworkCardProps) {
   const frame = frameFor(src);
+  const bounded = fit === "viewport";
 
   const image = (
     <ShimmerImage
@@ -43,17 +51,19 @@ export function ArtworkCard({
       alt={alt}
       width={src.width}
       height={src.height}
-      // Next only generates blurDataURL for lowercase image extensions;
-      // some assets are .PNG, so fall back to no placeholder for those.
-      placeholder={src.blurDataURL ? "blur" : "empty"}
+      placeholder={placeholderFor(src)}
       sizes={`(max-width: ${frame.px}px) 100vw, ${frame.px}px`}
-      className="h-auto w-full"
+      className={
+        bounded ? "mx-auto h-auto max-h-[70vh] w-auto max-w-full" : "h-auto w-full"
+      }
     />
   );
 
   return (
     <figure
-      className={`mx-auto w-full rounded-3xl border border-white/[0.07] bg-gradient-to-br from-void-lift/90 to-void-panel/70 shadow-glow-sm ${frame.className}`}
+      className={`mx-auto rounded-3xl border border-white/[0.07] bg-gradient-to-br from-void-lift/90 to-void-panel/70 shadow-glow-sm ${
+        bounded ? "w-fit max-w-full" : `w-full ${frame.className}`
+      }`}
     >
       <div
         className={`relative overflow-hidden rounded-t-3xl ${artist ? "" : "rounded-b-3xl"}`}

@@ -1,0 +1,9 @@
+# Build output and dependencies
+.next/
+node_modules/
+bun.lock
+
+# Written by Payload, not by hand
+src/payload-types.ts
+src/app/(payload)/admin/importMap.js
+src/migrations/

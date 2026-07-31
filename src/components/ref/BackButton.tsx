@@ -10,10 +10,7 @@ type BackButtonProps = {
   fallbackHref?: string;
 };
 
-export function BackButton({
-  label = "Back",
-  fallbackHref = "/",
-}: BackButtonProps) {
+export function BackButton({ label = "Back", fallbackHref = "/" }: BackButtonProps) {
   // Get the previous page based on the URL slash-separated path segments
   const pathname = usePathname();
   const previousPath = pathname.split("/").slice(0, -1).join("/");

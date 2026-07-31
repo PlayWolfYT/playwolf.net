@@ -3,12 +3,8 @@ import { ExampleGrid } from "@/components/ref/ExampleGrid";
 import { OpenImageLink } from "@/components/ref/OpenImageLink";
 import { RevealAllToggle } from "@/components/ref/RevealAllToggle";
 import { SheetPlaceholder } from "@/components/ref/SheetPlaceholder";
-import {
-  isImageSheet,
-  isWipSheet,
-  type Profile,
-  type ProfileKey,
-} from "@/lib/references";
+import { RichTextContent } from "@/lib/rich-text";
+import { isImageSheet, isWipSheet, type Profile, type ProfileKey } from "@/lib/content";
 
 type ProfileViewProps = {
   profile: Profile;
@@ -24,11 +20,7 @@ type ProfileViewProps = {
  * The After Dark panel keeps every image blur-gated and adds a
  * "Reveal all" master switch above the gallery.
  */
-export function ProfileView({
-  profile,
-  profileKey,
-  basePath,
-}: ProfileViewProps) {
+export function ProfileView({ profile, profileKey, basePath }: ProfileViewProps) {
   const isNsfw = profileKey === "nsfw";
   const sheet = profile.sheet;
 
@@ -45,7 +37,7 @@ export function ProfileView({
             artist={sheet.artist}
           />
           <div className="mt-6 flex justify-center">
-            <OpenImageLink src={sheet.src} />
+            <OpenImageLink image={sheet.src} />
           </div>
         </>
       ) : null}
@@ -55,9 +47,10 @@ export function ProfileView({
           <h2 className="font-display text-xs font-medium uppercase tracking-[0.28em] text-parchment-dim">
             About
           </h2>
-          <div className="mt-3 text-sm leading-relaxed text-parchment-muted whitespace-pre-line">
-            {profile.description}
-          </div>
+          <RichTextContent
+            className="mt-3 text-sm leading-relaxed text-parchment-muted"
+            value={profile.description}
+          />
         </section>
       ) : null}
 
@@ -73,9 +66,7 @@ export function ProfileView({
           basePath={basePath}
           nsfw={isNsfw}
           title="Examples"
-          description={
-            isNsfw ? "18+ content. Click any image to reveal." : undefined
-          }
+          description={isNsfw ? "18+ content. Click any image to reveal." : undefined}
           showBackButton={false}
         />
       </div>
