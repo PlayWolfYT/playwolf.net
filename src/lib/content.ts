@@ -95,6 +95,11 @@ export type Project = {
 export type SiteSettings = {
   maintenanceMode: boolean;
   maintenanceMessage?: string;
+  /**
+   * Path prefixes left reachable during maintenance. Missing/null falls back
+   * to `/ref`; an explicit empty list excludes nothing.
+   */
+  maintenanceExcludedPaths: string[];
   heroTitle?: string;
   heroTagline?: string;
   about?: RichTextValue;
@@ -109,6 +114,8 @@ export type SiteSettings = {
  */
 export const DEFAULT_SITE_SETTINGS: SiteSettings = {
   maintenanceMode: false,
+  // Keep in sync with `SiteSettings.maintenanceExcludedPaths` defaultValue.
+  maintenanceExcludedPaths: ["/ref"],
   links: [],
 };
 

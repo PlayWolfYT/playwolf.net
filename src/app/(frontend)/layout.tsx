@@ -1,10 +1,11 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono, Outfit } from "next/font/google";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { MaintenanceScreen } from "@/components/MaintenanceScreen";
 import { Analytics } from "@/components/site/Analytics";
 import { NsfwConsentProvider } from "@/components/site/NsfwConsent";
 import { SkipToContent } from "@/components/site/SkipToContent";
+import { isPathExcludedFromMaintenance, PATHNAME_HEADER } from "@/lib/maintenance";
 import { NSFW_CONSENT_COOKIE } from "@/lib/nsfw";
 import { getSiteSettings } from "@/lib/references";
 import "../globals.css";
@@ -75,19 +76,26 @@ export const dynamic = "force-dynamic";
 
 /**
  * Maintenance mode is enforced here rather than on the home page, so it covers
- * every public route at once. Payload's own routes live in a different group
- * and are unaffected, which is what keeps `/admin` reachable to turn it back
- * off again.
+ * every public route at once. Path prefixes listed in site settings
+ * (`maintenanceExcludedPaths`, default `/ref`) stay reachable. Payload's own
+ * routes live in a different group and are unaffected, which is what keeps
+ * `/admin` reachable to turn it back off again.
  */
 export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const [{ maintenanceMode, maintenanceMessage }, cookieStore] = await Promise.all([
+  const [settings, cookieStore, headerStore] = await Promise.all([
     getSiteSettings(),
     cookies(),
+    headers(),
   ]);
+  const { maintenanceMode, maintenanceMessage, maintenanceExcludedPaths } = settings;
+  const pathname = headerStore.get(PATHNAME_HEADER) ?? "/";
+  const showMaintenance =
+    maintenanceMode &&
+    !isPathExcludedFromMaintenance(pathname, maintenanceExcludedPaths);
   const nsfwConsent = cookieStore.get(NSFW_CONSENT_COOKIE)?.value === "1";
 
   return (
@@ -96,7 +104,7 @@ export default async function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} ${outfit.variable} font-sans`}
         suppressHydrationWarning
       >
-        {maintenanceMode ? (
+        {showMaintenance ? (
           <MaintenanceScreen message={maintenanceMessage} />
         ) : (
           <NsfwConsentProvider initialConsent={nsfwConsent}>
