@@ -50,7 +50,8 @@ export function FeaturedFriends({ example }: { example: Example }) {
                       fill
                       placeholder={placeholderFor(friend.image)}
                       sizes="(max-width: 768px) 100vw, 50vw"
-                      className="object-cover object-top"
+                      className="object-cover"
+                      style={{ objectPosition: friend.image.objectPosition }}
                     />
                   </div>
                 ) : null}
@@ -71,14 +72,14 @@ export function FeaturedFriends({ example }: { example: Example }) {
                     />
                   ) : null}
 
-                  <div className="flex flex-wrap items-center gap-4">
+                  <div className="mt-auto flex flex-col items-end gap-2 pt-4">
                     <Link
                       href={`/gallery?friend=${encodeURIComponent(friend.slug)}`}
                       className="inline-flex min-h-11 items-center text-xs font-medium uppercase tracking-[0.2em] text-glow-400 transition hover:text-glow-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-glow-500"
                     >
                       More artwork
                     </Link>
-                    <LinkRow className="justify-start" links={friend.links} />
+                    <LinkRow className="justify-end" links={friend.links} />
                   </div>
                 </div>
               </article>

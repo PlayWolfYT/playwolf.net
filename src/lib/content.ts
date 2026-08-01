@@ -29,6 +29,8 @@ export type ImageRef = {
   width: number;
   height: number;
   blurDataURL?: string;
+  /** CSS position derived from Payload's adjustable media focal point. */
+  objectPosition: string;
   original: {
     url: string;
     width: number;

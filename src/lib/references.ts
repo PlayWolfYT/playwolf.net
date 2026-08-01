@@ -115,6 +115,7 @@ function toImageRef(
   return {
     ...usable,
     blurDataURL: media.blurDataURL ?? undefined,
+    objectPosition: `${media.focalX ?? 50}% ${media.focalY ?? 50}%`,
     original,
   };
 }
