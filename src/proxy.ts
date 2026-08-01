@@ -8,7 +8,7 @@ import { PATHNAME_HEADER } from "@/lib/maintenance";
  * layout can honour maintenance-mode path exclusions. Maintenance itself is
  * still decided in the layout (where site settings are already loaded).
  */
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const requestHeaders = new Headers(request.headers);
   requestHeaders.set(PATHNAME_HEADER, request.nextUrl.pathname);
   return NextResponse.next({

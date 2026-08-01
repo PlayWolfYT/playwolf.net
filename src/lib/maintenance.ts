@@ -6,8 +6,8 @@
 export const DEFAULT_MAINTENANCE_EXCLUDED_PATHS = ["/ref"] as const;
 
 /**
- * Header set by `src/middleware.ts` so the root layout can see the request
- * path. App Router layouts do not receive the pathname otherwise.
+ * Header set by `src/proxy.ts` so the root layout can see the request path.
+ * App Router layouts do not receive the pathname otherwise.
  */
 export const PATHNAME_HEADER = "x-pathname";
 
