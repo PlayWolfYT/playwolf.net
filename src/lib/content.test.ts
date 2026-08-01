@@ -17,6 +17,7 @@ const image: ImageRef = {
   src: "/media/art-display.png",
   width: 800,
   height: 600,
+  objectPosition: "50% 50%",
   original: { url: "/media/art.png", width: 4000, height: 3000 },
 };
 

@@ -4,6 +4,7 @@ import type {
   Artist as StoredArtist,
   Artwork as StoredArtwork,
   Character as StoredCharacter,
+  Friend as StoredFriend,
   Media as StoredMedia,
   Project as StoredProject,
   Tag as StoredTag,
@@ -15,7 +16,6 @@ import type {
   ContentLink,
   Example,
   Featured,
-  Friend,
   GalleryItem,
   ImageRef,
   Profile,
@@ -115,6 +115,7 @@ function toImageRef(
   return {
     ...usable,
     blurDataURL: media.blurDataURL ?? undefined,
+    objectPosition: `${media.focalX ?? 50}% ${media.focalY ?? 50}%`,
     original,
   };
 }
@@ -168,18 +169,25 @@ function toSheet(
   return src ? { ...shared, kind: "image", src } : undefined;
 }
 
+function toFriend(friend: StoredFriend): Featured {
+  return {
+    kind: "friend",
+    name: friend.name,
+    slug: friend.slug,
+    image: toImageRef(friend.image),
+    description: friend.description ?? undefined,
+    links: toLinks(friend.links),
+  };
+}
+
 function toFeatured(featuring: StoredArtwork["featuring"]): Featured[] {
   return (featuring ?? []).flatMap((entry) => {
     const person = resolved(entry.value);
     if (!person) return [];
-    return [
-      {
-        kind:
-          entry.relationTo === "friends" ? ("friend" as const) : ("character" as const),
-        name: person.name,
-        slug: person.slug,
-      },
-    ];
+
+    if (entry.relationTo === "friends") return [toFriend(person as StoredFriend)];
+
+    return [{ kind: "character", name: person.name, slug: person.slug }];
   });
 }
 
@@ -257,7 +265,9 @@ async function loadCharacters(): Promise<Character[]> {
     }),
     payload.find({
       collection: "artworks",
-      depth: 1,
+      // Friends shown on example pages include their portrait, which is a
+      // relationship nested inside the polymorphic `featuring` relationship.
+      depth: 2,
       limit: 0,
       sort: ["order", "createdAt"],
     }),
@@ -353,37 +363,6 @@ export async function getAccentMap(): Promise<AccentMap> {
       ),
     ]),
   );
-}
-
-/* ------------------------------------------------------------------ *
- * Friends
- * ------------------------------------------------------------------ */
-
-async function loadFriends(): Promise<Friend[]> {
-  const payload = await getPayloadClient();
-  const friends = await payload.find({
-    collection: "friends",
-    depth: 1,
-    limit: 0,
-    sort: "name",
-  });
-
-  return friends.docs.map((friend) => ({
-    name: friend.name,
-    slug: friend.slug,
-    image: toImageRef(friend.image),
-    description: friend.description ?? undefined,
-    links: toLinks(friend.links),
-  }));
-}
-
-const cachedFriends = unstable_cache(loadFriends, ["site:friends"], {
-  tags: [CONTENT_TAG],
-});
-
-/** Everyone else's characters, alphabetically. */
-export function getFriends(): Promise<Friend[]> {
-  return cachedFriends();
 }
 
 /* ------------------------------------------------------------------ *

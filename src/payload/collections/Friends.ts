@@ -39,7 +39,8 @@ export const Friends: CollectionConfig = {
       type: "upload",
       relationTo: "media",
       admin: {
-        description: "Card portrait.",
+        description:
+          "Portrait shown beside featured artwork. Adjust its focal point in the selected media item to control the visible crop.",
       },
     },
     {

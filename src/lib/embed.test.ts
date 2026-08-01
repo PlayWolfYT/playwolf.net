@@ -8,6 +8,7 @@ function imageRef(src: string): ImageRef {
     src,
     width: 1600,
     height: 900,
+    objectPosition: "50% 50%",
     original: { url: "/media/original.png", width: 6000, height: 3375 },
   };
 }

@@ -269,7 +269,7 @@ export interface Friend {
    */
   slug: string;
   /**
-   * Card portrait.
+   * Portrait shown beside featured artwork. Adjust its focal point in the selected media item to control the visible crop.
    */
   image?: (number | null) | Media;
   description?: {

@@ -7,8 +7,8 @@ const CHIP_CLASS =
 
 /**
  * Who is in the picture and what it is about, as links out. Characters go to
- * their reference page; friends go to their card; tags open the gallery
- * narrowed to that tag — the three things someone is likely to want next.
+ * their reference page; friends jump to their profile below this artwork; tags
+ * open the gallery narrowed to that tag.
  */
 export function ArtworkChips({ example }: { example: Example }) {
   const people = example.featuring;
@@ -23,7 +23,7 @@ export function ArtworkChips({ example }: { example: Example }) {
           href={
             person.kind === "character"
               ? `/ref/${person.slug}`
-              : `/friends#${person.slug}`
+              : `#friend-${person.slug}`
           }
           className={CHIP_CLASS}
         >
