@@ -119,12 +119,20 @@ export const DEFAULT_SITE_SETTINGS: SiteSettings = {
   links: [],
 };
 
-/** Someone present in a picture. The kind decides which route it links into. */
-export type Featured = {
-  kind: "character" | "friend";
+/** One of this site's own characters present in a picture. */
+export type FeaturedCharacter = {
+  kind: "character";
   name: string;
   slug: string;
 };
+
+/** A friend's character, including the details shown alongside the artwork. */
+export type FeaturedFriend = Friend & {
+  kind: "friend";
+};
+
+/** Someone present in a picture. */
+export type Featured = FeaturedCharacter | FeaturedFriend;
 
 /** URL segment and lookup key for the two character profiles. */
 export type ProfileKey = "sfw" | "nsfw";

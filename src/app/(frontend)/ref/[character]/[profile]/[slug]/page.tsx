@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { ArtworkChips } from "@/components/ref/ArtworkChips";
 import { ExampleNav } from "@/components/ref/ExampleNav";
+import { FeaturedFriends } from "@/components/ref/FeaturedFriends";
 import { RefImage } from "@/components/ref/RefImage";
 import { buildImageMetadata } from "@/lib/embed";
 import { getCharacter, getExample, isProfileKey } from "@/lib/references";
@@ -57,6 +58,8 @@ export default async function ExamplePage({ params }: PageProps) {
       >
         <ArtworkChips example={example} />
       </RefImage>
+
+      <FeaturedFriends example={example} />
 
       <ExampleNav
         basePath={`/ref/${character.slug}/${profileParam}`}
