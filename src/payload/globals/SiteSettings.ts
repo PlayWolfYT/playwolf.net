@@ -46,6 +46,17 @@ export const SiteSettings: GlobalConfig = {
                 condition: (data) => Boolean(data?.maintenanceMode),
               },
             },
+            {
+              name: "maintenanceExcludedPaths",
+              type: "text",
+              hasMany: true,
+              defaultValue: ["/ref"],
+              admin: {
+                description:
+                  "Path prefixes that stay reachable during maintenance (exact match or subpaths). Defaults to /ref. Clear the list to put every public route behind the screen.",
+                condition: (data) => Boolean(data?.maintenanceMode),
+              },
+            },
           ],
         },
         {
