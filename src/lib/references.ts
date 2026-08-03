@@ -186,13 +186,13 @@ function toFriend(friend: StoredFriend): Featured {
  * a second time.
  */
 function toFeatured(artwork: StoredArtwork): Featured[] {
-  const others = (artwork.featuring ?? []).flatMap((entry) => {
+  const others: Featured[] = (artwork.featuring ?? []).flatMap((entry) => {
     const person = resolved(entry.value);
     if (!person) return [];
 
     if (entry.relationTo === "friends") return [toFriend(person as StoredFriend)];
 
-    return [{ kind: "character", name: person.name, slug: person.slug } as Featured];
+    return [{ kind: "character", name: person.name, slug: person.slug }];
   });
 
   const subject = resolved(artwork.character);
