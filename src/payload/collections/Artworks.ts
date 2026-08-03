@@ -9,6 +9,32 @@ const { afterChange, afterDelete } = revalidateHooks("artworks", {
 });
 
 /**
+ * A relationship reaches a hook either as a bare id or as the resolved
+ * document, depending on the depth of the operation that triggered it.
+ */
+function idOf(value: unknown): number | undefined {
+  if (typeof value === "number") return value;
+
+  if (typeof value === "string") {
+    const parsed = Number(value);
+    return value.trim() === "" || Number.isNaN(parsed) ? undefined : parsed;
+  }
+
+  if (value && typeof value === "object" && "id" in value) {
+    return idOf((value as { id: unknown }).id);
+  }
+
+  return undefined;
+}
+
+/** One entry of a polymorphic `hasMany` relationship, as Payload stores it. */
+function isPolymorphicValue(
+  entry: unknown,
+): entry is { relationTo: string; value: unknown } {
+  return typeof entry === "object" && entry !== null && "relationTo" in entry;
+}
+
+/**
  * A single piece of art. Its own collection because it is what gets added most
  * often — one form per upload rather than editing a growing array inside a
  * character.
@@ -80,13 +106,43 @@ export const Artworks: CollectionConfig = {
       // the frontend knows which collection to link into. This replaces the
       // old convention of encoding people into titles like "Hug (with Taire)",
       // and makes "every picture Taire appears in" a real query.
+      //
+      // The subject above is deliberately absent: it is always in the picture,
+      // so the frontend prepends it rather than asking for it twice.
       name: "featuring",
       type: "relationship",
       relationTo: ["characters", "friends"],
       hasMany: true,
-      label: "Featuring",
+      label: "Also featuring",
       admin: {
-        description: "Everyone present in the picture, including the subject.",
+        description:
+          "Everyone else in the picture. The character above is always featured.",
+      },
+      filterOptions: ({ relationTo, data }) => {
+        const subject = idOf(data?.character);
+        // `relationTo` is the collection being searched, so the id constraint
+        // only ever applies to the side it can mean anything on.
+        if (relationTo !== "characters" || subject === undefined) return true;
+        return { id: { not_equals: subject } };
+      },
+      hooks: {
+        // Keeps what is stored canonical even for writes that bypass the admin
+        // (REST, GraphQL, the Local API), so nothing has to dedupe on read.
+        beforeValidate: [
+          ({ value, data, originalDoc }) => {
+            const subject = idOf(data?.character ?? originalDoc?.character);
+            if (!Array.isArray(value) || subject === undefined) return value;
+
+            return value.filter(
+              (entry) =>
+                !(
+                  isPolymorphicValue(entry) &&
+                  entry.relationTo === "characters" &&
+                  idOf(entry.value) === subject
+                ),
+            );
+          },
+        ],
       },
     },
     {

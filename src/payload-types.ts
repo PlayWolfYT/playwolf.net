@@ -541,7 +541,7 @@ export interface Artwork {
   image: number | Media;
   artist?: (number | null) | Artist;
   /**
-   * Everyone present in the picture, including the subject.
+   * Everyone else in the picture. The character above is always featured.
    */
   featuring?:
     | (

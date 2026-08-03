@@ -1,6 +1,7 @@
 import { describe, expect, test } from "bun:test";
 
 import {
+  castWithSubject,
   facetOptions,
   getSheetImage,
   isProfileKey,
@@ -8,6 +9,8 @@ import {
   placeholderFor,
   type Character,
   type Example,
+  type Featured,
+  type FeaturedCharacter,
   type GalleryItem,
   type ImageRef,
   type ProfileKey,
@@ -108,6 +111,37 @@ describe("getSheetImage", () => {
       src: image,
       alt: "Full ref",
     });
+  });
+});
+
+describe("castWithSubject", () => {
+  const wuff: FeaturedCharacter = { kind: "character", name: "Wuff", slug: "wuff" };
+  const vex: Featured = { kind: "friend", name: "Vex", slug: "vex", links: [] };
+
+  test("puts the subject first, ahead of everyone else", () => {
+    expect(castWithSubject(wuff, [vex])).toEqual([wuff, vex]);
+  });
+
+  test("adds the subject to a picture that lists nobody", () => {
+    expect(castWithSubject(wuff, [])).toEqual([wuff]);
+  });
+
+  test("does not repeat a subject that is still stored alongside the others", () => {
+    expect(castWithSubject(wuff, [wuff, vex])).toEqual([wuff, vex]);
+  });
+
+  test("a friend sharing the subject's slug is a different person", () => {
+    const namesake: Featured = {
+      kind: "friend",
+      name: "Wuff",
+      slug: "wuff",
+      links: [],
+    };
+    expect(castWithSubject(wuff, [namesake])).toEqual([wuff, namesake]);
+  });
+
+  test("without a resolved subject the stored cast is left as it is", () => {
+    expect(castWithSubject(undefined, [vex])).toEqual([vex]);
   });
 });
 
