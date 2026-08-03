@@ -136,6 +136,27 @@ export type FeaturedFriend = Friend & {
 /** Someone present in a picture. */
 export type Featured = FeaturedCharacter | FeaturedFriend;
 
+/**
+ * The full cast of a picture: the character it belongs to first, then everyone
+ * else. The subject is never stored alongside the others — it is the artwork's
+ * own `character` — so it is merged in here, and duplicates are dropped for
+ * data written before that convention existed.
+ */
+export function castWithSubject(
+  subject: FeaturedCharacter | undefined,
+  others: Featured[],
+): Featured[] {
+  const cast = subject ? [subject, ...others] : others;
+  const seen = new Set<string>();
+
+  return cast.filter((person) => {
+    const key = `${person.kind}:${person.slug}`;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
 /** URL segment and lookup key for the two character profiles. */
 export type ProfileKey = "sfw" | "nsfw";
 

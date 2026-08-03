@@ -529,7 +529,7 @@ export interface Character {
 export interface Artwork {
   id: number;
   /**
-   * Just the subject. Who else is in the picture belongs in “Featuring”, not the title.
+   * Just the subject. Who else is in the picture belongs in “Also featuring”, not the title.
    */
   title: string;
   /**
@@ -541,7 +541,7 @@ export interface Artwork {
   image: number | Media;
   artist?: (number | null) | Artist;
   /**
-   * Everyone present in the picture, including the subject.
+   * Everyone else in the picture. The character above is always featured.
    */
   featuring?:
     | (

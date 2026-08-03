@@ -27,7 +27,7 @@ import type {
   Tag,
   WipAspect,
 } from "@/lib/content";
-import { DEFAULT_SITE_SETTINGS } from "@/lib/content";
+import { castWithSubject, DEFAULT_SITE_SETTINGS } from "@/lib/content";
 import { getPayloadClient } from "@/lib/payload";
 import { CONTENT_TAG } from "@/payload/hooks/revalidate";
 import {
@@ -180,8 +180,13 @@ function toFriend(friend: StoredFriend): Featured {
   };
 }
 
-function toFeatured(featuring: StoredArtwork["featuring"]): Featured[] {
-  return (featuring ?? []).flatMap((entry) => {
+/**
+ * The stored cast is everyone *besides* the subject; the artwork's own
+ * character is always in the picture, so it is prepended rather than typed in
+ * a second time.
+ */
+function toFeatured(artwork: StoredArtwork): Featured[] {
+  const others: Featured[] = (artwork.featuring ?? []).flatMap((entry) => {
     const person = resolved(entry.value);
     if (!person) return [];
 
@@ -189,6 +194,13 @@ function toFeatured(featuring: StoredArtwork["featuring"]): Featured[] {
 
     return [{ kind: "character", name: person.name, slug: person.slug }];
   });
+
+  const subject = resolved(artwork.character);
+
+  return castWithSubject(
+    subject && { kind: "character", name: subject.name, slug: subject.slug },
+    others,
+  );
 }
 
 function toExample(artwork: StoredArtwork): Example | undefined {
@@ -200,7 +212,7 @@ function toExample(artwork: StoredArtwork): Example | undefined {
     title: artwork.title,
     src,
     artist: toArtist(artwork.artist),
-    featuring: toFeatured(artwork.featuring),
+    featuring: toFeatured(artwork),
     tags: (artwork.tags ?? []).flatMap((tag) => toTag(tag) ?? []),
   };
 }
