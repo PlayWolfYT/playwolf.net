@@ -60,7 +60,7 @@ export const Artworks: CollectionConfig = {
       required: true,
       admin: {
         description:
-          "Just the subject. Who else is in the picture belongs in “Featuring”, not the title.",
+          "Just the subject. Who else is in the picture belongs in “Also featuring”, not the title.",
       },
     },
     // Two characters may each have a "hug", so uniqueness is scoped by the

@@ -529,7 +529,7 @@ export interface Character {
 export interface Artwork {
   id: number;
   /**
-   * Just the subject. Who else is in the picture belongs in “Featuring”, not the title.
+   * Just the subject. Who else is in the picture belongs in “Also featuring”, not the title.
    */
   title: string;
   /**
