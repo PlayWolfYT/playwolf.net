@@ -19,8 +19,10 @@ VM). Three long-running processes are involved:
 | PostgreSQL 16                     | All Payload collections + `siteSettings`           | apt-installed cluster, **not** started by the update script | `5432`                                |
 | Garage (S3)                       | Object storage for media uploads                   | static binary at `/tmp/garage`, config in `~/.garage`       | `3900` (S3), `3901` RPC, `3903` admin |
 
-Postgres and Garage are only needed at runtime — the update script (`bun install`) does
-**not** start them. Start them yourself at the beginning of a session:
+Postgres and Garage are only needed at runtime. The environment's `start` script now
+brings both up on every boot (idempotently) and syncs the local Garage S3 key into `.env`,
+so a fresh Cloud Agent already has them running — only `bun run dev` is started by hand. If
+you ever need to (re)start them manually (e.g. after stopping one), the commands are:
 
 ```bash
 # PostgreSQL (no systemd in this container, so use pg_ctlcluster)
