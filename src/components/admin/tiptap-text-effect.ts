@@ -1,20 +1,30 @@
 import { Mark, mergeAttributes } from "@tiptap/core";
 
-import { TEXT_EFFECTS, isTextEffect, type TextEffect } from "@/lib/text-effects";
+import {
+  DEFAULT_GRADIENT_COLORS,
+  TEXT_EFFECTS,
+  gradientStopsStyle,
+  isTextEffect,
+  normalizeGradientColors,
+  parseGradientColorsFromAttr,
+  parseGradientColorsFromStyle,
+  type TextEffect,
+} from "@/lib/text-effects";
 
 declare module "@tiptap/core" {
   interface Commands<ReturnType> {
     textEffect: {
-      setTextEffect: (effect: TextEffect) => ReturnType;
+      setTextEffect: (effect: TextEffect, colors?: string[]) => ReturnType;
       unsetTextEffect: () => ReturnType;
-      toggleTextEffect: (effect: TextEffect) => ReturnType;
+      toggleTextEffect: (effect: TextEffect, colors?: string[]) => ReturnType;
     };
   }
 }
 
 /**
  * TipTap mark that maps onto Payload's TextStateFeature `effect` keys via
- * the public `fx-*` class names. Round-trips through `lexical-html.ts`.
+ * the public `fx-*` class names. The `gradient` effect also carries colour
+ * stops (`colors`) as a CSS variable + data attribute for round-trips.
  */
 export const TextEffectMark = Mark.create({
   name: "textEffect",
@@ -33,10 +43,15 @@ export const TextEffectMark = Mark.create({
           }
           return null;
         },
-        renderHTML: (attributes) => {
-          if (!isTextEffect(attributes.effect)) return {};
-          return { class: TEXT_EFFECTS[attributes.effect].className };
-        },
+        renderHTML: () => ({}),
+      },
+      colors: {
+        default: null,
+        parseHTML: (element) =>
+          parseGradientColorsFromAttr(element.getAttribute("data-gradient-colors")) ??
+          parseGradientColorsFromStyle(element.getAttribute("style")) ??
+          null,
+        renderHTML: () => ({}),
       },
     };
   },
@@ -47,31 +62,84 @@ export const TextEffectMark = Mark.create({
       getAttrs: (el) => {
         if (typeof el === "string") return false;
         const className = el.getAttribute("class") ?? "";
-        return className.split(/\s+/).includes(effect.className) ? null : false;
+        if (!className.split(/\s+/).includes(effect.className)) return false;
+        return null;
       },
     }));
   },
 
   renderHTML({ HTMLAttributes }) {
-    return ["span", mergeAttributes(HTMLAttributes), 0];
+    const effect = HTMLAttributes.effect as TextEffect | null;
+    if (!isTextEffect(effect)) {
+      return ["span", mergeAttributes(HTMLAttributes), 0];
+    }
+
+    const attrs: Record<string, string> = {
+      class: TEXT_EFFECTS[effect].className,
+    };
+
+    if (effect === "gradient") {
+      const colors = normalizeGradientColors(HTMLAttributes.colors) ?? [
+        ...DEFAULT_GRADIENT_COLORS,
+      ];
+      attrs.style = gradientStopsStyle(colors);
+      attrs["data-gradient-colors"] = colors.join(",");
+    }
+
+    // Drop TipTap's raw attribute names from the DOM output.
+    const {
+      effect: _e,
+      colors: _c,
+      ...rest
+    } = HTMLAttributes as Record<string, unknown>;
+    void _e;
+    void _c;
+
+    return ["span", mergeAttributes(rest, attrs), 0];
   },
 
   addCommands() {
     return {
       setTextEffect:
-        (effect) =>
+        (effect, colors) =>
         ({ commands }) =>
-          commands.setMark(this.name, { effect }),
+          commands.setMark(this.name, {
+            effect,
+            colors:
+              effect === "gradient"
+                ? (normalizeGradientColors(colors) ?? [...DEFAULT_GRADIENT_COLORS])
+                : null,
+          }),
       unsetTextEffect:
         () =>
         ({ commands }) =>
           commands.unsetMark(this.name),
       toggleTextEffect:
-        (effect) =>
+        (effect, colors) =>
         ({ commands, editor }) => {
-          const current = editor.getAttributes(this.name).effect;
-          if (current === effect) return commands.unsetMark(this.name);
-          return commands.setMark(this.name, { effect });
+          const current = editor.getAttributes(this.name);
+          if (current.effect === effect && effect !== "gradient") {
+            return commands.unsetMark(this.name);
+          }
+          if (
+            current.effect === "gradient" &&
+            effect === "gradient" &&
+            !colors &&
+            editor.isActive(this.name, { effect: "gradient" })
+          ) {
+            // Plain toggle without new colours removes the mark.
+            return commands.unsetMark(this.name);
+          }
+          return commands.setMark(this.name, {
+            effect,
+            colors:
+              effect === "gradient"
+                ? (normalizeGradientColors(colors) ??
+                  normalizeGradientColors(current.colors) ?? [
+                    ...DEFAULT_GRADIENT_COLORS,
+                  ])
+                : null,
+          });
         },
     };
   },

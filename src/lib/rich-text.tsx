@@ -8,8 +8,10 @@ import type { CSSProperties } from "react";
 
 import type { RichTextValue } from "@/lib/content";
 import {
+  GRADIENT_COLORS_STATE_KEY,
   NODE_STATE_KEY,
   TEXT_EFFECT_STATE_KEY,
+  normalizeGradientColors,
   textEffectClass,
 } from "@/lib/text-effects";
 
@@ -45,18 +47,29 @@ const withTextEffects: JSXConvertersFunction = ({ defaultConverters }) => ({
     const state = (args.node as { [NODE_STATE_KEY]?: Record<string, unknown> })[
       NODE_STATE_KEY
     ];
-    const effectClass = textEffectClass(state?.[TEXT_EFFECT_STATE_KEY]);
+    const effect = state?.[TEXT_EFFECT_STATE_KEY];
+    const effectClass = textEffectClass(effect);
     const extraClass =
       typeof state?.htmlClass === "string" ? state.htmlClass.trim() : "";
     const className = [effectClass, extraClass].filter(Boolean).join(" ") || undefined;
-    const style =
-      typeof state?.htmlStyle === "string" && state.htmlStyle.trim()
-        ? inlineStyleObject(state.htmlStyle)
-        : undefined;
 
-    if (!className && !style) return rendered;
+    const style: CSSProperties = {
+      ...(typeof state?.htmlStyle === "string" && state.htmlStyle.trim()
+        ? inlineStyleObject(state.htmlStyle)
+        : {}),
+    };
+
+    if (effect === "gradient") {
+      const colors = normalizeGradientColors(state?.[GRADIENT_COLORS_STATE_KEY]);
+      if (colors) {
+        (style as Record<string, string>)["--fx-gradient-stops"] = colors.join(", ");
+      }
+    }
+
+    const hasStyle = Object.keys(style).length > 0;
+    if (!className && !hasStyle) return rendered;
     return (
-      <span className={className} style={style}>
+      <span className={className} style={hasStyle ? style : undefined}>
         {rendered}
       </span>
     );
