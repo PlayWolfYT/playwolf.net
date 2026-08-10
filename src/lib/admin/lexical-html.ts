@@ -2,17 +2,24 @@
  * Bridge between Payload Lexical JSON and HTML for TipTap editors.
  * Uses a tiny tag tokenizer so conversion works on the server (no DOM).
  *
- * Text effects (rainbow / shake / glow) round-trip as `<span class="fx-*">`
- * and Lexical `$` state (`{ effect: "rainbow" }`). Extra span classes/styles
- * ride along as `$htmlClass` / `$htmlStyle` for frontend-safe shenanigans.
+ * Text effects (rainbow / shake / glow / gradient) round-trip as
+ * `<span class="fx-*">` and Lexical `$` state (`{ effect: "rainbow" }`).
+ * Gradient colour stops live under `$gradientColors` and as
+ * `--fx-gradient-stops` / `data-gradient-colors` in HTML. Extra span
+ * classes/styles ride along as `$htmlClass` / `$htmlStyle`.
  */
 
 import type { RichTextValue } from "@/lib/content";
 import {
+  GRADIENT_COLORS_STATE_KEY,
   NODE_STATE_KEY,
   TEXT_EFFECT_STATE_KEY,
   TEXT_EFFECTS,
+  gradientStopsStyle,
   isTextEffect,
+  normalizeGradientColors,
+  parseGradientColorsFromAttr,
+  parseGradientColorsFromStyle,
   textEffectClass,
   type TextEffect,
 } from "@/lib/text-effects";
@@ -80,7 +87,12 @@ function blockMeta() {
 function textNode(
   text: string,
   format = 0,
-  extras?: { effect?: TextEffect; htmlClass?: string; htmlStyle?: string },
+  extras?: {
+    effect?: TextEffect;
+    gradientColors?: string[];
+    htmlClass?: string;
+    htmlStyle?: string;
+  },
 ) {
   const node: LexNode = {
     detail: 0,
@@ -93,6 +105,9 @@ function textNode(
   };
   const state: Record<string, unknown> = {};
   if (extras?.effect) state[TEXT_EFFECT_STATE_KEY] = extras.effect;
+  if (extras?.gradientColors?.length) {
+    state[GRADIENT_COLORS_STATE_KEY] = extras.gradientColors;
+  }
   if (extras?.htmlClass) state.htmlClass = extras.htmlClass;
   if (extras?.htmlStyle) state.htmlStyle = extras.htmlStyle;
   if (Object.keys(state).length > 0) node[NODE_STATE_KEY] = state;
@@ -162,22 +177,33 @@ function nodeToHtml(node: LexNode): string {
 
       const state = (node[NODE_STATE_KEY] as Record<string, unknown> | undefined) ?? {};
       const classes: string[] = [];
-      const effectClass = textEffectClass(state[TEXT_EFFECT_STATE_KEY]);
+      const effect = state[TEXT_EFFECT_STATE_KEY];
+      const effectClass = textEffectClass(effect);
       if (effectClass) classes.push(effectClass);
       if (typeof state.htmlClass === "string" && state.htmlClass.trim()) {
         classes.push(...state.htmlClass.trim().split(/\s+/));
       }
-      const style =
-        typeof state.htmlStyle === "string" && state.htmlStyle.trim()
-          ? state.htmlStyle.trim()
-          : undefined;
 
-      if (classes.length > 0 || style) {
+      const gradientColors = normalizeGradientColors(state[GRADIENT_COLORS_STATE_KEY]);
+      const styleParts: string[] = [];
+      if (effect === "gradient" && gradientColors) {
+        styleParts.push(gradientStopsStyle(gradientColors));
+      }
+      if (typeof state.htmlStyle === "string" && state.htmlStyle.trim()) {
+        styleParts.push(state.htmlStyle.trim());
+      }
+      const style = styleParts.length > 0 ? styleParts.join("; ") : undefined;
+      const dataAttr =
+        effect === "gradient" && gradientColors
+          ? ` data-gradient-colors="${escapeAttr(gradientColors.join(","))}"`
+          : "";
+
+      if (classes.length > 0 || style || dataAttr) {
         const classAttr = classes.length
           ? ` class="${escapeAttr(classes.join(" "))}"`
           : "";
         const styleAttr = style ? ` style="${escapeAttr(style)}"` : "";
-        t = `<span${classAttr}${styleAttr}>${t}</span>`;
+        t = `<span${classAttr}${styleAttr}${dataAttr}>${t}</span>`;
       }
       return t;
     }
@@ -243,6 +269,7 @@ function tokenize(html: string): Token[] {
 type Frame = { name: string; node: LexNode };
 type SpanFrame = {
   effect?: TextEffect;
+  gradientColors?: string[];
   htmlClass?: string;
   htmlStyle?: string;
 };
@@ -261,10 +288,12 @@ export function htmlToLexical(html: string): RichTextValue {
 
   const activeSpan = (): SpanFrame => {
     let effect: TextEffect | undefined;
+    let gradientColors: string[] | undefined;
     let htmlClass: string | undefined;
     let htmlStyle: string | undefined;
     for (const frame of spanStack) {
       if (frame.effect) effect = frame.effect;
+      if (frame.gradientColors) gradientColors = frame.gradientColors;
       if (frame.htmlClass) {
         htmlClass = htmlClass ? `${htmlClass} ${frame.htmlClass}` : frame.htmlClass;
       }
@@ -272,7 +301,7 @@ export function htmlToLexical(html: string): RichTextValue {
         htmlStyle = htmlStyle ? `${htmlStyle};${frame.htmlStyle}` : frame.htmlStyle;
       }
     }
-    return { effect, htmlClass, htmlStyle };
+    return { effect, gradientColors, htmlClass, htmlStyle };
   };
 
   const currentChildren = (): LexNode[] => {
@@ -338,10 +367,21 @@ export function htmlToLexical(html: string): RichTextValue {
           .map((cls) => EFFECT_CLASS_TO_KEY[cls])
           .filter((key): key is TextEffect => Boolean(key));
         const otherClasses = classes.filter((cls) => !EFFECT_CLASS_TO_KEY[cls]);
+        const effect = effectKeys[0];
+        const gradientColors =
+          parseGradientColorsFromAttr(attrs["data-gradient-colors"]) ??
+          parseGradientColorsFromStyle(attrs.style);
+        // Drop the CSS variable from leftover style — it lives in $gradientColors.
+        const leftoverStyle = (attrs.style ?? "")
+          .replace(/--fx-gradient-stops\s*:\s*[^;]+;?/gi, "")
+          .replace(/;\s*;/g, ";")
+          .replace(/^;|;$/g, "")
+          .trim();
         spanStack.push({
-          effect: effectKeys[0],
+          effect,
+          gradientColors: effect === "gradient" ? gradientColors : undefined,
           htmlClass: otherClasses.length ? otherClasses.join(" ") : undefined,
-          htmlStyle: attrs.style || undefined,
+          htmlStyle: leftoverStyle || undefined,
         });
         continue;
       }
