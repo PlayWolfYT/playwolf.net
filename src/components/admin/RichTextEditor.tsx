@@ -26,9 +26,14 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 
+import { GradientEffectPicker } from "@/components/admin/GradientEffectPicker";
 import { HtmlSpanMark } from "@/components/admin/tiptap-html-span";
 import { TextEffectMark } from "@/components/admin/tiptap-text-effect";
-import { TEXT_EFFECTS, type TextEffect } from "@/lib/text-effects";
+import {
+  normalizeGradientColors,
+  TEXT_EFFECTS,
+  type TextEffect,
+} from "@/lib/text-effects";
 
 type RichTextEditorProps = {
   id?: string;
@@ -70,7 +75,9 @@ function ToolbarButton({
   );
 }
 
-const EFFECT_ICONS: Record<TextEffect, React.ReactNode> = {
+const FIXED_EFFECTS = ["rainbow", "shake", "glow"] as const satisfies TextEffect[];
+
+const EFFECT_ICONS: Record<(typeof FIXED_EFFECTS)[number], React.ReactNode> = {
   rainbow: <Sparkles className="h-4 w-4" />,
   shake: <Waves className="h-4 w-4" />,
   glow: <Zap className="h-4 w-4" />,
@@ -171,6 +178,11 @@ export function RichTextEditor({
     setSourceMode((prev) => !prev);
   }
 
+  const gradientActive = editor.isActive("textEffect", { effect: "gradient" });
+  const gradientColors = normalizeGradientColors(
+    editor.getAttributes("textEffect").colors,
+  );
+
   return (
     <div
       className={`overflow-hidden rounded-lg border border-zinc-300 bg-white shadow-sm ${
@@ -213,7 +225,7 @@ export function RichTextEditor({
           <Strikethrough className="h-4 w-4" />
         </ToolbarButton>
         <span className="mx-1 h-5 w-px bg-zinc-200" aria-hidden />
-        {(Object.keys(TEXT_EFFECTS) as TextEffect[]).map((effect) => (
+        {FIXED_EFFECTS.map((effect) => (
           <ToolbarButton
             key={effect}
             label={TEXT_EFFECTS[effect].label}
@@ -224,6 +236,17 @@ export function RichTextEditor({
             {EFFECT_ICONS[effect]}
           </ToolbarButton>
         ))}
+        <GradientEffectPicker
+          active={gradientActive}
+          disabled={disabled || sourceMode}
+          currentColors={gradientColors}
+          onApply={(colors) => {
+            editor.chain().focus().setTextEffect("gradient", colors).run();
+          }}
+          onClear={() => {
+            editor.chain().focus().unsetTextEffect().run();
+          }}
+        />
         <span className="mx-1 h-5 w-px bg-zinc-200" aria-hidden />
         <ToolbarButton
           label="Heading 2"
