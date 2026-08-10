@@ -4,8 +4,6 @@ import { useRef } from "react";
 
 /**
  * Wraps a delete server action in a native `confirm()` before it submits.
- * A form rather than a button + fetch so it works the same as every other
- * mutation in the admin — a normal server-action POST with a redirect.
  */
 export function DeleteButton({
   action,
@@ -44,7 +42,7 @@ export function DeleteButton({
         type="submit"
         className={
           className ??
-          "inline-flex items-center justify-center rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-1.5 text-xs font-medium text-red-300 transition hover:bg-red-500/20"
+          "inline-flex items-center justify-center rounded-lg border border-red-200 bg-white px-3 py-1.5 text-xs font-medium text-red-600 shadow-sm transition hover:bg-red-50"
         }
       >
         {label}

@@ -39,13 +39,13 @@ export function AdminSidebarNav({ items }: { items: AdminNavItem[] }) {
   const entries = toEntries(items);
 
   return (
-    <nav aria-label="Admin" className="flex flex-col gap-1">
+    <nav aria-label="Admin" className="flex flex-col gap-0.5">
       {entries.map((entry) => {
         if (entry.kind === "group") {
           return (
             <p
               key={entry.key}
-              className="mt-3 px-3 font-mono text-[0.6rem] uppercase tracking-[0.22em] text-parchment-dim first:mt-0"
+              className="mt-4 px-3 pb-1 text-[0.65rem] font-semibold uppercase tracking-wider text-zinc-400 first:mt-0"
             >
               {entry.label}
             </p>
@@ -60,8 +60,8 @@ export function AdminSidebarNav({ items }: { items: AdminNavItem[] }) {
             href={item.href}
             className={`rounded-lg px-3 py-2 text-sm transition ${
               active
-                ? "bg-glow-500/10 text-glow-300 shadow-inner-glow"
-                : "text-parchment-muted hover:bg-white/[0.04] hover:text-parchment"
+                ? "bg-sky-50 font-medium text-sky-800"
+                : "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900"
             }`}
           >
             {item.label}

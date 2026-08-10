@@ -1,27 +1,34 @@
 # playwolf.net
 
-Next.js site for playwolf.net with Tailwind CSS. Dependencies and scripts use [Bun](https://bun.sh). Maintenance mode is controlled by an environment variable so you can flip it per environment without code changes.
+Next.js site for playwolf.net with Tailwind CSS and Payload CMS. Dependencies and
+scripts use [Bun](https://bun.sh).
 
 ## Development
 
+Requires Docker Desktop (for Postgres + Garage) and Bun.
+
 ```bash
 bun install
-bun run dev
+cp .env.example .env   # if you do not already have a .env
+bun run dev:up         # start Postgres + Garage, bootstrap the media bucket
+bun run dev            # Next.js + Payload on http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000). Lint with `bun run lint`.
+`bun run dev:up` layers [`docker-compose.dev.yml`](docker-compose.dev.yml) on
+[`docker-compose.yml`](docker-compose.yml) so Postgres (`5432`) and Garage
+(`3900` S3 / `3903` admin) are published on loopback only, then runs
+[`scripts/garage-bootstrap.ts`](scripts/garage-bootstrap.ts) to assign the
+single-node layout, create the `playwolf-media` bucket, and import the pinned
+local S3 credentials from `.env`.
 
-## Maintenance mode
+Tear the stack down with `bun run dev:down`. Re-running `dev:up` is safe — the
+bootstrap is idempotent.
 
-Copy `.env.example` to `.env.local` and set:
+Open [http://localhost:3000](http://localhost:3000). Admin lives at
+[`/admin`](http://localhost:3000/admin). Lint with `bun run lint`.
 
-```bash
-MAINTENANCE_MODE=true
-```
-
-Truthy values: `true`, `1`, or `yes` (case-insensitive). Anything else (or unset) shows the early-access placeholder instead.
-
-To preview the non-maintenance page locally, set `MAINTENANCE_MODE=false` or remove the variable.
+Maintenance mode is toggled under **Site settings → Status** in the admin — it
+is not an environment variable.
 
 ## Production
 
@@ -30,4 +37,5 @@ bun run build
 bun run start
 ```
 
-Set `MAINTENANCE_MODE` in your host’s environment (for example Vercel project settings) when you need the maintenance screen.
+See [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) for the Coolify / Garage
+production bootstrap.

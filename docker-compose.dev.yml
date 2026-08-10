@@ -1,0 +1,19 @@
+# Local development override — publish Postgres and Garage on loopback so
+# `bun run dev` on the host can reach them. Bind to 127.0.0.1 only; do not
+# expose these ports on the LAN.
+#
+# Dev-only. Never layer this file on a Coolify host (production or staging);
+# those stacks keep db/garage internal to the Docker network.
+#
+#   docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d db garage
+#   # or: bun run dev:up
+
+services:
+  db:
+    ports:
+      - "127.0.0.1:5432:5432"
+
+  garage:
+    ports:
+      - "127.0.0.1:3900:3900"
+      - "127.0.0.1:3903:3903"

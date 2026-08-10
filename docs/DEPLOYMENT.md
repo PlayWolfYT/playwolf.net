@@ -543,6 +543,11 @@ After the container is up, initialize the single-node cluster from the VM shell.
 Garage node serves nothing until a layout is assigned** — this step is easy to skip and
 produces confusing "no partitions available" errors.
 
+For local development the same steps are automated by
+[`scripts/garage-bootstrap.ts`](../scripts/garage-bootstrap.ts) (`bun run dev:up`), which
+imports pinned localhost credentials via `garage key import`. **Production must use
+`key create` below** — never import the local `.env.example` constants into Coolify.
+
 ```bash
 GARAGE="docker exec -it <garage-container> /garage"
 

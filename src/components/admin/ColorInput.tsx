@@ -5,10 +5,7 @@ import { useId, useState } from "react";
 const HEX = /^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/;
 
 /**
- * A hex text input paired with a native colour swatch. Simpler than the
- * Payload admin's `react-colorful` picker — this is a small ancillary field
- * (accent colours, gradient stops), not worth a client bundle for a picker
- * widget when `<input type="color">` already does the job.
+ * A hex text input paired with a native colour swatch.
  */
 export function ColorInput({
   name,
@@ -36,10 +33,7 @@ export function ColorInput({
   return (
     <div className="flex flex-col gap-1.5">
       {label ? (
-        <label
-          htmlFor={inputId}
-          className="font-display text-xs font-medium uppercase tracking-[0.14em] text-parchment-muted"
-        >
+        <label htmlFor={inputId} className="text-sm font-medium text-zinc-800">
           {label}
         </label>
       ) : null}
@@ -48,7 +42,7 @@ export function ColorInput({
           type="color"
           value={HEX.test(value) ? value : "#3abef9"}
           onChange={(event) => setValue(event.target.value)}
-          className="h-9 w-10 shrink-0 cursor-pointer rounded-md border border-white/10 bg-void-lift"
+          className="h-9 w-10 shrink-0 cursor-pointer rounded-md border border-zinc-300 bg-white"
           aria-label={label ? `${label} swatch` : "Colour swatch"}
         />
         <input
@@ -59,7 +53,7 @@ export function ColorInput({
           onChange={(event) => setValue(event.target.value)}
           placeholder="#3abef9"
           spellCheck={false}
-          className="w-full rounded-lg border border-white/10 bg-void-lift/70 px-3 py-2 font-mono text-sm text-parchment outline-none focus:border-glow-500/60 focus:ring-1 focus:ring-glow-500/40"
+          className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 font-mono text-sm text-zinc-900 shadow-sm outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20"
         />
       </div>
     </div>

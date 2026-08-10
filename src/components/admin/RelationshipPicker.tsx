@@ -11,10 +11,8 @@ export type RelationshipOption = {
 
 /**
  * A search-select over a small preloaded option list. The admin's datasets
- * (characters, artists, friends, tags) are all a handful to a few dozen
- * documents, so the whole list is fetched once by the page (a server
- * component) and filtered here client-side — no per-keystroke round trip to
- * search.
+ * are a handful to a few dozen documents, so the whole list is fetched once
+ * by the page and filtered here client-side.
  */
 export function RelationshipPicker({
   name,
@@ -32,17 +30,11 @@ export function RelationshipPicker({
   label?: string;
   options: RelationshipOption[];
   defaultValue?: string[];
-  /** Controlled selection — preferred by the schema-driven form. */
   value?: string[];
   onChange?: (next: string[]) => void;
   multiple?: boolean;
   placeholder?: string;
   description?: string;
-  /**
-   * When the option value is `relationTo:id` (see `listFeaturingOptions`),
-   * encode the hidden input as `{ relationTo, value }[]` instead of a bare
-   * value list — the shape `parsePolymorphicList` expects.
-   */
   polymorphic?: boolean;
 }) {
   const [uncontrolled, setUncontrolled] = useState<string[]>(defaultValue);
@@ -91,26 +83,24 @@ export function RelationshipPicker({
   return (
     <div className="flex flex-col gap-1.5">
       {label ? (
-        <span className="font-display text-xs font-medium uppercase tracking-[0.14em] text-parchment-muted">
-          {label}
-        </span>
+        <span className="text-sm font-medium text-zinc-800">{label}</span>
       ) : null}
 
       {name ? <input type="hidden" name={name} value={encoded} /> : null}
 
       {selected.length > 0 ? (
         <ul className="flex flex-wrap gap-1.5">
-          {selected.map((value) => (
+          {selected.map((entry) => (
             <li
-              key={value}
-              className="flex items-center gap-1.5 rounded-full border border-glow-500/30 bg-glow-500/10 px-2.5 py-1 text-xs text-glow-300"
+              key={entry}
+              className="flex items-center gap-1.5 rounded-md border border-sky-200 bg-sky-50 px-2.5 py-1 text-xs font-medium text-sky-800"
             >
-              {byValue.get(value)?.label ?? value}
+              {byValue.get(entry)?.label ?? entry}
               <button
                 type="button"
-                onClick={() => remove(value)}
-                aria-label={`Remove ${byValue.get(value)?.label ?? value}`}
-                className="text-glow-400/70 hover:text-glow-200"
+                onClick={() => remove(entry)}
+                aria-label={`Remove ${byValue.get(entry)?.label ?? entry}`}
+                className="text-sky-600/70 hover:text-sky-900"
               >
                 ×
               </button>
@@ -131,10 +121,10 @@ export function RelationshipPicker({
             onFocus={() => setOpen(true)}
             onBlur={() => setTimeout(() => setOpen(false), 120)}
             placeholder={placeholder}
-            className="w-full rounded-lg border border-white/10 bg-void-lift/70 px-3 py-2 text-sm text-parchment placeholder:text-parchment-dim/60 outline-none focus:border-glow-500/60 focus:ring-1 focus:ring-glow-500/40"
+            className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 placeholder:text-zinc-400 shadow-sm outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20"
           />
           {open && filtered.length > 0 ? (
-            <ul className="absolute z-20 mt-1 max-h-56 w-full overflow-auto rounded-lg border border-white/10 bg-void-panel shadow-glow-md">
+            <ul className="absolute z-20 mt-1 max-h-56 w-full overflow-auto rounded-lg border border-zinc-200 bg-white shadow-lg">
               {filtered.map((option) => (
                 <li key={option.value}>
                   <button
@@ -143,11 +133,11 @@ export function RelationshipPicker({
                       event.preventDefault();
                       add(option.value);
                     }}
-                    className="flex w-full flex-col px-3 py-2 text-left text-sm text-parchment-muted transition hover:bg-glow-500/10 hover:text-parchment"
+                    className="flex w-full flex-col px-3 py-2 text-left text-sm text-zinc-700 transition hover:bg-sky-50"
                   >
                     <span>{option.label}</span>
                     {option.hint ? (
-                      <span className="text-xs text-parchment-dim">{option.hint}</span>
+                      <span className="text-xs text-zinc-500">{option.hint}</span>
                     ) : null}
                   </button>
                 </li>
@@ -157,7 +147,7 @@ export function RelationshipPicker({
         </div>
       ) : null}
 
-      {description ? <p className="text-xs text-parchment-dim">{description}</p> : null}
+      {description ? <p className="text-xs text-zinc-500">{description}</p> : null}
     </div>
   );
 }

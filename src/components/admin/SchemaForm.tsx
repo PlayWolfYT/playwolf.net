@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition, type FormEvent } from "react";
+import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 
 import {
@@ -21,6 +21,7 @@ import {
   RelationshipPicker,
   type RelationshipOption,
 } from "@/components/admin/RelationshipPicker";
+import { RichTextEditor } from "@/components/admin/RichTextEditor";
 import {
   saveCollectionDocumentAction,
   saveGlobalDocumentAction,
@@ -115,11 +116,15 @@ export function SchemaForm({
   const router = useRouter();
   const [values, setValues] = useState(initialValues);
   const [error, setError] = useState<string | undefined>();
-  const [pending, startTransition] = useTransition();
+  const [success, setSuccess] = useState<string | undefined>();
+  // Explicit saving state — `useTransition` stays pending through
+  // `router.push`/`refresh`, which left the button stuck on "Saving…".
+  const [saving, setSaving] = useState(false);
 
   const root = values;
 
   function patch(path: string[], value: unknown) {
+    setSuccess(undefined);
     setValues((prev) => setAt(prev, path, value) as Record<string, unknown>);
   }
 
@@ -204,15 +209,15 @@ export function SchemaForm({
               {rows.map((row, rowIndex) => (
                 <div
                   key={rowIndex}
-                  className="rounded-xl border border-white/[0.08] bg-void-lift/40 p-4"
+                  className="rounded-lg border border-zinc-200 bg-zinc-50/80 p-4"
                 >
                   <div className="mb-3 flex items-center justify-between">
-                    <p className="font-mono text-[0.65rem] uppercase tracking-[0.18em] text-parchment-dim">
+                    <p className="text-xs font-medium uppercase tracking-wide text-zinc-500">
                       {field.label ?? field.name} {rowIndex + 1}
                     </p>
                     <button
                       type="button"
-                      className="text-xs text-red-300 hover:text-red-200"
+                      className="text-xs font-medium text-red-600 hover:text-red-700"
                       onClick={() => {
                         const next = rows.filter((_, i) => i !== rowIndex);
                         patch(arrayPath, next);
@@ -226,7 +231,7 @@ export function SchemaForm({
               ))}
               <button
                 type="button"
-                className="rounded-lg border border-white/10 px-3 py-1.5 text-xs text-parchment-muted transition hover:border-glow-500/40 hover:text-glow-300"
+                className="rounded-lg border border-zinc-300 bg-white px-3 py-1.5 text-xs font-medium text-zinc-700 shadow-sm transition hover:bg-zinc-50"
                 onClick={() => patch(arrayPath, [...rows, {}])}
               >
                 Add {field.label ?? field.name}
@@ -337,7 +342,7 @@ export function SchemaForm({
         const rich = isStudioRichText(value)
           ? value
           : ({
-              __studioPlain: "",
+              __studioHtml: "",
               __studioOriginal: null,
             } satisfies StudioRichText);
         return (
@@ -345,22 +350,19 @@ export function SchemaForm({
             key={inputId}
             label={field.label}
             htmlFor={inputId}
-            description={
-              field.description ?? "Plain text. Leave a blank line between paragraphs."
-            }
+            description={field.description}
             required={field.required}
           >
-            <TextArea
+            <RichTextEditor
               id={inputId}
-              value={rich.__studioPlain}
+              value={rich.__studioHtml}
               disabled={field.readOnly}
-              onChange={(event) =>
+              onChange={(html) =>
                 patch(fieldPath, {
-                  __studioPlain: event.target.value,
+                  __studioHtml: html,
                   __studioOriginal: rich.__studioOriginal,
                 } satisfies StudioRichText)
               }
-              rows={5}
             />
           </Field>
         );
@@ -558,10 +560,12 @@ export function SchemaForm({
     });
   }
 
-  function onSubmit(event: FormEvent) {
+  async function onSubmit(event: FormEvent) {
     event.preventDefault();
     setError(undefined);
-    startTransition(async () => {
+    setSuccess(undefined);
+    setSaving(true);
+    try {
       const result =
         kind === "global"
           ? await saveGlobalDocumentAction({ global: slug, values })
@@ -569,35 +573,62 @@ export function SchemaForm({
 
       if (!result.ok) {
         setError(result.error);
+        setSaving(false);
         return;
       }
 
+      // Inline success — editing the same URL with `?flash=updated` often
+      // doesn't remount the page FlashMessage, so the form owns the feedback.
       if (kind === "global") {
-        router.push(`/admin/globals/${slug}?flash=updated`);
+        setSuccess("Saved.");
+        setSaving(false);
+        router.replace(`/admin/globals/${slug}?flash=updated`);
         router.refresh();
         return;
       }
 
       const nextId = result.id ?? id;
-      router.push(
-        `/admin/collections/${slug}/${nextId}?flash=${id != null ? "updated" : "created"}`,
-      );
+      const isCreate = id == null;
+      setSuccess(isCreate ? "Created." : "Saved.");
+      setSaving(false);
+
+      if (isCreate) {
+        router.push(`/admin/collections/${slug}/${nextId}?flash=created`);
+      } else {
+        router.replace(`/admin/collections/${slug}/${nextId}?flash=updated`);
+      }
       router.refresh();
-    });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Save failed.");
+      setSaving(false);
+    }
   }
 
   return (
     <form onSubmit={onSubmit} className="flex flex-col gap-5">
       {error ? (
-        <p className="rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-200">
+        <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
           {error}
+        </p>
+      ) : null}
+      {success ? (
+        <p
+          role="status"
+          className="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-800"
+        >
+          {success}
         </p>
       ) : null}
 
       <div className="flex flex-col gap-4">{renderFields(fields, [])}</div>
 
-      <div className="flex items-center gap-3">
-        <SubmitButton>{pending ? "Saving…" : submitLabel}</SubmitButton>
+      <div className="sticky bottom-0 z-10 -mx-1 flex items-center gap-3 border-t border-zinc-200 bg-zinc-50/95 px-1 py-3 backdrop-blur">
+        <SubmitButton disabled={saving}>
+          {saving ? "Saving…" : submitLabel}
+        </SubmitButton>
+        {success ? (
+          <span className="text-sm font-medium text-emerald-700">{success}</span>
+        ) : null}
       </div>
     </form>
   );

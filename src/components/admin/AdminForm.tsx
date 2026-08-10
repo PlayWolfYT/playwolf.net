@@ -6,14 +6,15 @@ import type {
 } from "react";
 
 /**
- * Plain, server-renderable form primitives shared by every admin form. No
- * client interactivity here on purpose — the interactive pieces (pickers,
- * array editors) live in their own components; everything else is a native
- * input styled to match the site's glass / dark-void aesthetic.
+ * Shared form primitives for the admin panel — readable light chrome with
+ * clear borders and focus rings (standard admin, not the public void theme).
  */
 
 const baseInputClass =
-  "w-full rounded-lg border border-white/10 bg-void-lift/70 px-3 py-2 text-sm text-parchment placeholder:text-parchment-dim/60 shadow-inner-glow outline-none transition focus:border-glow-500/60 focus:ring-1 focus:ring-glow-500/40 disabled:cursor-not-allowed disabled:opacity-50";
+  "w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 " +
+  "placeholder:text-zinc-400 shadow-sm outline-none transition " +
+  "focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 " +
+  "disabled:cursor-not-allowed disabled:bg-zinc-50 disabled:text-zinc-500";
 
 export function Field({
   label,
@@ -31,16 +32,15 @@ export function Field({
   return (
     <div className="flex flex-col gap-1.5">
       {label ? (
-        <label
-          htmlFor={htmlFor}
-          className="font-display text-xs font-medium uppercase tracking-[0.14em] text-parchment-muted"
-        >
+        <label htmlFor={htmlFor} className="text-sm font-medium text-zinc-800">
           {label}
-          {required ? <span className="ml-1 text-glow-500">*</span> : null}
+          {required ? <span className="ml-1 text-sky-600">*</span> : null}
         </label>
       ) : null}
       {children}
-      {description ? <p className="text-xs text-parchment-dim">{description}</p> : null}
+      {description ? (
+        <p className="text-xs leading-relaxed text-zinc-500">{description}</p>
+      ) : null}
     </div>
   );
 }
@@ -79,13 +79,13 @@ export function Checkbox({
   ...props
 }: InputHTMLAttributes<HTMLInputElement> & { label: string }) {
   return (
-    <label className="flex items-center gap-2.5 text-sm text-parchment-muted">
+    <label className="flex cursor-pointer items-start gap-2.5 text-sm text-zinc-800">
       <input
         {...props}
         type="checkbox"
-        className="h-4 w-4 rounded border-white/20 bg-void-lift text-glow-500 accent-glow-500 focus:ring-glow-500/50"
+        className="mt-0.5 h-4 w-4 shrink-0 rounded border-zinc-300 text-sky-600 accent-sky-600 focus:ring-sky-500/40"
       />
-      {label}
+      <span>{label}</span>
     </label>
   );
 }
@@ -101,7 +101,7 @@ export function Select({
   );
 }
 
-/** Section card wrapper — the glass panel every form group sits inside. */
+/** Section card wrapper for a form group. */
 export function FormSection({
   title,
   description,
@@ -112,14 +112,12 @@ export function FormSection({
   children: ReactNode;
 }) {
   return (
-    <section className="rounded-2xl border border-white/[0.08] bg-gradient-to-b from-white/[0.05] to-white/[0.015] p-5 shadow-inner-glow sm:p-6">
+    <section className="rounded-xl border border-zinc-200 bg-white p-5 shadow-sm sm:p-6">
       {title ? (
-        <header className="mb-4">
-          <h2 className="font-display text-sm font-medium tracking-wide text-parchment">
-            {title}
-          </h2>
+        <header className="mb-4 border-b border-zinc-100 pb-3">
+          <h2 className="text-sm font-semibold text-zinc-900">{title}</h2>
           {description ? (
-            <p className="mt-1 text-xs text-parchment-dim">{description}</p>
+            <p className="mt-1 text-xs leading-relaxed text-zinc-500">{description}</p>
           ) : null}
         </header>
       ) : null}
@@ -132,11 +130,18 @@ export function FormRow({ children }: { children: ReactNode }) {
   return <div className="grid gap-4 sm:grid-cols-2">{children}</div>;
 }
 
-export function SubmitButton({ children }: { children: ReactNode }) {
+export function SubmitButton({
+  children,
+  disabled,
+}: {
+  children: ReactNode;
+  disabled?: boolean;
+}) {
   return (
     <button
       type="submit"
-      className="inline-flex items-center justify-center rounded-lg border border-glow-500/40 bg-glow-500/10 px-4 py-2 text-sm font-medium text-glow-400 shadow-glow-sm transition hover:bg-glow-500/20 hover:text-glow-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-glow-500"
+      disabled={disabled}
+      className="inline-flex items-center justify-center rounded-lg bg-sky-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-sky-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-600 disabled:cursor-not-allowed disabled:opacity-60"
     >
       {children}
     </button>

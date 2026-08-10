@@ -40,10 +40,10 @@ export default async function GlobalEditPage({
   return (
     <div className="flex flex-col gap-6">
       <header>
-        <p className="font-mono text-[0.65rem] uppercase tracking-[0.28em] text-glow-500">
+        <p className="text-xs font-semibold uppercase tracking-wider text-zinc-400">
           Global
         </p>
-        <h1 className="mt-2 font-display text-2xl font-light tracking-tight text-parchment">
+        <h1 className="mt-1 text-2xl font-semibold tracking-tight text-zinc-900">
           {schema.label}
         </h1>
       </header>

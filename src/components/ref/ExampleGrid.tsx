@@ -108,13 +108,16 @@ export function ExampleGrid({
                     same destination is noise for anyone using a screen reader. */}
                 <Link
                   href={detailHref}
-                  className={`block ${card} focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-glow-500`}
+                  className={`group block ${card} focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-glow-500`}
                 >
                   <div className="relative aspect-square w-full overflow-hidden">
-                    {thumb}
-                    {example.isWip || (!example.src && example.wipImages.length > 0) ? (
-                      <WipTape />
-                    ) : null}
+                    <div className="absolute inset-0 origin-center transition duration-500 group-hover:scale-105">
+                      {thumb}
+                      {example.isWip ||
+                      (!example.src && example.wipImages.length > 0) ? (
+                        <WipTape />
+                      ) : null}
+                    </div>
                   </div>
                   {caption}
                 </Link>

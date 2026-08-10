@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { ArtworkChips } from "@/components/ref/ArtworkChips";
+import { BackButton } from "@/components/ref/BackButton";
 import { CommissionStatus } from "@/components/ref/CommissionStatus";
 import { ExampleNav } from "@/components/ref/ExampleNav";
 import { FeaturedFriends } from "@/components/ref/FeaturedFriends";
@@ -90,6 +91,7 @@ export default async function ExamplePage({ params }: PageProps) {
           description={isNsfw ? "18+ content." : undefined}
           artist={example.artist}
           backHref={backHref}
+          isWip={example.isWip}
         >
           <ArtworkChips example={example} />
         </RefImage>
@@ -103,8 +105,9 @@ export default async function ExamplePage({ params }: PageProps) {
               wip: example.wipPlaceholder,
             }}
           />
-          <div className="mt-6 flex justify-center">
+          <div className="mt-6 flex flex-col items-center gap-3">
             <ArtworkChips example={example} />
+            <BackButton fallbackHref={backHref} />
           </div>
         </section>
       ) : heroImage ? (
@@ -115,6 +118,7 @@ export default async function ExamplePage({ params }: PageProps) {
           description={isNsfw ? "18+ content." : undefined}
           artist={example.artist}
           backHref={backHref}
+          isWip={example.isWip}
         >
           <ArtworkChips example={example} />
         </RefImage>
@@ -126,8 +130,9 @@ export default async function ExamplePage({ params }: PageProps) {
           <h1 className="mt-3 font-display text-3xl font-semibold text-parchment">
             {example.title}
           </h1>
-          <div className="mt-6 flex justify-center">
+          <div className="mt-6 flex flex-col items-center gap-3">
             <ArtworkChips example={example} />
+            <BackButton fallbackHref={backHref} />
           </div>
         </section>
       )}
