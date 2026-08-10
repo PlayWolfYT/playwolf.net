@@ -552,6 +552,9 @@ export interface Artwork {
     lastArtistUpdateAt?: string | null;
     lastArtistUpdateNote?: string | null;
   };
+  /**
+   * Progress sketches. Kept after completion when “Show WIP history” is on.
+   */
   wipImages?:
     | {
         image: number | Media;
@@ -1269,7 +1272,7 @@ export interface SiteSetting {
       serverUrl?: string | null;
       topic?: string | null;
       /**
-       * Optional access token.
+       * Optional access token (secret).
        */
       token?: string | null;
     };
@@ -1281,6 +1284,9 @@ export interface SiteSetting {
        */
       secure?: boolean | null;
       user?: string | null;
+      /**
+       * SMTP password (secret).
+       */
       password?: string | null;
       from?: string | null;
       to?: string | null;

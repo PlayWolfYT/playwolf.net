@@ -156,6 +156,14 @@ function adminRecord(field: Field): Record<string, unknown> {
   return (field.admin ?? {}) as Record<string, unknown>;
 }
 
+/**
+ * Extract defaultValue, excluding functions (which cannot be serialized to client components).
+ */
+function safeDefaultValue(value: unknown): unknown {
+  if (typeof value === "function") return undefined;
+  return value;
+}
+
 function serializeNamed(
   field: Field & { name: string },
   partial: Omit<
@@ -271,7 +279,7 @@ export function serializeFields(fields: Field[]): AdminField[] {
           type: "text",
           required: Boolean(text.required),
           hasMany: Boolean(text.hasMany),
-          defaultValue: text.defaultValue,
+          defaultValue: safeDefaultValue(text.defaultValue),
         }),
       );
       continue;
@@ -283,7 +291,7 @@ export function serializeFields(fields: Field[]): AdminField[] {
         serializeNamed(textarea, {
           type: "textarea",
           required: Boolean(textarea.required),
-          defaultValue: textarea.defaultValue,
+          defaultValue: safeDefaultValue(textarea.defaultValue),
         }),
       );
       continue;
@@ -297,7 +305,7 @@ export function serializeFields(fields: Field[]): AdminField[] {
           required: Boolean(number.required),
           min: typeof number.min === "number" ? number.min : undefined,
           max: typeof number.max === "number" ? number.max : undefined,
-          defaultValue: number.defaultValue,
+          defaultValue: safeDefaultValue(number.defaultValue),
         }),
       );
       continue;
@@ -330,7 +338,7 @@ export function serializeFields(fields: Field[]): AdminField[] {
       out.push(
         serializeNamed(checkbox, {
           type: "checkbox",
-          defaultValue: checkbox.defaultValue,
+          defaultValue: safeDefaultValue(checkbox.defaultValue),
         }),
       );
       continue;
@@ -344,7 +352,7 @@ export function serializeFields(fields: Field[]): AdminField[] {
           required: Boolean(select.required),
           hasMany: Boolean(select.hasMany),
           options: optionList(select.options),
-          defaultValue: select.defaultValue,
+          defaultValue: safeDefaultValue(select.defaultValue),
         }),
       );
       continue;
@@ -357,7 +365,7 @@ export function serializeFields(fields: Field[]): AdminField[] {
           type: "radio",
           required: Boolean(radio.required),
           options: optionList(radio.options),
-          defaultValue: radio.defaultValue,
+          defaultValue: safeDefaultValue(radio.defaultValue),
         }),
       );
       continue;

@@ -10,15 +10,23 @@ function isActive(pathname: string, href: string): boolean {
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
-type NavEntry = { kind: "group"; label: string } | { kind: "link"; item: AdminNavItem };
+type NavEntry =
+  | { kind: "group"; label: string; key: string }
+  | { kind: "link"; item: AdminNavItem };
 
 function toEntries(items: AdminNavItem[]): NavEntry[] {
   const entries: NavEntry[] = [];
   let lastGroup: string | undefined;
+  let groupIndex = 0;
 
   for (const item of items) {
     if (item.group && item.group !== lastGroup) {
-      entries.push({ kind: "group", label: item.group });
+      entries.push({
+        kind: "group",
+        label: item.group,
+        key: `group-${groupIndex}-${item.group}`,
+      });
+      groupIndex += 1;
       lastGroup = item.group;
     }
     entries.push({ kind: "link", item });
@@ -37,7 +45,7 @@ export function AdminSidebarNav({ items }: { items: AdminNavItem[] }) {
         if (entry.kind === "group") {
           return (
             <p
-              key={`group-${entry.label}`}
+              key={entry.key}
               className="mt-3 px-3 font-mono text-[0.6rem] uppercase tracking-[0.22em] text-parchment-dim first:mt-0"
             >
               {entry.label}

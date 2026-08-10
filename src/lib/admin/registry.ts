@@ -95,6 +95,7 @@ function toGlobalSchema(config: SanitizedGlobalConfig): AdminGlobalSchema {
 export async function getCollectionSchema(
   slug: string,
 ): Promise<AdminCollectionSchema | null> {
+  if (!isStudioCollection(slug)) return null;
   const payload = await getPayloadClient();
   const config = payload.config.collections.find((entry) => entry.slug === slug);
   return config ? toCollectionSchema(config) : null;
@@ -106,14 +107,30 @@ export async function getGlobalSchema(slug: string): Promise<AdminGlobalSchema |
   return config ? toGlobalSchema(config) : null;
 }
 
+/** Payload's own bookkeeping collections — never surfaced in the studio. */
+function isStudioCollection(slug: string): boolean {
+  return !slug.startsWith("payload-");
+}
+
+const NAV_GROUP_ORDER = ["Overview", "Content", "People", "Library", "System"] as const;
+
 export async function listCollectionSchemas(): Promise<AdminCollectionSchema[]> {
   const payload = await getPayloadClient();
-  return payload.config.collections.map(toCollectionSchema);
+  return payload.config.collections
+    .filter((collection) => isStudioCollection(collection.slug))
+    .map(toCollectionSchema);
 }
 
 export async function listGlobalSchemas(): Promise<AdminGlobalSchema[]> {
   const payload = await getPayloadClient();
   return payload.config.globals.map(toGlobalSchema);
+}
+
+function groupFor(slug: string): string {
+  if (slug === "users" || slug === "siteSettings") return "System";
+  if (slug === "media" || slug === "tags") return "Library";
+  if (slug === "artists" || slug === "friends") return "People";
+  return "Content";
 }
 
 /** Nav entries derived from the live Payload config (collections + globals). */
@@ -125,14 +142,7 @@ export async function getAdminNavFromConfig(): Promise<
     listGlobalSchemas(),
   ]);
 
-  const groupFor = (slug: string): string => {
-    if (slug === "users") return "System";
-    if (slug === "media" || slug === "tags") return "Library";
-    if (slug === "artists" || slug === "friends") return "People";
-    return "Content";
-  };
-
-  return [
+  const items = [
     { href: "/admin", label: "Dashboard", group: "Overview" },
     ...collections.map((collection) => ({
       href: `/admin/collections/${collection.slug}`,
@@ -145,6 +155,17 @@ export async function getAdminNavFromConfig(): Promise<
       group: "System",
     })),
   ];
+
+  // Keep each group contiguous so sidebar headers stay unique and readable.
+  return items.sort((a, b) => {
+    const groupDelta =
+      NAV_GROUP_ORDER.indexOf(a.group as (typeof NAV_GROUP_ORDER)[number]) -
+      NAV_GROUP_ORDER.indexOf(b.group as (typeof NAV_GROUP_ORDER)[number]);
+    if (groupDelta !== 0) return groupDelta;
+    if (a.href === "/admin") return -1;
+    if (b.href === "/admin") return 1;
+    return a.label.localeCompare(b.label);
+  });
 }
 
 export { collectRelationSlugs };
