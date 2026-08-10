@@ -11,8 +11,7 @@ function isActive(pathname: string, href: string): boolean {
 }
 
 type NavEntry =
-  | { kind: "group"; label: string; key: string }
-  | { kind: "link"; item: AdminNavItem };
+  { kind: "group"; label: string; key: string } | { kind: "link"; item: AdminNavItem };
 
 function toEntries(items: AdminNavItem[]): NavEntry[] {
   const entries: NavEntry[] = [];
