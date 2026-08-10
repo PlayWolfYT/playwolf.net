@@ -116,6 +116,7 @@ export function SchemaForm({
   const router = useRouter();
   const [values, setValues] = useState(initialValues);
   const [error, setError] = useState<string | undefined>();
+  const [success, setSuccess] = useState<string | undefined>();
   // Explicit saving state — `useTransition` stays pending through
   // `router.push`/`refresh`, which left the button stuck on "Saving…".
   const [saving, setSaving] = useState(false);
@@ -123,6 +124,7 @@ export function SchemaForm({
   const root = values;
 
   function patch(path: string[], value: unknown) {
+    setSuccess(undefined);
     setValues((prev) => setAt(prev, path, value) as Record<string, unknown>);
   }
 
@@ -561,6 +563,7 @@ export function SchemaForm({
   async function onSubmit(event: FormEvent) {
     event.preventDefault();
     setError(undefined);
+    setSuccess(undefined);
     setSaving(true);
     try {
       const result =
@@ -574,19 +577,27 @@ export function SchemaForm({
         return;
       }
 
+      // Inline success — editing the same URL with `?flash=updated` often
+      // doesn't remount the page FlashMessage, so the form owns the feedback.
       if (kind === "global") {
-        router.push(`/admin/globals/${slug}?flash=updated`);
-        router.refresh();
+        setSuccess("Saved.");
         setSaving(false);
+        router.replace(`/admin/globals/${slug}?flash=updated`);
+        router.refresh();
         return;
       }
 
       const nextId = result.id ?? id;
-      router.push(
-        `/admin/collections/${slug}/${nextId}?flash=${id != null ? "updated" : "created"}`,
-      );
-      router.refresh();
+      const isCreate = id == null;
+      setSuccess(isCreate ? "Created." : "Saved.");
       setSaving(false);
+
+      if (isCreate) {
+        router.push(`/admin/collections/${slug}/${nextId}?flash=created`);
+      } else {
+        router.replace(`/admin/collections/${slug}/${nextId}?flash=updated`);
+      }
+      router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Save failed.");
       setSaving(false);
@@ -600,6 +611,14 @@ export function SchemaForm({
           {error}
         </p>
       ) : null}
+      {success ? (
+        <p
+          role="status"
+          className="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-800"
+        >
+          {success}
+        </p>
+      ) : null}
 
       <div className="flex flex-col gap-4">{renderFields(fields, [])}</div>
 
@@ -607,6 +626,9 @@ export function SchemaForm({
         <SubmitButton disabled={saving}>
           {saving ? "Saving…" : submitLabel}
         </SubmitButton>
+        {success ? (
+          <span className="text-sm font-medium text-emerald-700">{success}</span>
+        ) : null}
       </div>
     </form>
   );

@@ -1,9 +1,21 @@
 /**
  * Bridge between Payload Lexical JSON and HTML for TipTap editors.
  * Uses a tiny tag tokenizer so conversion works on the server (no DOM).
+ *
+ * Text effects (rainbow / shake / glow) round-trip as `<span class="fx-*">`
+ * and Lexical `$` state (`{ effect: "rainbow" }`). Extra span classes/styles
+ * ride along as `$htmlClass` / `$htmlStyle` for frontend-safe shenanigans.
  */
 
 import type { RichTextValue } from "@/lib/content";
+import {
+  NODE_STATE_KEY,
+  TEXT_EFFECT_STATE_KEY,
+  TEXT_EFFECTS,
+  isTextEffect,
+  textEffectClass,
+  type TextEffect,
+} from "@/lib/text-effects";
 
 /** Marker stored in form state for rich-text fields edited as HTML. */
 export type StudioRichText = {
@@ -52,6 +64,10 @@ const EMPTY_LEXICAL = {
   },
 } as RichTextValue;
 
+const EFFECT_CLASS_TO_KEY = Object.fromEntries(
+  Object.entries(TEXT_EFFECTS).map(([key, effect]) => [effect.className, key]),
+) as Record<string, TextEffect>;
+
 function blockMeta() {
   return {
     direction: "ltr" as const,
@@ -61,16 +77,26 @@ function blockMeta() {
   };
 }
 
-function textNode(text: string, format = 0) {
-  return {
+function textNode(
+  text: string,
+  format = 0,
+  extras?: { effect?: TextEffect; htmlClass?: string; htmlStyle?: string },
+) {
+  const node: LexNode = {
     detail: 0,
     format,
-    mode: "normal" as const,
+    mode: "normal",
     style: "",
     text,
-    type: "text" as const,
+    type: "text",
     version: 1,
   };
+  const state: Record<string, unknown> = {};
+  if (extras?.effect) state[TEXT_EFFECT_STATE_KEY] = extras.effect;
+  if (extras?.htmlClass) state.htmlClass = extras.htmlClass;
+  if (extras?.htmlStyle) state.htmlStyle = extras.htmlStyle;
+  if (Object.keys(state).length > 0) node[NODE_STATE_KEY] = state;
+  return node;
 }
 
 export function lexicalToHtml(state: RichTextValue | null | undefined): string {
@@ -84,6 +110,10 @@ function escapeHtml(text: string): string {
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;");
+}
+
+function escapeAttr(text: string): string {
+  return escapeHtml(text).replace(/'/g, "&#39;");
 }
 
 function nodeToHtml(node: LexNode): string {
@@ -113,10 +143,12 @@ function nodeToHtml(node: LexNode): string {
       return `<blockquote>${inner}</blockquote>`;
     }
     case "link": {
-      const href = escapeHtml(String(node.fields?.url ?? node.url ?? "#"));
+      const href = escapeAttr(String(node.fields?.url ?? node.url ?? "#"));
       const inner = (node.children ?? []).map(nodeToHtml).join("");
       return `<a href="${href}">${inner}</a>`;
     }
+    case "horizontalrule":
+      return "<hr>";
     case "linebreak":
       return "<br>";
     case "text": {
@@ -127,6 +159,26 @@ function nodeToHtml(node: LexNode): string {
       if (format & 8) t = `<u>${t}</u>`;
       if (format & 16) t = `<s>${t}</s>`;
       if (format & 32) t = `<code>${t}</code>`;
+
+      const state = (node[NODE_STATE_KEY] as Record<string, unknown> | undefined) ?? {};
+      const classes: string[] = [];
+      const effectClass = textEffectClass(state[TEXT_EFFECT_STATE_KEY]);
+      if (effectClass) classes.push(effectClass);
+      if (typeof state.htmlClass === "string" && state.htmlClass.trim()) {
+        classes.push(...state.htmlClass.trim().split(/\s+/));
+      }
+      const style =
+        typeof state.htmlStyle === "string" && state.htmlStyle.trim()
+          ? state.htmlStyle.trim()
+          : undefined;
+
+      if (classes.length > 0 || style) {
+        const classAttr = classes.length
+          ? ` class="${escapeAttr(classes.join(" "))}"`
+          : "";
+        const styleAttr = style ? ` style="${escapeAttr(style)}"` : "";
+        t = `<span${classAttr}${styleAttr}>${t}</span>`;
+      }
       return t;
     }
     default:
@@ -138,7 +190,8 @@ type Token =
   | { kind: "open"; name: string; attrs: Record<string, string> }
   | { kind: "close"; name: string }
   | { kind: "text"; value: string }
-  | { kind: "br" };
+  | { kind: "br" }
+  | { kind: "hr" };
 
 function tokenize(html: string): Token[] {
   const tokens: Token[] = [];
@@ -163,8 +216,12 @@ function tokenize(html: string): Token[] {
         const val = am[2] ?? am[4] ?? "";
         if (key) attrs[key] = val;
       }
-      if (name === "br" || selfClosing) {
+      if (name === "br") {
         tokens.push({ kind: "br" });
+      } else if (name === "hr") {
+        tokens.push({ kind: "hr" });
+      } else if (selfClosing) {
+        // Ignore other void tags.
       } else {
         tokens.push({ kind: "open", name, attrs });
       }
@@ -184,6 +241,11 @@ function tokenize(html: string): Token[] {
 }
 
 type Frame = { name: string; node: LexNode };
+type SpanFrame = {
+  effect?: TextEffect;
+  htmlClass?: string;
+  htmlStyle?: string;
+};
 
 export function htmlToLexical(html: string): RichTextValue {
   const trimmed = html.trim();
@@ -194,7 +256,24 @@ export function htmlToLexical(html: string): RichTextValue {
   const tokens = tokenize(trimmed);
   const rootChildren: LexNode[] = [];
   const stack: Frame[] = [];
+  const spanStack: SpanFrame[] = [];
   let format = 0;
+
+  const activeSpan = (): SpanFrame => {
+    let effect: TextEffect | undefined;
+    let htmlClass: string | undefined;
+    let htmlStyle: string | undefined;
+    for (const frame of spanStack) {
+      if (frame.effect) effect = frame.effect;
+      if (frame.htmlClass) {
+        htmlClass = htmlClass ? `${htmlClass} ${frame.htmlClass}` : frame.htmlClass;
+      }
+      if (frame.htmlStyle) {
+        htmlStyle = htmlStyle ? `${htmlStyle};${frame.htmlStyle}` : frame.htmlStyle;
+      }
+    }
+    return { effect, htmlClass, htmlStyle };
+  };
 
   const currentChildren = (): LexNode[] => {
     if (stack.length === 0) return rootChildren;
@@ -213,12 +292,21 @@ export function htmlToLexical(html: string): RichTextValue {
   for (const token of tokens) {
     if (token.kind === "text") {
       const target = stack.length ? currentChildren() : ensureBlock();
-      target.push(textNode(token.value, format));
+      target.push(textNode(token.value, format, activeSpan()));
       continue;
     }
     if (token.kind === "br") {
       const target = stack.length ? currentChildren() : ensureBlock();
       target.push({ type: "linebreak", version: 1 });
+      continue;
+    }
+    if (token.kind === "hr") {
+      // HR is a block-level sibling under root (or current block parent).
+      if (stack.length === 0) {
+        rootChildren.push({ type: "horizontalrule", version: 1 });
+      } else {
+        currentChildren().push({ type: "horizontalrule", version: 1 });
+      }
       continue;
     }
     if (token.kind === "open") {
@@ -241,6 +329,20 @@ export function htmlToLexical(html: string): RichTextValue {
       }
       if (name === "code") {
         format |= 32;
+        continue;
+      }
+
+      if (name === "span") {
+        const classes = (attrs.class ?? "").split(/\s+/).filter(Boolean);
+        const effectKeys = classes
+          .map((cls) => EFFECT_CLASS_TO_KEY[cls])
+          .filter((key): key is TextEffect => Boolean(key));
+        const otherClasses = classes.filter((cls) => !EFFECT_CLASS_TO_KEY[cls]);
+        spanStack.push({
+          effect: effectKeys[0],
+          htmlClass: otherClasses.length ? otherClasses.join(" ") : undefined,
+          htmlStyle: attrs.style || undefined,
+        });
         continue;
       }
 
@@ -268,7 +370,7 @@ export function htmlToLexical(html: string): RichTextValue {
           children: [],
           ...blockMeta(),
         };
-      } else if (name === "div" || name === "span") {
+      } else if (name === "div") {
         if (stack.length === 0) {
           node = { type: "paragraph", children: [], ...blockMeta() };
         }
@@ -303,6 +405,11 @@ export function htmlToLexical(html: string): RichTextValue {
       continue;
     }
 
+    if (name === "span") {
+      spanStack.pop();
+      continue;
+    }
+
     for (let i = stack.length - 1; i >= 0; i--) {
       if (stack[i]!.name === name) {
         stack.splice(i);
@@ -327,6 +434,7 @@ export function htmlToLexical(html: string): RichTextValue {
 export function htmlHasContent(html: string): boolean {
   const text = html
     .replace(/<br\s*\/?>/gi, " ")
+    .replace(/<hr\s*\/?>/gi, " ")
     .replace(/<[^>]+>/g, " ")
     .replace(/&nbsp;/g, " ")
     .replace(/\s+/g, " ")
@@ -345,4 +453,13 @@ export function equalsHtml(
       .replace(/<p>\s*<\/p>/gi, "")
       .trim();
   return norm(lexicalToHtml(value)) === norm(html);
+}
+
+/** Exported for tests — map a class list to a known effect key. */
+export function effectFromClassName(className: string): TextEffect | undefined {
+  for (const cls of className.split(/\s+/)) {
+    const key = EFFECT_CLASS_TO_KEY[cls];
+    if (key && isTextEffect(key)) return key;
+  }
+  return undefined;
 }

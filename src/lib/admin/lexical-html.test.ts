@@ -7,6 +7,7 @@ import {
   lexicalToHtml,
 } from "@/lib/admin/lexical-html";
 import { plaintextToLexical } from "@/lib/admin/lexical";
+import { NODE_STATE_KEY, TEXT_EFFECT_STATE_KEY } from "@/lib/text-effects";
 
 describe("lexicalToHtml / htmlToLexical", () => {
   test("round-trips a simple paragraph", () => {
@@ -44,5 +45,30 @@ describe("lexicalToHtml / htmlToLexical", () => {
     const html = lexicalToHtml(value);
     expect(equalsHtml(value, html)).toBe(true);
     expect(equalsHtml(value, "<p>Edited</p>")).toBe(false);
+  });
+
+  test("round-trips fx-* text effects into Lexical $ state", () => {
+    const html = '<p><span class="fx-rainbow">Wow</span></p>';
+    const lexical = htmlToLexical(html);
+    const paragraph = (lexical.root.children as Array<{ children?: unknown[] }>)[0];
+    const text = paragraph?.children?.[0] as {
+      text?: string;
+      [key: string]: unknown;
+    };
+    expect(text?.text).toBe("Wow");
+    expect(
+      (text?.[NODE_STATE_KEY] as Record<string, unknown> | undefined)?.[
+        TEXT_EFFECT_STATE_KEY
+      ],
+    ).toBe("rainbow");
+    expect(lexicalToHtml(lexical)).toContain('class="fx-rainbow"');
+  });
+
+  test("preserves horizontal rules", () => {
+    const html = "<p>Above</p><hr><p>Below</p>";
+    const lexical = htmlToLexical(html);
+    const types = (lexical.root.children as Array<{ type: string }>).map((n) => n.type);
+    expect(types).toContain("horizontalrule");
+    expect(lexicalToHtml(lexical)).toContain("<hr>");
   });
 });

@@ -2,22 +2,33 @@
 
 import Link from "@tiptap/extension-link";
 import Placeholder from "@tiptap/extension-placeholder";
+import Underline from "@tiptap/extension-underline";
 import { EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import {
   Bold,
+  Code2,
   Heading2,
   Heading3,
   Italic,
   Link2,
   List,
   ListOrdered,
+  Minus,
   Quote,
   Redo2,
+  Sparkles,
   Strikethrough,
+  Underline as UnderlineIcon,
   Undo2,
+  Waves,
+  Zap,
 } from "lucide-react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+
+import { HtmlSpanMark } from "@/components/admin/tiptap-html-span";
+import { TextEffectMark } from "@/components/admin/tiptap-text-effect";
+import { TEXT_EFFECTS, type TextEffect } from "@/lib/text-effects";
 
 type RichTextEditorProps = {
   id?: string;
@@ -48,7 +59,7 @@ function ToolbarButton({
       aria-pressed={active}
       disabled={disabled}
       onClick={onClick}
-      className={`inline-flex h-8 w-8 items-center justify-center rounded-md text-sm transition ${
+      className={`inline-flex h-8 min-w-8 items-center justify-center rounded-md px-1.5 text-sm transition ${
         active
           ? "bg-sky-100 text-sky-800"
           : "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900"
@@ -59,9 +70,16 @@ function ToolbarButton({
   );
 }
 
+const EFFECT_ICONS: Record<TextEffect, React.ReactNode> = {
+  rainbow: <Sparkles className="h-4 w-4" />,
+  shake: <Waves className="h-4 w-4" />,
+  glow: <Zap className="h-4 w-4" />,
+};
+
 /**
  * TipTap WYSIWYG that speaks HTML to the schema form. On save, HTML is
- * converted back to Payload Lexical JSON via `htmlToLexical`.
+ * converted back to Payload Lexical JSON via `htmlToLexical`, including the
+ * custom `fx-*` text effects.
  */
 export function RichTextEditor({
   id,
@@ -70,17 +88,22 @@ export function RichTextEditor({
   placeholder = "Write something…",
   onChange,
 }: RichTextEditorProps) {
+  const [sourceMode, setSourceMode] = useState(false);
+
   const editor = useEditor({
     immediatelyRender: false,
-    editable: !disabled,
+    editable: !disabled && !sourceMode,
     extensions: [
       StarterKit.configure({
         heading: { levels: [2, 3] },
       }),
+      Underline,
       Link.configure({
         openOnClick: false,
         HTMLAttributes: { class: "text-sky-700 underline" },
       }),
+      TextEffectMark,
+      HtmlSpanMark,
       Placeholder.configure({ placeholder }),
     ],
     content: value || "",
@@ -91,13 +114,14 @@ export function RichTextEditor({
       attributes: {
         id: id ?? "",
         class:
-          "min-h-[8rem] px-3 py-2.5 text-sm leading-relaxed text-zinc-900 focus:outline-none " +
+          "tiptap min-h-[8rem] px-3 py-2.5 text-sm leading-relaxed text-zinc-900 focus:outline-none " +
           "[&_p]:my-2 [&_ul]:my-2 [&_ul]:list-disc [&_ul]:pl-5 " +
           "[&_ol]:my-2 [&_ol]:list-decimal [&_ol]:pl-5 " +
           "[&_blockquote]:my-2 [&_blockquote]:border-l-2 [&_blockquote]:border-zinc-300 [&_blockquote]:pl-3 [&_blockquote]:text-zinc-600 " +
           "[&_h2]:my-3 [&_h2]:text-lg [&_h2]:font-semibold " +
           "[&_h3]:my-2 [&_h3]:text-base [&_h3]:font-semibold " +
           "[&_a]:text-sky-700 [&_a]:underline " +
+          "[&_hr]:my-4 [&_hr]:border-zinc-300 " +
           "[&_code]:rounded [&_code]:bg-zinc-100 [&_code]:px-1 [&_code]:py-0.5 [&_code]:text-[0.85em]",
       },
     },
@@ -105,22 +129,20 @@ export function RichTextEditor({
 
   useEffect(() => {
     if (!editor) return;
-    editor.setEditable(!disabled);
-  }, [disabled, editor]);
+    editor.setEditable(!disabled && !sourceMode);
+  }, [disabled, editor, sourceMode]);
 
   // Sync external resets (e.g. after navigation with new initial values).
   useEffect(() => {
-    if (!editor) return;
+    if (!editor || sourceMode) return;
     const current = editor.getHTML();
     const next = value || "";
     if (current !== next && next !== "<p></p>") {
-      // Avoid fighting the user's caret during typing — only apply when
-      // the incoming value is meaningfully different from a blank editor.
       if (current === "<p></p>" || current === "" || !editor.isFocused) {
         editor.commands.setContent(next, { emitUpdate: false });
       }
     }
-  }, [editor, value]);
+  }, [editor, sourceMode, value]);
 
   if (!editor) {
     return (
@@ -142,6 +164,13 @@ export function RichTextEditor({
     editor.chain().focus().extendMarkRange("link").setLink({ href: url.trim() }).run();
   }
 
+  function toggleSource() {
+    if (!sourceMode && editor) {
+      onChange(editor.getHTML());
+    }
+    setSourceMode((prev) => !prev);
+  }
+
   return (
     <div
       className={`overflow-hidden rounded-lg border border-zinc-300 bg-white shadow-sm ${
@@ -154,7 +183,7 @@ export function RichTextEditor({
         <ToolbarButton
           label="Bold"
           active={editor.isActive("bold")}
-          disabled={disabled}
+          disabled={disabled || sourceMode}
           onClick={() => editor.chain().focus().toggleBold().run()}
         >
           <Bold className="h-4 w-4" />
@@ -162,24 +191,44 @@ export function RichTextEditor({
         <ToolbarButton
           label="Italic"
           active={editor.isActive("italic")}
-          disabled={disabled}
+          disabled={disabled || sourceMode}
           onClick={() => editor.chain().focus().toggleItalic().run()}
         >
           <Italic className="h-4 w-4" />
         </ToolbarButton>
         <ToolbarButton
+          label="Underline"
+          active={editor.isActive("underline")}
+          disabled={disabled || sourceMode}
+          onClick={() => editor.chain().focus().toggleUnderline().run()}
+        >
+          <UnderlineIcon className="h-4 w-4" />
+        </ToolbarButton>
+        <ToolbarButton
           label="Strikethrough"
           active={editor.isActive("strike")}
-          disabled={disabled}
+          disabled={disabled || sourceMode}
           onClick={() => editor.chain().focus().toggleStrike().run()}
         >
           <Strikethrough className="h-4 w-4" />
         </ToolbarButton>
         <span className="mx-1 h-5 w-px bg-zinc-200" aria-hidden />
+        {(Object.keys(TEXT_EFFECTS) as TextEffect[]).map((effect) => (
+          <ToolbarButton
+            key={effect}
+            label={TEXT_EFFECTS[effect].label}
+            active={editor.isActive("textEffect", { effect })}
+            disabled={disabled || sourceMode}
+            onClick={() => editor.chain().focus().toggleTextEffect(effect).run()}
+          >
+            {EFFECT_ICONS[effect]}
+          </ToolbarButton>
+        ))}
+        <span className="mx-1 h-5 w-px bg-zinc-200" aria-hidden />
         <ToolbarButton
           label="Heading 2"
           active={editor.isActive("heading", { level: 2 })}
-          disabled={disabled}
+          disabled={disabled || sourceMode}
           onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
         >
           <Heading2 className="h-4 w-4" />
@@ -187,7 +236,7 @@ export function RichTextEditor({
         <ToolbarButton
           label="Heading 3"
           active={editor.isActive("heading", { level: 3 })}
-          disabled={disabled}
+          disabled={disabled || sourceMode}
           onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
         >
           <Heading3 className="h-4 w-4" />
@@ -195,7 +244,7 @@ export function RichTextEditor({
         <ToolbarButton
           label="Bullet list"
           active={editor.isActive("bulletList")}
-          disabled={disabled}
+          disabled={disabled || sourceMode}
           onClick={() => editor.chain().focus().toggleBulletList().run()}
         >
           <List className="h-4 w-4" />
@@ -203,7 +252,7 @@ export function RichTextEditor({
         <ToolbarButton
           label="Numbered list"
           active={editor.isActive("orderedList")}
-          disabled={disabled}
+          disabled={disabled || sourceMode}
           onClick={() => editor.chain().focus().toggleOrderedList().run()}
         >
           <ListOrdered className="h-4 w-4" />
@@ -211,7 +260,7 @@ export function RichTextEditor({
         <ToolbarButton
           label="Quote"
           active={editor.isActive("blockquote")}
-          disabled={disabled}
+          disabled={disabled || sourceMode}
           onClick={() => editor.chain().focus().toggleBlockquote().run()}
         >
           <Quote className="h-4 w-4" />
@@ -219,28 +268,59 @@ export function RichTextEditor({
         <ToolbarButton
           label="Link"
           active={editor.isActive("link")}
-          disabled={disabled}
+          disabled={disabled || sourceMode}
           onClick={setLink}
         >
           <Link2 className="h-4 w-4" />
         </ToolbarButton>
+        <ToolbarButton
+          label="Horizontal rule"
+          disabled={disabled || sourceMode}
+          onClick={() => editor.chain().focus().setHorizontalRule().run()}
+        >
+          <Minus className="h-4 w-4" />
+        </ToolbarButton>
         <span className="mx-1 h-5 w-px bg-zinc-200" aria-hidden />
         <ToolbarButton
           label="Undo"
-          disabled={disabled || !editor.can().undo()}
+          disabled={disabled || sourceMode || !editor.can().undo()}
           onClick={() => editor.chain().focus().undo().run()}
         >
           <Undo2 className="h-4 w-4" />
         </ToolbarButton>
         <ToolbarButton
           label="Redo"
-          disabled={disabled || !editor.can().redo()}
+          disabled={disabled || sourceMode || !editor.can().redo()}
           onClick={() => editor.chain().focus().redo().run()}
         >
           <Redo2 className="h-4 w-4" />
         </ToolbarButton>
+        <span className="mx-1 h-5 w-px bg-zinc-200" aria-hidden />
+        <ToolbarButton
+          label={sourceMode ? "Visual editor" : "HTML source"}
+          active={sourceMode}
+          disabled={disabled}
+          onClick={toggleSource}
+        >
+          <Code2 className="h-4 w-4" />
+        </ToolbarButton>
       </div>
-      <EditorContent editor={editor} />
+
+      {sourceMode ? (
+        <textarea
+          id={id}
+          value={value}
+          disabled={disabled}
+          spellCheck={false}
+          onChange={(event) => {
+            onChange(event.target.value);
+            editor.commands.setContent(event.target.value || "", { emitUpdate: false });
+          }}
+          className="min-h-[10rem] w-full resize-y bg-zinc-50 px-3 py-2.5 font-mono text-[0.8rem] leading-relaxed text-zinc-900 outline-none"
+        />
+      ) : (
+        <EditorContent editor={editor} />
+      )}
     </div>
   );
 }
