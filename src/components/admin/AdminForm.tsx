@@ -38,7 +38,9 @@ export function Field({
         </label>
       ) : null}
       {children}
-      {description ? <p className="text-xs leading-relaxed text-zinc-500">{description}</p> : null}
+      {description ? (
+        <p className="text-xs leading-relaxed text-zinc-500">{description}</p>
+      ) : null}
     </div>
   );
 }

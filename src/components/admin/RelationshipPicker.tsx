@@ -82,7 +82,9 @@ export function RelationshipPicker({
 
   return (
     <div className="flex flex-col gap-1.5">
-      {label ? <span className="text-sm font-medium text-zinc-800">{label}</span> : null}
+      {label ? (
+        <span className="text-sm font-medium text-zinc-800">{label}</span>
+      ) : null}
 
       {name ? <input type="hidden" name={name} value={encoded} /> : null}
 

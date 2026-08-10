@@ -53,7 +53,10 @@ export function AdminShell({
               playwolf.net · Admin
             </Link>
             <form action={logoutThenRedirect}>
-              <button type="submit" className="text-xs font-medium text-sky-700 underline">
+              <button
+                type="submit"
+                className="text-xs font-medium text-sky-700 underline"
+              >
                 Sign out
               </button>
             </form>

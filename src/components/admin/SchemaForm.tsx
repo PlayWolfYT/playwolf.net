@@ -604,7 +604,9 @@ export function SchemaForm({
       <div className="flex flex-col gap-4">{renderFields(fields, [])}</div>
 
       <div className="sticky bottom-0 z-10 -mx-1 flex items-center gap-3 border-t border-zinc-200 bg-zinc-50/95 px-1 py-3 backdrop-blur">
-        <SubmitButton disabled={saving}>{saving ? "Saving…" : submitLabel}</SubmitButton>
+        <SubmitButton disabled={saving}>
+          {saving ? "Saving…" : submitLabel}
+        </SubmitButton>
       </div>
     </form>
   );

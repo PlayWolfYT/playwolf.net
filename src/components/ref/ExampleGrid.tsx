@@ -113,7 +113,8 @@ export function ExampleGrid({
                   <div className="relative aspect-square w-full overflow-hidden">
                     <div className="absolute inset-0 origin-center transition duration-500 group-hover:scale-105">
                       {thumb}
-                      {example.isWip || (!example.src && example.wipImages.length > 0) ? (
+                      {example.isWip ||
+                      (!example.src && example.wipImages.length > 0) ? (
                         <WipTape />
                       ) : null}
                     </div>

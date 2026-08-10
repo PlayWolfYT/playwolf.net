@@ -145,7 +145,9 @@ export function RichTextEditor({
   return (
     <div
       className={`overflow-hidden rounded-lg border border-zinc-300 bg-white shadow-sm ${
-        disabled ? "opacity-60" : "focus-within:border-sky-500 focus-within:ring-2 focus-within:ring-sky-500/20"
+        disabled
+          ? "opacity-60"
+          : "focus-within:border-sky-500 focus-within:ring-2 focus-within:ring-sky-500/20"
       }`}
     >
       <div className="flex flex-wrap items-center gap-0.5 border-b border-zinc-200 bg-zinc-50 px-1.5 py-1">

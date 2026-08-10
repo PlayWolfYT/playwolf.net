@@ -111,7 +111,9 @@ export default async function AdminDashboardPage() {
 
       <section className="rounded-xl border border-zinc-200 bg-white p-5 shadow-sm sm:p-6">
         <header className="mb-4 flex items-center justify-between">
-          <h2 className="text-sm font-semibold text-zinc-900">In-progress commissions</h2>
+          <h2 className="text-sm font-semibold text-zinc-900">
+            In-progress commissions
+          </h2>
           <Link
             href="/admin/collections/artworks"
             className="text-xs font-medium text-sky-700 hover:text-sky-800"
@@ -164,7 +166,9 @@ export default async function AdminDashboardPage() {
 
       <section className="rounded-xl border border-zinc-200 bg-white p-5 shadow-sm sm:p-6">
         <header className="mb-4 flex items-center justify-between">
-          <h2 className="text-sm font-semibold text-zinc-900">Recently updated artworks</h2>
+          <h2 className="text-sm font-semibold text-zinc-900">
+            Recently updated artworks
+          </h2>
           <Link
             href="/admin/collections/artworks"
             className="text-xs font-medium text-sky-700 hover:text-sky-800"
