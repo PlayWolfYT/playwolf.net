@@ -8,8 +8,10 @@ services:
       dockerfile: Dockerfile
     image: playwolf-web:latest
     restart: unless-stopped
-    ports:
-      - "${WEB_PORT:-3000}:3000"
+    # No host port publish. Coolify (and any reverse proxy) reaches this
+    # service on the Docker network at container port 3000. Publishing
+    # 3000:3000 here breaks a second stack (staging) on the same host.
+    # For a local publish, use: docker compose -f docker-compose.yml -f docker-compose.host-ports.yml up
     environment:
       NODE_ENV: production
       NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-https://playwolf.net}
@@ -123,8 +125,8 @@ services:
     image: ghcr.io/umami-software/umami:3.2.0
     restart: unless-stopped
     init: true
-    ports:
-      - "${UMAMI_PORT:-3001}:3000"
+    # Same as web: no host bind. Coolify domain should be e.g.
+    # http://umami.playwolf.net:3000 (the :3000 is the container port).
     environment:
       DATABASE_URL: postgresql://${POSTGRES_USER:-playwolf}:${POSTGRES_PASSWORD}@db:5432/${UMAMI_DB:-umami}
       APP_SECRET: ${UMAMI_APP_SECRET:?Set UMAMI_APP_SECRET to sign Umami sessions}
