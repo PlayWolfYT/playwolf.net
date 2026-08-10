@@ -21,6 +21,7 @@ export function galleryHref(filter: GalleryFilter): string {
     if (value) params.set(key, value);
   }
   if (filter.includeNsfw) params.set("nsfw", "1");
+  if (filter.includeWip) params.set("wip", "1");
 
   const query = params.toString();
   return query ? `/gallery?${query}` : "/gallery";
@@ -33,7 +34,10 @@ export function parseFilter(
   const single = (value: string | string[] | undefined) =>
     Array.isArray(value) ? value[0] : value;
 
-  const filter: GalleryFilter = { includeNsfw: single(params.nsfw) === "1" };
+  const filter: GalleryFilter = {
+    includeNsfw: single(params.nsfw) === "1",
+    includeWip: single(params.wip) === "1",
+  };
   for (const key of FACET_KEYS) {
     const value = single(params[key]);
     if (value) filter[key] = value;
@@ -116,9 +120,20 @@ export function FacetBar({
           {filter.includeNsfw ? "Showing 18+" : "Show 18+"}
         </Link>
 
+        <Link
+          href={galleryHref({ ...filter, includeWip: !filter.includeWip })}
+          aria-pressed={filter.includeWip}
+          className={filter.includeWip ? CHIP_ON : CHIP_OFF}
+        >
+          {filter.includeWip ? "Showing WIP" : "Show WIP"}
+        </Link>
+
         {narrowed ? (
           <Link
-            href={galleryHref({ includeNsfw: filter.includeNsfw })}
+            href={galleryHref({
+              includeNsfw: filter.includeNsfw,
+              includeWip: filter.includeWip,
+            })}
             className={CHIP_OFF}
           >
             Clear filters

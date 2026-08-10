@@ -1,12 +1,19 @@
-import type { CollectionConfig } from "payload";
+import type { CollectionConfig, FieldAccess } from "payload";
+import { ValidationError } from "payload";
 
+import { addInterval, type ReminderUnit } from "@/lib/reminders";
 import { anyone, authenticated } from "../access";
+import { wipFields } from "../fields/profile";
 import { slugField } from "../fields/slug";
+import { withStudioCondition } from "../fields/studioCondition";
 import { bySlug, revalidateHooks } from "../hooks/revalidate";
 
 const { afterChange, afterDelete } = revalidateHooks("artworks", {
   extraTags: bySlug,
 });
+
+/** Field-level gate: public/local reads without a user never see these. */
+const authenticatedField: FieldAccess = ({ req }) => Boolean(req.user);
 
 /**
  * A relationship reaches a hook either as a bare id or as the resolved
@@ -34,6 +41,23 @@ function isPolymorphicValue(
   return typeof entry === "object" && entry !== null && "relationTo" in entry;
 }
 
+function lifecycleOf(
+  data: { lifecycle?: string | null } | null | undefined,
+  originalDoc: { lifecycle?: string | null } | null | undefined,
+): "complete" | "in_progress" {
+  const value = data?.lifecycle ?? originalDoc?.lifecycle ?? "complete";
+  return value === "in_progress" ? "in_progress" : "complete";
+}
+
+function hasImage(
+  data: { image?: unknown } | null | undefined,
+  originalDoc: { image?: unknown } | null | undefined,
+): boolean {
+  const image = data?.image !== undefined ? data.image : originalDoc?.image;
+  if (image === null || image === undefined || image === "") return false;
+  return true;
+}
+
 /**
  * A single piece of art. Its own collection because it is what gets added most
  * often — one form per upload rather than editing a growing array inside a
@@ -48,11 +72,70 @@ export const Artworks: CollectionConfig = {
     update: authenticated,
   },
   admin: {
-    defaultColumns: ["title", "character", "profile", "artist", "updatedAt"],
+    defaultColumns: [
+      "title",
+      "lifecycle",
+      "character",
+      "profile",
+      "artist",
+      "updatedAt",
+    ],
     group: "Content",
     useAsTitle: "title",
   },
-  hooks: { afterChange, afterDelete },
+  hooks: {
+    beforeValidate: [
+      ({ data, originalDoc, req }) => {
+        if (!data) return data;
+
+        const lifecycle = lifecycleOf(data, originalDoc);
+        if (lifecycle === "complete" && !hasImage(data, originalDoc)) {
+          throw new ValidationError({
+            collection: "artworks",
+            errors: [
+              {
+                message: "Final image is required when lifecycle is complete.",
+                path: "image",
+              },
+            ],
+            req,
+          });
+        }
+
+        return data;
+      },
+    ],
+    beforeChange: [
+      ({ data, originalDoc }) => {
+        if (!data) return data;
+
+        const reminder = data.reminder ?? originalDoc?.reminder;
+        if (!reminder?.enabled) return data;
+
+        const nextAt = data.reminder?.nextAt ?? originalDoc?.reminder?.nextAt;
+        if (nextAt) return data;
+
+        const interval =
+          data.reminder?.interval ?? originalDoc?.reminder?.interval ?? 1;
+        const unit = (data.reminder?.unit ??
+          originalDoc?.reminder?.unit ??
+          "weeks") as ReminderUnit;
+
+        data.reminder = {
+          ...(typeof reminder === "object" && reminder !== null ? reminder : {}),
+          ...data.reminder,
+          enabled: true,
+          interval,
+          unit,
+          nextAt: addInterval(new Date(), interval, unit).toISOString(),
+        };
+
+        return data;
+      },
+    ],
+    afterChange,
+    afterDelete,
+  },
   fields: [
     {
       name: "title",
@@ -90,11 +173,215 @@ export const Artworks: CollectionConfig = {
       ],
     },
     {
+      name: "lifecycle",
+      type: "select",
+      defaultValue: "complete",
+      options: [
+        { label: "Complete", value: "complete" },
+        { label: "In progress", value: "in_progress" },
+      ],
+      admin: {
+        description:
+          "In-progress commissions can ship without a final image and show WIP sketches instead.",
+        position: "sidebar",
+      },
+    },
+    {
       name: "image",
       type: "upload",
       relationTo: "media",
-      required: true,
+      // Required when lifecycle is complete — enforced in beforeValidate so
+      // in-progress commissions can omit the final deliverable.
+      admin: {
+        description: "Final artwork. Required once the piece is marked complete.",
+      },
     },
+    withStudioCondition(
+      {
+        name: "commission",
+        type: "group",
+        label: "Commission status",
+        access: {
+          read: authenticatedField,
+          update: authenticatedField,
+        },
+        fields: [
+          {
+            name: "paid",
+            type: "checkbox",
+            defaultValue: false,
+          },
+          {
+            name: "artistStarted",
+            type: "checkbox",
+            defaultValue: false,
+            label: "Artist started",
+          },
+          {
+            name: "lastArtistUpdateAt",
+            type: "date",
+            label: "Last artist update",
+            admin: {
+              date: { pickerAppearance: "dayAndTime" },
+            },
+          },
+          {
+            name: "lastArtistUpdateNote",
+            type: "textarea",
+            label: "Last update note",
+          },
+        ],
+      },
+      { kind: "siblingEq", field: "lifecycle", value: "in_progress" },
+      (_, siblingData) => siblingData?.lifecycle === "in_progress",
+    ),
+    {
+      name: "wipImages",
+      type: "array",
+      label: "WIP sketches",
+      labels: { singular: "WIP image", plural: "WIP images" },
+      admin: {
+        description:
+          "Progress sketches. Kept after completion when “Show WIP history” is on.",
+        initCollapsed: true,
+      },
+      fields: [
+        {
+          name: "image",
+          type: "upload",
+          relationTo: "media",
+          required: true,
+        },
+        {
+          name: "caption",
+          type: "text",
+        },
+        {
+          name: "addedAt",
+          type: "date",
+          admin: {
+            date: { pickerAppearance: "dayAndTime" },
+          },
+        },
+      ],
+    },
+    withStudioCondition(
+      {
+        name: "overviewDisplay",
+        type: "select",
+        defaultValue: "generated",
+        options: [
+          { label: "Generated placeholder", value: "generated" },
+          { label: "WIP image", value: "wipImage" },
+        ],
+        admin: {
+          description: "What the overview / gallery card shows while in progress.",
+        },
+      },
+      { kind: "siblingEq", field: "lifecycle", value: "in_progress" },
+      (_, siblingData) => siblingData?.lifecycle === "in_progress",
+    ),
+    withStudioCondition(
+      {
+        name: "overviewWipImage",
+        type: "upload",
+        relationTo: "media",
+        admin: {
+          description: "Should be one of the WIP sketches above.",
+        },
+      },
+      {
+        kind: "and",
+        conditions: [
+          { kind: "siblingEq", field: "lifecycle", value: "in_progress" },
+          { kind: "siblingEq", field: "overviewDisplay", value: "wipImage" },
+        ],
+      },
+      (_, siblingData) =>
+        siblingData?.lifecycle === "in_progress" &&
+        siblingData?.overviewDisplay === "wipImage",
+    ),
+    withStudioCondition(
+      {
+        name: "wipPlaceholder",
+        type: "group",
+        label: "Placeholder options",
+        fields: wipFields,
+      },
+      { kind: "siblingEq", field: "lifecycle", value: "in_progress" },
+      (_, siblingData) => siblingData?.lifecycle === "in_progress",
+    ),
+    {
+      name: "showWipHistory",
+      type: "checkbox",
+      defaultValue: false,
+      label: "Show WIP history when complete",
+      admin: {
+        description:
+          "When the piece is finished, still show the WIP sketches on the public detail page.",
+      },
+    },
+    withStudioCondition(
+      {
+        name: "reminder",
+        type: "group",
+        label: "Follow-up reminder",
+        access: {
+          read: authenticatedField,
+          update: authenticatedField,
+        },
+        fields: [
+          {
+            name: "enabled",
+            type: "checkbox",
+            defaultValue: false,
+          },
+          {
+            type: "row",
+            fields: [
+              {
+                name: "interval",
+                type: "number",
+                defaultValue: 1,
+                min: 1,
+                admin: { width: "50%" },
+              },
+              {
+                name: "unit",
+                type: "select",
+                defaultValue: "weeks",
+                options: [
+                  { label: "Days", value: "days" },
+                  { label: "Weeks", value: "weeks" },
+                  { label: "Months", value: "months" },
+                ],
+                admin: { width: "50%" },
+              },
+            ],
+          },
+          {
+            name: "nextAt",
+            type: "date",
+            label: "Next reminder",
+            admin: {
+              date: { pickerAppearance: "dayAndTime" },
+              description: "Filled automatically when reminders are enabled.",
+            },
+          },
+          {
+            name: "lastSentAt",
+            type: "date",
+            label: "Last sent",
+            admin: {
+              date: { pickerAppearance: "dayAndTime" },
+              readOnly: true,
+            },
+          },
+        ],
+      },
+      { kind: "siblingEq", field: "lifecycle", value: "in_progress" },
+      (_, siblingData) => siblingData?.lifecycle === "in_progress",
+    ),
     {
       name: "artist",
       type: "relationship",

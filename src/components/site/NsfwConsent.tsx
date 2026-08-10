@@ -248,8 +248,8 @@ function NsfwWarning({
             id={bodyId}
             className="mx-auto mt-4 max-w-sm text-sm leading-relaxed text-parchment-muted"
           >
-            This part of the site holds artwork meant for adults. Continue only if
-            you are 18 or older and happy to see it.
+            This part of the site holds artwork meant for adults. Continue only if you
+            are 18 or older and happy to see it.
           </p>
 
           <div className="mt-8 flex flex-col-reverse gap-3 sm:flex-row">
