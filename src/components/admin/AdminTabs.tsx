@@ -4,9 +4,8 @@ import { useState, type ReactNode } from "react";
 
 /**
  * Client-side tab switcher for a single `<form>` that covers more ground
- * than fits comfortably in one view (character SFW / After Dark profiles).
- * Panels are hidden with CSS rather than unmounted, so every field — visible
- * tab or not — is still part of the form and submits with it.
+ * than fits comfortably in one view. Panels are hidden with CSS rather than
+ * unmounted, so every field — visible tab or not — still submits with the form.
  */
 export function AdminTabs({
   tabs,
@@ -17,16 +16,16 @@ export function AdminTabs({
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex flex-wrap gap-1.5 rounded-full border border-white/[0.08] bg-void-lift/50 p-1">
+      <div className="flex flex-wrap gap-1 border-b border-zinc-200 pb-px">
         {tabs.map((tab) => (
           <button
             key={tab.key}
             type="button"
             onClick={() => setActive(tab.key)}
-            className={`rounded-full px-3.5 py-1.5 text-xs font-medium transition ${
+            className={`-mb-px border-b-2 px-3.5 py-2 text-sm font-medium transition ${
               active === tab.key
-                ? "bg-glow-500/15 text-glow-300 shadow-glow-sm"
-                : "text-parchment-dim hover:text-parchment-muted"
+                ? "border-sky-600 text-sky-800"
+                : "border-transparent text-zinc-500 hover:text-zinc-800"
             }`}
           >
             {tab.label}

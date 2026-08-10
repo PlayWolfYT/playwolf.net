@@ -69,11 +69,11 @@ function Header({
     <header>
       <Link
         href={`/admin/collections/${schema.slug}`}
-        className="font-mono text-[0.65rem] uppercase tracking-[0.28em] text-glow-500 hover:text-glow-300"
+        className="text-xs font-medium text-sky-700 hover:text-sky-800"
       >
         ← {schema.label}
       </Link>
-      <h1 className="mt-2 font-display text-2xl font-light tracking-tight text-parchment">
+      <h1 className="mt-1 text-2xl font-semibold tracking-tight text-zinc-900">
         New {schema.singularLabel}
       </h1>
     </header>

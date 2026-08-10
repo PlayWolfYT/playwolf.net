@@ -12,7 +12,7 @@ export function MediaUploadForm() {
           type="file"
           accept="image/*"
           required
-          className="block w-full text-sm text-parchment-muted file:mr-3 file:rounded-lg file:border file:border-white/10 file:bg-void-lift file:px-3 file:py-1.5 file:text-xs file:text-parchment"
+          className="block w-full text-sm text-zinc-700 file:mr-3 file:rounded-lg file:border file:border-zinc-300 file:bg-white file:px-3 file:py-1.5 file:text-xs file:font-medium file:text-zinc-700"
         />
       </Field>
       <Field label="Alt text" htmlFor="alt" description="Defaults to the filename.">

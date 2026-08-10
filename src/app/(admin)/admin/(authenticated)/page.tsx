@@ -86,10 +86,10 @@ export default async function AdminDashboardPage() {
   return (
     <div className="flex flex-col gap-8">
       <header>
-        <p className="font-mono text-[0.65rem] uppercase tracking-[0.28em] text-glow-500">
+        <p className="text-xs font-semibold uppercase tracking-wider text-zinc-400">
           Overview
         </p>
-        <h1 className="mt-2 font-display text-2xl font-light tracking-tight text-parchment sm:text-3xl">
+        <h1 className="mt-1 text-2xl font-semibold tracking-tight text-zinc-900">
           Dashboard
         </h1>
       </header>
@@ -99,63 +99,59 @@ export default async function AdminDashboardPage() {
           <Link
             key={card.href}
             href={card.href}
-            className="rounded-2xl border border-white/[0.08] bg-gradient-to-b from-white/[0.05] to-white/[0.015] p-4 shadow-inner-glow transition hover:border-glow-500/30"
+            className="rounded-xl border border-zinc-200 bg-white p-4 shadow-sm transition hover:border-sky-300 hover:shadow"
           >
-            <p className="font-display text-2xl font-light text-parchment">
-              {card.value}
-            </p>
-            <p className="mt-1 text-xs uppercase tracking-[0.14em] text-parchment-dim">
+            <p className="text-2xl font-semibold text-zinc-900">{card.value}</p>
+            <p className="mt-1 text-xs font-medium uppercase tracking-wide text-zinc-500">
               {card.label}
             </p>
           </Link>
         ))}
       </section>
 
-      <section className="rounded-2xl border border-white/[0.08] bg-gradient-to-b from-white/[0.05] to-white/[0.015] p-5 shadow-inner-glow sm:p-6">
+      <section className="rounded-xl border border-zinc-200 bg-white p-5 shadow-sm sm:p-6">
         <header className="mb-4 flex items-center justify-between">
-          <h2 className="font-display text-sm font-medium tracking-wide text-parchment">
-            In-progress commissions
-          </h2>
+          <h2 className="text-sm font-semibold text-zinc-900">In-progress commissions</h2>
           <Link
             href="/admin/collections/artworks"
-            className="text-xs text-glow-400 hover:text-glow-300"
+            className="text-xs font-medium text-sky-700 hover:text-sky-800"
           >
             View all →
           </Link>
         </header>
 
         {inProgress.length === 0 ? (
-          <p className="text-sm text-parchment-dim">Nothing in progress right now.</p>
+          <p className="text-sm text-zinc-500">Nothing in progress right now.</p>
         ) : (
           <ul className="flex flex-col gap-2">
             {inProgress.map((artwork) => (
               <li
                 key={artwork.id}
-                className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-white/[0.06] bg-void-lift/40 px-3 py-2"
+                className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-zinc-100 bg-zinc-50 px-3 py-2"
               >
                 <div>
                   <Link
                     href={`/admin/collections/artworks/${artwork.id}`}
-                    className="text-sm text-parchment hover:text-glow-300"
+                    className="text-sm font-medium text-zinc-900 hover:text-sky-700"
                   >
                     {artwork.title}
                   </Link>
-                  <p className="text-xs text-parchment-dim">
+                  <p className="text-xs text-zinc-500">
                     {characterName(artwork.character)} · {artwork.profile}
                   </p>
                 </div>
                 <div className="flex items-center gap-2 text-xs">
                   {artwork.commission?.paid ? (
-                    <span className="rounded-full border border-glow-500/30 bg-glow-500/10 px-2 py-0.5 text-glow-300">
+                    <span className="rounded-md bg-emerald-50 px-2 py-0.5 font-medium text-emerald-700">
                       Paid
                     </span>
                   ) : (
-                    <span className="rounded-full border border-white/10 px-2 py-0.5 text-parchment-dim">
+                    <span className="rounded-md bg-zinc-100 px-2 py-0.5 font-medium text-zinc-500">
                       Unpaid
                     </span>
                   )}
                   {artwork.commission?.artistStarted ? (
-                    <span className="rounded-full border border-glow-500/30 bg-glow-500/10 px-2 py-0.5 text-glow-300">
+                    <span className="rounded-md bg-sky-50 px-2 py-0.5 font-medium text-sky-700">
                       Started
                     </span>
                   ) : null}
@@ -166,14 +162,12 @@ export default async function AdminDashboardPage() {
         )}
       </section>
 
-      <section className="rounded-2xl border border-white/[0.08] bg-gradient-to-b from-white/[0.05] to-white/[0.015] p-5 shadow-inner-glow sm:p-6">
+      <section className="rounded-xl border border-zinc-200 bg-white p-5 shadow-sm sm:p-6">
         <header className="mb-4 flex items-center justify-between">
-          <h2 className="font-display text-sm font-medium tracking-wide text-parchment">
-            Recently updated artworks
-          </h2>
+          <h2 className="text-sm font-semibold text-zinc-900">Recently updated artworks</h2>
           <Link
             href="/admin/collections/artworks"
-            className="text-xs text-glow-400 hover:text-glow-300"
+            className="text-xs font-medium text-sky-700 hover:text-sky-800"
           >
             View all →
           </Link>
@@ -184,10 +178,10 @@ export default async function AdminDashboardPage() {
             <li key={artwork.id}>
               <Link
                 href={`/admin/collections/artworks/${artwork.id}`}
-                className="flex items-center justify-between gap-2 rounded-lg border border-white/[0.06] bg-void-lift/40 px-3 py-2 text-sm text-parchment-muted transition hover:border-glow-500/30 hover:text-parchment"
+                className="flex items-center justify-between gap-2 rounded-lg border border-zinc-100 bg-zinc-50 px-3 py-2 text-sm text-zinc-700 transition hover:border-sky-200 hover:bg-sky-50/50"
               >
-                <span>{artwork.title}</span>
-                <span className="text-xs text-parchment-dim">
+                <span className="font-medium">{artwork.title}</span>
+                <span className="text-xs text-zinc-500">
                   {characterName(artwork.character)}
                 </span>
               </Link>

@@ -64,16 +64,16 @@ export default async function CollectionListPage({
     <div className="flex flex-col gap-6">
       <header className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <p className="font-mono text-[0.65rem] uppercase tracking-[0.28em] text-glow-500">
+          <p className="text-xs font-semibold uppercase tracking-wider text-zinc-400">
             Collection
           </p>
-          <h1 className="mt-2 font-display text-2xl font-light tracking-tight text-parchment">
+          <h1 className="mt-1 text-2xl font-semibold tracking-tight text-zinc-900">
             {schema.label}
           </h1>
         </div>
         <Link
           href={`/admin/collections/${slug}/new`}
-          className="rounded-lg border border-glow-500/40 bg-glow-500/10 px-3 py-1.5 text-sm text-glow-300 transition hover:bg-glow-500/20"
+          className="rounded-lg bg-sky-600 px-3 py-1.5 text-sm font-medium text-white shadow-sm transition hover:bg-sky-700"
         >
           New {schema.singularLabel}
         </Link>
@@ -82,14 +82,14 @@ export default async function CollectionListPage({
       <FlashMessage flash={flash} error={error} />
 
       {docs.length === 0 ? (
-        <p className="text-sm text-parchment-dim">Nothing here yet.</p>
+        <p className="text-sm text-zinc-500">Nothing here yet.</p>
       ) : (
-        <div className="overflow-x-auto rounded-2xl border border-white/[0.08]">
+        <div className="overflow-x-auto rounded-xl border border-zinc-200 bg-white shadow-sm">
           <table className="min-w-full text-left text-sm">
-            <thead className="bg-void-lift/60 font-mono text-[0.65rem] uppercase tracking-[0.18em] text-parchment-dim">
+            <thead className="border-b border-zinc-200 bg-zinc-50 text-xs font-semibold uppercase tracking-wide text-zinc-500">
               <tr>
                 {columns.map((column) => (
-                  <th key={column} className="px-3 py-2 font-medium">
+                  <th key={column} className="px-3 py-2.5 font-semibold">
                     {column}
                   </th>
                 ))}
@@ -101,14 +101,14 @@ export default async function CollectionListPage({
                 return (
                   <tr
                     key={String(doc.id)}
-                    className="border-t border-white/[0.06] transition hover:bg-glow-500/5"
+                    className="border-t border-zinc-100 transition hover:bg-sky-50/40"
                   >
                     {columns.map((column, index) => (
-                      <td key={column} className="px-3 py-2 text-parchment-muted">
+                      <td key={column} className="px-3 py-2.5 text-zinc-600">
                         {index === 0 ? (
                           <Link
                             href={`/admin/collections/${slug}/${doc.id}`}
-                            className="text-parchment hover:text-glow-300"
+                            className="font-medium text-zinc-900 hover:text-sky-700"
                           >
                             {cellValue(record, column)}
                           </Link>

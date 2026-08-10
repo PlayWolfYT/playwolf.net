@@ -1,21 +1,15 @@
-import { equalsPlain, plaintextToLexical, richTextToPlain } from "@/lib/admin/lexical";
+import {
+  equalsHtml,
+  htmlToLexical,
+  isStudioRichText,
+  lexicalToHtml,
+  type StudioRichText,
+} from "@/lib/admin/lexical-html";
 import type { AdminField } from "@/lib/admin/schema";
 import type { RichTextValue } from "@/lib/content";
 
-/** Marker stored in form state for rich-text fields edited as plain text. */
-export type StudioRichText = {
-  __studioPlain: string;
-  __studioOriginal: RichTextValue | null;
-};
-
-export function isStudioRichText(value: unknown): value is StudioRichText {
-  return (
-    typeof value === "object" &&
-    value !== null &&
-    "__studioPlain" in value &&
-    "__studioOriginal" in value
-  );
-}
+export type { StudioRichText };
+export { isStudioRichText };
 
 function idOf(value: unknown): number | string | null {
   if (typeof value === "number" && Number.isFinite(value)) return value;
@@ -53,7 +47,7 @@ function relationValue(value: unknown, polymorphic: boolean): unknown {
 
 /**
  * Shape a stored Payload document for the schema form: relationships become
- * ids, uploads become ids, rich text becomes a plain/original pair.
+ * ids, uploads become ids, rich text becomes an HTML/original pair.
  */
 export function documentToFormValues(
   doc: Record<string, unknown> | null | undefined,
@@ -110,7 +104,6 @@ export function documentToFormValues(
       if (field.type === "relationship" || field.type === "upload") {
         const polymorphic = Array.isArray(field.relationTo);
         into[field.name] = relationValue(raw, polymorphic && Boolean(field.hasMany));
-        // Polymorphic hasMany uses {relationTo,value}[]; single polymorphic is rare here.
         if (polymorphic && field.hasMany) {
           into[field.name] = relationValue(raw, true);
         } else if (field.hasMany) {
@@ -124,7 +117,7 @@ export function documentToFormValues(
       if (field.type === "richText") {
         const original = (raw as RichTextValue | null | undefined) ?? null;
         into[field.name] = {
-          __studioPlain: richTextToPlain(original),
+          __studioHtml: lexicalToHtml(original),
           __studioOriginal: original,
         } satisfies StudioRichText;
         continue;
@@ -149,7 +142,7 @@ export function documentToFormValues(
 }
 
 /**
- * Convert form state back into a Payload `data` object. Rich-text plain
+ * Convert form state back into a Payload `data` object. Rich-text HTML
  * markers become Lexical documents (preserving the original when unchanged).
  */
 export function formValuesToDocument(
@@ -204,11 +197,11 @@ export function formValuesToDocument(
 
       if (field.type === "richText") {
         if (isStudioRichText(raw)) {
-          into[field.name] = equalsPlain(raw.__studioOriginal, raw.__studioPlain)
+          into[field.name] = equalsHtml(raw.__studioOriginal, raw.__studioHtml)
             ? raw.__studioOriginal
-            : plaintextToLexical(raw.__studioPlain);
+            : htmlToLexical(raw.__studioHtml);
         } else if (typeof raw === "string") {
-          into[field.name] = plaintextToLexical(raw);
+          into[field.name] = htmlToLexical(raw);
         } else {
           into[field.name] = raw ?? null;
         }

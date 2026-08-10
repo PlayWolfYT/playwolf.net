@@ -40,9 +40,14 @@ export default function AdminRootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className="scroll-smooth" suppressHydrationWarning>
+    <html
+      lang="en"
+      className="scroll-smooth"
+      style={{ colorScheme: "light" }}
+      suppressHydrationWarning
+    >
       <body
-        className={`${geistSans.variable} ${geistMono.variable} ${outfit.variable} font-sans`}
+        className={`${geistSans.variable} ${geistMono.variable} ${outfit.variable} min-h-screen bg-zinc-100 font-sans text-zinc-900 antialiased`}
         suppressHydrationWarning
       >
         {children}

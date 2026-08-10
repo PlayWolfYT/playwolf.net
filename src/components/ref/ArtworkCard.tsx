@@ -2,6 +2,7 @@ import type { Artist, ImageRef } from "@/lib/content";
 import { placeholderFor } from "@/lib/content";
 import { ArtistBar } from "@/components/ref/ArtistBar";
 import { ShimmerImage } from "@/components/ref/ShimmerImage";
+import { WipTape } from "@/components/ref/WipTape";
 
 type ArtworkCardProps = {
   src: ImageRef;
@@ -14,6 +15,8 @@ type ArtworkCardProps = {
    * nowhere to scroll to.
    */
   fit?: "page" | "viewport";
+  /** When true, show the diagonal WIP tape over the image. */
+  isWip?: boolean;
 };
 
 /**
@@ -29,7 +32,13 @@ function frameFor(src: ImageRef): { className: string; px: number } {
 }
 
 /** Single piece of artwork with its credit bar attached to the same card. */
-export function ArtworkCard({ src, alt, artist, fit = "page" }: ArtworkCardProps) {
+export function ArtworkCard({
+  src,
+  alt,
+  artist,
+  fit = "page",
+  isWip = false,
+}: ArtworkCardProps) {
   const frame = frameFor(src);
   const bounded = fit === "viewport";
 
@@ -49,14 +58,17 @@ export function ArtworkCard({ src, alt, artist, fit = "page" }: ArtworkCardProps
 
   return (
     <figure
-      className={`mx-auto rounded-3xl border border-white/[0.07] bg-gradient-to-br from-void-lift/90 to-void-panel/70 shadow-glow-sm ${
+      className={`group mx-auto rounded-3xl border border-white/[0.07] bg-gradient-to-br from-void-lift/90 to-void-panel/70 shadow-glow-sm transition hover:border-glow-500/40 ${
         bounded ? "w-fit max-w-full" : `w-full ${frame.className}`
       }`}
     >
       <div
         className={`relative overflow-hidden rounded-t-3xl ${artist ? "" : "rounded-b-3xl"}`}
       >
-        {image}
+        <div className="relative origin-center transition duration-500 group-hover:scale-[1.02]">
+          {image}
+          {isWip ? <WipTape /> : null}
+        </div>
       </div>
 
       {artist ? (

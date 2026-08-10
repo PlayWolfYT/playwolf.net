@@ -72,15 +72,13 @@ export function MediaPicker({
   return (
     <div className="flex flex-col gap-2">
       {label ? (
-        <span className="font-display text-xs font-medium uppercase tracking-[0.14em] text-parchment-muted">
-          {label}
-        </span>
+        <span className="text-sm font-medium text-zinc-800">{label}</span>
       ) : null}
 
       <input type="hidden" name={name} value={selected?.id ?? ""} />
 
       <div className="flex flex-wrap items-start gap-3">
-        <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-lg border border-white/10 bg-void-lift">
+        <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-lg border border-zinc-300 bg-zinc-50">
           {selected ? (
             <Image
               src={selected.thumbnailURL || selected.url}
@@ -91,14 +89,14 @@ export function MediaPicker({
               unoptimized
             />
           ) : (
-            <span className="flex h-full items-center justify-center text-[0.65rem] text-parchment-dim">
+            <span className="flex h-full items-center justify-center text-xs text-zinc-400">
               None
             </span>
           )}
         </div>
 
         <div className="flex flex-col gap-2">
-          <label className="inline-flex w-fit cursor-pointer items-center justify-center rounded-lg border border-white/10 px-3 py-1.5 text-xs text-parchment-muted transition hover:border-glow-500/40 hover:text-glow-300">
+          <label className="inline-flex w-fit cursor-pointer items-center justify-center rounded-lg border border-zinc-300 bg-white px-3 py-1.5 text-xs font-medium text-zinc-700 shadow-sm transition hover:bg-zinc-50">
             {pending ? "Uploading…" : "Upload new"}
             <input
               type="file"
@@ -112,12 +110,12 @@ export function MediaPicker({
             <button
               type="button"
               onClick={() => setSelected(undefined)}
-              className="w-fit rounded-lg border border-red-500/30 px-3 py-1.5 text-xs text-red-300 hover:bg-red-500/10"
+              className="w-fit rounded-lg border border-red-200 bg-white px-3 py-1.5 text-xs font-medium text-red-600 hover:bg-red-50"
             >
               Clear
             </button>
           ) : null}
-          {error ? <p className="text-xs text-red-300">{error}</p> : null}
+          {error ? <p className="text-xs text-red-600">{error}</p> : null}
         </div>
       </div>
 
@@ -130,8 +128,8 @@ export function MediaPicker({
                 onClick={() => setSelected(option)}
                 className={`relative h-14 w-14 overflow-hidden rounded-md border transition ${
                   selected?.id === option.id
-                    ? "border-glow-500 shadow-glow-sm"
-                    : "border-white/10 hover:border-white/30"
+                    ? "border-sky-500 ring-2 ring-sky-500/30"
+                    : "border-zinc-300 hover:border-zinc-400"
                 }`}
                 title={option.alt}
               >
@@ -149,7 +147,7 @@ export function MediaPicker({
         </ul>
       ) : null}
 
-      {description ? <p className="text-xs text-parchment-dim">{description}</p> : null}
+      {description ? <p className="text-xs text-zinc-500">{description}</p> : null}
     </div>
   );
 }
