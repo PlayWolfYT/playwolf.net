@@ -8,10 +8,22 @@ manager/build tool (`node` is only the production runtime). Standard commands li
 production/prod-style stack is described in [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md).
 The notes below are the non-obvious bits for developing in the Cursor Cloud VM.
 
-### Services (all local, none containerised here)
+### Services
 
-The dev workflow is `bun run dev` (not `docker compose`; Docker is not installed in this
-VM). Three long-running processes are involved:
+On a Docker-capable machine (local Windows/macOS/Linux with Docker Desktop), prefer:
+
+```bash
+bun run dev:up   # Postgres + Garage via compose, then scripts/garage-bootstrap.ts
+bun run dev      # Next.js + Payload
+```
+
+That layers [`docker-compose.dev.yml`](docker-compose.dev.yml) to publish `db:5432`
+and `garage:3900`/`3903` on loopback, and imports the pinned local S3 credentials
+from `.env`. Do **not** use `docker-compose.dev.yml` on Coolify.
+
+#### Cursor Cloud VM (no Docker)
+
+The Cloud VM does not have Docker. Three long-running processes are involved:
 
 | Service                           | Purpose                                            | How it runs in this VM                                      | Port                                  |
 | --------------------------------- | -------------------------------------------------- | ----------------------------------------------------------- | ------------------------------------- |
