@@ -1,8 +1,9 @@
 import Image from "next/image";
 import Link from "next/link";
 
-import { placeholderFor, type GalleryItem } from "@/lib/content";
+import { exampleThumb, placeholderFor, type GalleryItem } from "@/lib/content";
 import { ShimmerImage } from "@/components/ref/ShimmerImage";
+import { WipTape } from "@/components/ref/WipTape";
 
 const THUMB_SIZES =
   "(max-width: 640px) 50vw, (max-width: 1024px) 33vw, (max-width: 1280px) 25vw, (max-width: 1536px) 20vw, 17vw";
@@ -20,28 +21,33 @@ export function GalleryGrid({ items }: { items: GalleryItem[] }) {
     <ul className="flex w-full flex-wrap gap-4">
       {items.map(({ character, example, profile }) => {
         const href = `/ref/${character.slug}/${profile}/${example.slug}`;
-        const thumb = (
+        const thumbSrc = exampleThumb(example);
+        const thumb = thumbSrc ? (
           <>
             <Image
-              src={example.src}
+              src={thumbSrc}
               alt=""
               aria-hidden
               fill
               loading="lazy"
-              placeholder={placeholderFor(example.src)}
+              placeholder={placeholderFor(thumbSrc)}
               sizes={THUMB_SIZES}
               className="scale-110 object-cover blur-2xl"
             />
             <ShimmerImage
-              src={example.src}
+              src={thumbSrc}
               alt={example.title}
               fill
               loading="lazy"
-              placeholder={placeholderFor(example.src)}
+              placeholder={placeholderFor(thumbSrc)}
               sizes={THUMB_SIZES}
               className="relative z-10 object-contain"
             />
           </>
+        ) : (
+          <div className="flex h-full items-center justify-center bg-void-lift/80 px-3 text-center font-mono text-[0.65rem] uppercase tracking-[0.2em] text-parchment-dim">
+            {example.isWip ? "WIP" : "No image"}
+          </div>
         );
 
         const caption = (
@@ -67,6 +73,7 @@ export function GalleryGrid({ items }: { items: GalleryItem[] }) {
             >
               <div className="relative aspect-square w-full overflow-hidden">
                 {thumb}
+                {example.isWip ? <WipTape /> : null}
               </div>
               {caption}
             </Link>

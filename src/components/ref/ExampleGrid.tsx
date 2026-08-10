@@ -1,9 +1,10 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { Example } from "@/lib/content";
-import { placeholderFor } from "@/lib/content";
+import { exampleThumb, placeholderFor } from "@/lib/content";
 import { BackButton } from "@/components/ref/BackButton";
 import { ShimmerImage } from "@/components/ref/ShimmerImage";
+import { WipTape } from "@/components/ref/WipTape";
 
 type ExampleGridProps = {
   examples: Example[];
@@ -58,30 +59,35 @@ export function ExampleGrid({
         <ul className="flex w-full flex-wrap justify-center gap-4">
           {examples.map((example) => {
             const detailHref = `${basePath}/${example.slug}`;
+            const thumbSrc = exampleThumb(example);
             const thumbSizes =
               "(max-width: 640px) 50vw, (max-width: 1024px) 33vw, (max-width: 1280px) 25vw, (max-width: 1536px) 20vw, 17vw";
-            const thumb = (
+            const thumb = thumbSrc ? (
               <>
                 <Image
-                  src={example.src}
+                  src={thumbSrc}
                   alt=""
                   aria-hidden
                   fill
                   loading="lazy"
-                  placeholder={placeholderFor(example.src)}
+                  placeholder={placeholderFor(thumbSrc)}
                   sizes={thumbSizes}
                   className="scale-110 object-cover blur-2xl"
                 />
                 <ShimmerImage
-                  src={example.src}
+                  src={thumbSrc}
                   alt={example.title}
                   fill
                   loading="lazy"
-                  placeholder={placeholderFor(example.src)}
+                  placeholder={placeholderFor(thumbSrc)}
                   sizes={thumbSizes}
                   className="relative z-10 object-contain"
                 />
               </>
+            ) : (
+              <div className="flex h-full items-center justify-center bg-void-lift/80 px-3 text-center font-mono text-[0.65rem] uppercase tracking-[0.2em] text-parchment-dim">
+                {example.isWip ? "WIP" : "No image"}
+              </div>
             );
 
             const card =
@@ -106,6 +112,9 @@ export function ExampleGrid({
                 >
                   <div className="relative aspect-square w-full overflow-hidden">
                     {thumb}
+                    {example.isWip || (!example.src && example.wipImages.length > 0) ? (
+                      <WipTape />
+                    ) : null}
                   </div>
                   {caption}
                 </Link>
