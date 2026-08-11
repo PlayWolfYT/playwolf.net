@@ -5,7 +5,9 @@
  * The editor stores the *key* on the text node under `TEXT_EFFECT_STATE_KEY`;
  * `css` is what Payload's TextStateFeature uses as a live preview, and
  * `className` is what the frontend converter emits. The `gradient` effect
- * additionally stores colour stops under `GRADIENT_COLORS_STATE_KEY`.
+ * additionally stores colour stops under `GRADIENT_COLORS_STATE_KEY` and as
+ * full inline CSS on the Lexical text node's `style` field (so stops survive
+ * even if unknown `$` keys are stripped).
  */
 
 export const TEXT_EFFECT_STATE_KEY = "effect";
@@ -64,8 +66,9 @@ export const TEXT_EFFECTS = {
   gradient: {
     label: "Gradient",
     className: "fx-gradient",
+    // Default preview stops — real colours are applied as full inline CSS.
     css: {
-      "background-image": `linear-gradient(90deg, var(--fx-gradient-stops, ${DEFAULT_GRADIENT_COLORS.join(", ")}))`,
+      "background-image": `linear-gradient(90deg, ${DEFAULT_GRADIENT_COLORS.join(", ")})`,
       "-webkit-background-clip": "text",
       "background-clip": "text",
       color: "transparent",
@@ -98,18 +101,56 @@ export function normalizeGradientColors(value: unknown): string[] | undefined {
   return colors.length >= 2 ? colors : undefined;
 }
 
-/** Inline style assigning the CSS variable consumed by `.fx-gradient`. */
+/**
+ * Full inline CSS that paints a text gradient without relying on CSS variables
+ * (custom-property fallbacks can't contain commas, so var()-based gradients
+ * were silently invalid whenever stops weren't applied).
+ */
+export function gradientTextStyle(colors: string[]): string {
+  const stops = colors.join(", ");
+  return [
+    `background-image: linear-gradient(90deg, ${stops})`,
+    "-webkit-background-clip: text",
+    "background-clip: text",
+    "color: transparent",
+  ].join("; ");
+}
+
+/** @deprecated Use `gradientTextStyle` — kept for older HTML that only set the var. */
 export function gradientStopsStyle(colors: string[]): string {
   return `--fx-gradient-stops: ${colors.join(", ")}`;
 }
 
-/** Read stops from an inline style that sets `--fx-gradient-stops`. */
+/** React style object for the same full text-gradient CSS. */
+export function gradientTextStyleObject(colors: string[]): Record<string, string> {
+  return {
+    backgroundImage: `linear-gradient(90deg, ${colors.join(", ")})`,
+    WebkitBackgroundClip: "text",
+    backgroundClip: "text",
+    color: "transparent",
+  };
+}
+
+/** Read stops from an inline style (CSS var or linear-gradient). */
 export function parseGradientColorsFromStyle(
   style: string | null | undefined,
 ): string[] | undefined {
   if (!style) return undefined;
-  const match = /--fx-gradient-stops\s*:\s*([^;]+)/i.exec(style);
-  return match ? normalizeGradientColors(match[1]) : undefined;
+  const fromVar = /--fx-gradient-stops\s*:\s*([^;]+)/i.exec(style);
+  if (fromVar) {
+    const colors = normalizeGradientColors(fromVar[1]);
+    if (colors) return colors;
+  }
+  const fromGradient =
+    /linear-gradient\(\s*90deg\s*,\s*([^)]+)\)/i.exec(style) ??
+    /linear-gradient\(\s*([^)]+)\)/i.exec(style);
+  if (fromGradient) {
+    // Drop an optional leading angle token if present without 90deg match.
+    const body = fromGradient[1] ?? "";
+    const withoutAngle = body.replace(/^(?:to\s+\w+|[-\d.]+deg)\s*,\s*/i, "");
+    return normalizeGradientColors(withoutAngle);
+  }
+  return undefined;
 }
 
 /** Read stops from `data-gradient-colors="#a,#b"`. */

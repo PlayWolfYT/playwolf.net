@@ -1,7 +1,8 @@
 import { describe, expect, test } from "bun:test";
 
 import {
-  gradientStopsStyle,
+  gradientTextStyle,
+  gradientTextStyleObject,
   normalizeGradientColors,
   parseGradientColorsFromAttr,
   parseGradientColorsFromStyle,
@@ -31,16 +32,31 @@ describe("normalizeGradientColors", () => {
 });
 
 describe("gradient helpers", () => {
-  test("builds the CSS variable style", () => {
-    expect(gradientStopsStyle(["#ff0000", "#0000ff"])).toBe(
-      "--fx-gradient-stops: #ff0000, #0000ff",
-    );
+  test("builds full inline text-gradient CSS", () => {
+    const css = gradientTextStyle(["#ff0000", "#0000ff"]);
+    expect(css).toContain("linear-gradient(90deg, #ff0000, #0000ff)");
+    expect(css).toContain("background-clip: text");
+    expect(css).toContain("color: transparent");
+  });
+
+  test("builds a React style object", () => {
+    expect(gradientTextStyleObject(["#ff0000", "#0000ff"])).toEqual({
+      backgroundImage: "linear-gradient(90deg, #ff0000, #0000ff)",
+      WebkitBackgroundClip: "text",
+      backgroundClip: "text",
+      color: "transparent",
+    });
   });
 
   test("parses stops from style and data attributes", () => {
     expect(
       parseGradientColorsFromStyle("--fx-gradient-stops: #aaa, #bbb; color: red"),
     ).toEqual(["#aaa", "#bbb"]);
+    expect(
+      parseGradientColorsFromStyle(
+        "background-image: linear-gradient(90deg, #ff0000, #00ff00); color: transparent",
+      ),
+    ).toEqual(["#ff0000", "#00ff00"]);
     expect(parseGradientColorsFromAttr("#aaa,#bbb")).toEqual(["#aaa", "#bbb"]);
   });
 

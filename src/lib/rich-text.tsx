@@ -11,7 +11,9 @@ import {
   GRADIENT_COLORS_STATE_KEY,
   NODE_STATE_KEY,
   TEXT_EFFECT_STATE_KEY,
+  gradientTextStyleObject,
   normalizeGradientColors,
+  parseGradientColorsFromStyle,
   textEffectClass,
 } from "@/lib/text-effects";
 
@@ -24,6 +26,11 @@ function inlineStyleObject(css: string): CSSProperties {
     if (idx === -1) continue;
     const prop = trimmed.slice(0, idx).trim();
     const value = trimmed.slice(idx + 1).trim();
+    // Preserve CSS custom properties as-is; camelCase the rest.
+    if (prop.startsWith("--")) {
+      style[prop] = value;
+      continue;
+    }
     const camel = prop.replace(/-([a-z])/g, (_, c: string) => c.toUpperCase());
     style[camel] = value;
   }
@@ -44,9 +51,11 @@ const withTextEffects: JSXConvertersFunction = ({ defaultConverters }) => ({
     const base = TextJSXConverter.text;
     const rendered = typeof base === "function" ? base(args) : args.node.text;
 
-    const state = (args.node as { [NODE_STATE_KEY]?: Record<string, unknown> })[
-      NODE_STATE_KEY
-    ];
+    const node = args.node as {
+      style?: string;
+      [NODE_STATE_KEY]?: Record<string, unknown>;
+    };
+    const state = node[NODE_STATE_KEY];
     const effect = state?.[TEXT_EFFECT_STATE_KEY];
     const effectClass = textEffectClass(effect);
     const extraClass =
@@ -60,9 +69,14 @@ const withTextEffects: JSXConvertersFunction = ({ defaultConverters }) => ({
     };
 
     if (effect === "gradient") {
-      const colors = normalizeGradientColors(state?.[GRADIENT_COLORS_STATE_KEY]);
+      const colors =
+        normalizeGradientColors(state?.[GRADIENT_COLORS_STATE_KEY]) ??
+        parseGradientColorsFromStyle(node.style);
       if (colors) {
-        (style as Record<string, string>)["--fx-gradient-stops"] = colors.join(", ");
+        Object.assign(style, gradientTextStyleObject(colors));
+      } else if (typeof node.style === "string" && node.style.trim()) {
+        // Fall back to whatever full CSS was parked on the Lexical style field.
+        Object.assign(style, inlineStyleObject(node.style));
       }
     }
 

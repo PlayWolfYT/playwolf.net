@@ -3,7 +3,7 @@ import { Mark, mergeAttributes } from "@tiptap/core";
 import {
   DEFAULT_GRADIENT_COLORS,
   TEXT_EFFECTS,
-  gradientStopsStyle,
+  gradientTextStyle,
   isTextEffect,
   normalizeGradientColors,
   parseGradientColorsFromAttr,
@@ -21,10 +21,35 @@ declare module "@tiptap/core" {
   }
 }
 
+function effectDomAttrs(
+  effect: unknown,
+  colors: unknown,
+): Record<string, string> | null {
+  if (!isTextEffect(effect)) return null;
+
+  const attrs: Record<string, string> = {
+    class: TEXT_EFFECTS[effect].className,
+  };
+
+  if (effect === "gradient") {
+    const stops = normalizeGradientColors(colors) ?? [...DEFAULT_GRADIENT_COLORS];
+    // Full inline CSS so the editor paints without CSS-variable fallbacks.
+    attrs.style = gradientTextStyle(stops);
+    attrs["data-gradient-colors"] = stops.join(",");
+  }
+
+  return attrs;
+}
+
 /**
  * TipTap mark that maps onto Payload's TextStateFeature `effect` keys via
  * the public `fx-*` class names. The `gradient` effect also carries colour
- * stops (`colors`) as a CSS variable + data attribute for round-trips.
+ * stops (`colors`) as full inline gradient CSS + data attribute for round-trips.
+ *
+ * Important: TipTap only puts an attribute into `HTMLAttributes` when that
+ * attribute's own `renderHTML` returns keys. Reading `effect`/`colors` from
+ * `HTMLAttributes` in the mark `renderHTML` therefore always missed — emit
+ * the DOM attrs from the attribute `renderHTML` (or from `mark.attrs`).
  */
 export const TextEffectMark = Mark.create({
   name: "textEffect",
@@ -43,7 +68,9 @@ export const TextEffectMark = Mark.create({
           }
           return null;
         },
-        renderHTML: () => ({}),
+        // Emit class/style here so TipTap includes them in HTMLAttributes.
+        renderHTML: (attributes) =>
+          effectDomAttrs(attributes.effect, attributes.colors) ?? {},
       },
       colors: {
         default: null,
@@ -51,6 +78,7 @@ export const TextEffectMark = Mark.create({
           parseGradientColorsFromAttr(element.getAttribute("data-gradient-colors")) ??
           parseGradientColorsFromStyle(element.getAttribute("style")) ??
           null,
+        // Handled together with `effect` above.
         renderHTML: () => ({}),
       },
     };
@@ -68,25 +96,9 @@ export const TextEffectMark = Mark.create({
     }));
   },
 
-  renderHTML({ HTMLAttributes }) {
-    const effect = HTMLAttributes.effect as TextEffect | null;
-    if (!isTextEffect(effect)) {
-      return ["span", mergeAttributes(HTMLAttributes), 0];
-    }
-
-    const attrs: Record<string, string> = {
-      class: TEXT_EFFECTS[effect].className,
-    };
-
-    if (effect === "gradient") {
-      const colors = normalizeGradientColors(HTMLAttributes.colors) ?? [
-        ...DEFAULT_GRADIENT_COLORS,
-      ];
-      attrs.style = gradientStopsStyle(colors);
-      attrs["data-gradient-colors"] = colors.join(",");
-    }
-
-    // Drop TipTap's raw attribute names from the DOM output.
+  renderHTML({ mark, HTMLAttributes }) {
+    // Prefer mark.attrs in case TipTap versions differ on HTMLAttributes merge.
+    const fromMark = effectDomAttrs(mark.attrs.effect, mark.attrs.colors);
     const {
       effect: _e,
       colors: _c,
@@ -95,7 +107,7 @@ export const TextEffectMark = Mark.create({
     void _e;
     void _c;
 
-    return ["span", mergeAttributes(rest, attrs), 0];
+    return ["span", mergeAttributes(rest, fromMark ?? {}), 0];
   },
 
   addCommands() {
