@@ -16,8 +16,6 @@ import "react-image-crop/dist/ReactCrop.css";
 
 import { frameForCollection, type UploadFrame } from "@/payload/uploadFrames";
 
-import "@payloadcms/ui/dist/elements/EditUpload/index.scss";
-
 const baseClass = "edit-upload";
 
 /** Matches Payload's `editDrawerSlug` from `@payloadcms/ui` Upload (not re-exported). */

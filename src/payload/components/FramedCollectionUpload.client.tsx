@@ -37,8 +37,6 @@ import { toast } from "sonner";
 import { EditUpload } from "@/payload/components/AspectLockedEditUpload";
 import { frameForCollection, type FramedCollectionSlug } from "@/payload/uploadFrames";
 
-import "@payloadcms/ui/dist/elements/Upload/index.scss";
-
 const baseClass = "file-field";
 const editDrawerSlug = "edit-upload";
 const sizePreviewSlug = "preview-sizes";
