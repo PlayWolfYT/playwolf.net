@@ -156,23 +156,14 @@ body {
 }
 
 /*
- * Default stops for `.fx-gradient`. Real colours are also written as full
- * inline `background-image` / `background-clip` / `color` by the TipTap mark
- * and the Lexical HTML bridge — don't use `var(--x, #a, #b)` fallbacks here:
- * commas break CSS custom-property fallback parsing.
+ * Default stops for `.fx-gradient`. Real colours may also be written as full
+ * inline `background-image` / `background-clip` / `color` on the Lexical node
+ * — don't use `var(--x, #a, #b)` fallbacks here: commas break CSS
+ * custom-property fallback parsing.
  */
 .fx-gradient {
   background-image: linear-gradient(90deg, #ff5f6d, #5cccff, #b47cff);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
-}
-
-/* TipTap placeholder (admin rich-text editor) */
-.tiptap p.is-editor-empty:first-child::before {
-  color: #a1a1aa;
-  content: attr(data-placeholder);
-  float: left;
-  height: 0;
-  pointer-events: none;
 }

@@ -4,9 +4,10 @@ import { NextResponse } from "next/server";
 import { PATHNAME_HEADER } from "@/lib/maintenance";
 
 /**
- * Forwards the request pathname into a request header so the frontend root
- * layout can honour maintenance-mode path exclusions. Maintenance itself is
- * still decided in the layout (where site settings are already loaded).
+ * Forwards the request pathname into a request header so the frontend
+ * template can honour maintenance-mode path exclusions. Maintenance itself is
+ * decided in `app/(frontend)/template.tsx` (where site settings are loaded),
+ * which remounts on every soft navigation.
  */
 export function proxy(request: NextRequest) {
   const requestHeaders = new Headers(request.headers);

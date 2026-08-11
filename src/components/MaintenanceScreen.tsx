@@ -1,4 +1,5 @@
 import { BrandBackdrop, SparkStar } from "@/components/BrandBackdrop";
+import { MaintenanceBackButton } from "@/components/MaintenanceBackButton";
 
 /**
  * `message` comes from the `siteSettings` global, so the reason for the outage
@@ -9,7 +10,7 @@ export function MaintenanceScreen({ message }: { message?: string }) {
     <main className="relative isolate flex min-h-screen flex-col items-center justify-center overflow-hidden bg-void px-6 py-16">
       <BrandBackdrop density="full" />
 
-      <div className="relative z-10 w-full max-w-lg">
+      <div className="relative z-10 flex w-full max-w-lg flex-col items-center">
         <div className="mb-10 flex items-center justify-center gap-3">
           <span className="relative flex h-2 w-2">
             <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-glow-400/40 opacity-75" />
@@ -23,7 +24,7 @@ export function MaintenanceScreen({ message }: { message?: string }) {
           </span>
         </div>
 
-        <div className="relative rounded-3xl border border-white/[0.08] bg-gradient-to-b from-white/[0.07] to-white/[0.02] p-px shadow-glow-md backdrop-blur-2xl">
+        <div className="relative w-full rounded-3xl border border-white/[0.08] bg-gradient-to-b from-white/[0.07] to-white/[0.02] p-px shadow-glow-md backdrop-blur-2xl">
           <div className="absolute -right-6 -top-4 text-glow-500/50 animate-twinkle">
             <SparkStar className="h-5 w-5" />
           </div>
@@ -59,6 +60,8 @@ export function MaintenanceScreen({ message }: { message?: string }) {
             <div className="mx-auto mt-10 h-px max-w-xs bg-gradient-to-r from-transparent via-glow-500/55 to-transparent" />
           </div>
         </div>
+
+        <MaintenanceBackButton />
 
         <p className="mt-10 text-center text-xs text-parchment-dim/80">
           © <span suppressHydrationWarning>{new Date().getFullYear()}</span>{" "}
