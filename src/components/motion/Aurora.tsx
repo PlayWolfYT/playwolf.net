@@ -84,6 +84,7 @@ export function Aurora() {
   useEffect(() => {
     const container = containerRef.current;
     if (!container || reducedMotion) return;
+    const element = container;
 
     const renderer = new Renderer({ alpha: true, premultipliedAlpha: true });
     const gl = renderer.gl;
@@ -98,28 +99,28 @@ export function Aurora() {
       fragment: FRAGMENT_SHADER,
       uniforms: {
         uTime: { value: 0 },
-        uColorStops: { value: accentStops(container) },
+        uColorStops: { value: accentStops(element) },
         uResolution: { value: [1, 1] },
       },
     });
     const mesh = new Mesh(gl, { geometry, program });
-    container.appendChild(gl.canvas);
+    element.appendChild(gl.canvas);
 
     function resize() {
-      const width = container.offsetWidth;
-      const height = container.offsetHeight;
+      const width = element.offsetWidth;
+      const height = element.offsetHeight;
       renderer.setSize(width, height);
       program.uniforms.uResolution.value = [width, height];
     }
 
     const resizeObserver = new ResizeObserver(resize);
-    resizeObserver.observe(container);
+    resizeObserver.observe(element);
     resize();
 
-    const themedShell = container.parentElement?.parentElement;
+    const themedShell = element.parentElement?.parentElement;
     const themeObserver = themedShell
       ? new MutationObserver(() => {
-          program.uniforms.uColorStops.value = accentStops(container);
+          program.uniforms.uColorStops.value = accentStops(element);
         })
       : null;
     themeObserver?.observe(themedShell!, {
