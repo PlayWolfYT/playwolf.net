@@ -111,7 +111,7 @@ export const SiteSettings: GlobalConfig = {
               relationTo: "site-images",
               admin: {
                 description:
-                  "Default social preview image. Upload under Site images to crop the share frame (roughly 1200×630).",
+                  "Default social preview. Upload under Site images — crop is locked to 1.91:1 (1200×630).",
               },
             },
           ],

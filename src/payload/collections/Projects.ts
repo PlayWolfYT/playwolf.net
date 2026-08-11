@@ -49,7 +49,7 @@ export const Projects: CollectionConfig = {
       relationTo: "project-images",
       admin: {
         description:
-          "Card / hero cover. Upload under Project images so you can crop to the frame.",
+          "Card / hero cover. Upload under Project images — crop is locked to 16:9 to match the project cards.",
       },
     },
     {
