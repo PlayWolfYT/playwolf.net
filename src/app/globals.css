@@ -54,25 +54,54 @@ body {
   100% {
     transform: translate(0, 0) rotate(0deg);
   }
-  25% {
-    transform: translate(-0.04em, 0.03em) rotate(-1.2deg);
+  20% {
+    transform: translate(-0.018em, 0.012em) rotate(-0.35deg);
   }
-  50% {
-    transform: translate(0.03em, -0.04em) rotate(1deg);
+  40% {
+    transform: translate(0.016em, -0.014em) rotate(0.3deg);
   }
-  75% {
-    transform: translate(0.04em, 0.03em) rotate(-0.6deg);
+  60% {
+    transform: translate(-0.014em, -0.01em) rotate(-0.25deg);
+  }
+  80% {
+    transform: translate(0.012em, 0.014em) rotate(0.2deg);
   }
 }
 
-@keyframes fx-shimmer {
+/* Bursty counterpart to `fx-shake`: all the movement happens in the first
+   fifth of the cycle, the rest of the timeline is a deliberate rest. */
+@keyframes fx-twitch {
   0%,
-  15% {
-    background-position: 100% 50%;
-  }
-  70%,
+  22%,
   100% {
-    background-position: -100% 50%;
+    transform: translate(0, 0) rotate(0deg);
+  }
+  3% {
+    transform: translate(-0.05em, 0.03em) rotate(-1.4deg);
+  }
+  7% {
+    transform: translate(0.045em, -0.035em) rotate(1.2deg);
+  }
+  11% {
+    transform: translate(-0.04em, -0.02em) rotate(-0.9deg);
+  }
+  15% {
+    transform: translate(0.03em, 0.025em) rotate(0.6deg);
+  }
+  19% {
+    transform: translate(-0.015em, 0.01em) rotate(-0.3deg);
+  }
+}
+
+/* Travels exactly one background tile (200%), so the last frame is identical
+   to the first and the loop has no visible snap. `linear` is deliberate:
+   easing would stall the highlight at the loop boundary. */
+@keyframes fx-shimmer {
+  from {
+    background-position: 200% 50%;
+  }
+  to {
+    background-position: 0% 50%;
   }
 }
 
@@ -119,7 +148,12 @@ body {
 
 .fx-shake {
   display: inline-block;
-  animation: fx-shake 0.5s ease-in-out infinite;
+  animation: fx-shake 0.9s ease-in-out infinite;
+}
+
+.fx-twitch {
+  display: inline-block;
+  animation: fx-twitch 2.4s ease-in-out infinite;
 }
 
 .fx-glow {
@@ -129,20 +163,26 @@ body {
     0 0 18px rgb(var(--accent-500) / 0.45);
 }
 
+/* 90deg keeps neighbouring tiles seam-free, and pinning the base colour at
+   both 0% and 100% makes the two flat regions read as one long pause between
+   sweeps. The highlight sits at 75% so the reduced-motion resting frame
+   (`background-position: 0% 50%`) shows flat base colour. */
 .fx-shimmer {
   background-image: linear-gradient(
-    105deg,
-    rgb(138 132 122) 20%,
-    rgb(247 244 236) 45%,
-    rgb(var(--accent-300)) 50%,
-    rgb(247 244 236) 55%,
-    rgb(138 132 122) 80%
+    90deg,
+    rgb(138 132 122) 0%,
+    rgb(138 132 122) 62%,
+    rgb(247 244 236) 72%,
+    rgb(var(--accent-300)) 75%,
+    rgb(247 244 236) 78%,
+    rgb(138 132 122) 88%,
+    rgb(138 132 122) 100%
   );
-  background-size: 240% 100%;
+  background-size: 200% 100%;
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
-  animation: fx-shimmer 2.8s ease-in-out infinite;
+  animation: fx-shimmer 3.2s linear infinite;
 }
 
 .fx-float {

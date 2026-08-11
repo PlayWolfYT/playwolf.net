@@ -51,7 +51,15 @@ export const TEXT_EFFECTS = {
     className: "fx-shake",
     css: {
       display: "inline-block",
-      animation: "fx-shake 0.5s ease-in-out infinite",
+      animation: "fx-shake 0.9s ease-in-out infinite",
+    },
+  },
+  twitch: {
+    label: "Twitch",
+    className: "fx-twitch",
+    css: {
+      display: "inline-block",
+      animation: "fx-twitch 2.4s ease-in-out infinite",
     },
   },
   glow: {
@@ -68,12 +76,12 @@ export const TEXT_EFFECTS = {
     className: "fx-shimmer",
     css: {
       "background-image":
-        "linear-gradient(105deg, #8a847a 20%, #f7f4ec 45%, #8ad9ff 50%, #f7f4ec 55%, #8a847a 80%)",
-      "background-size": "240% 100%",
+        "linear-gradient(90deg, #8a847a 0%, #8a847a 62%, #f7f4ec 72%, #8ad9ff 75%, #f7f4ec 78%, #8a847a 88%, #8a847a 100%)",
+      "background-size": "200% 100%",
       "-webkit-background-clip": "text",
       "background-clip": "text",
       color: "transparent",
-      animation: "fx-shimmer 2.8s ease-in-out infinite",
+      animation: "fx-shimmer 3.2s linear infinite",
     },
   },
   float: {

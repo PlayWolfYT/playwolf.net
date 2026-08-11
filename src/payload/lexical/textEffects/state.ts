@@ -26,6 +26,7 @@ import {
 export const FIXED_TEXT_EFFECTS = [
   "rainbow",
   "shake",
+  "twitch",
   "glow",
   "shimmer",
   "float",
