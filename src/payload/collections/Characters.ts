@@ -66,7 +66,11 @@ export const Characters: CollectionConfig = {
         {
           name: "image",
           type: "upload",
-          relationTo: "media",
+          relationTo: "character-images",
+          admin: {
+            description:
+              "Overview / card portrait. Upload under Character images to crop the frame. Reference sheets stay on Media.",
+          },
         },
         {
           name: "alt",

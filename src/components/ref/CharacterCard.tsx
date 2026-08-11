@@ -24,9 +24,7 @@ export function CharacterCard({ character }: CharacterCardProps) {
         className="group block h-full overflow-hidden rounded-3xl border border-white/[0.07] bg-gradient-to-br from-void-lift/90 to-void-panel/70 p-px shadow-glow-sm backdrop-blur-xl transition hover:border-glow-500/40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-glow-500"
       >
         <div className="h-full overflow-hidden rounded-[calc(1.5rem-1px)] shadow-inner-glow">
-          {/* Square cover crop anchored to the top so portraits keep the head
-              in frame and the wide ref-sheet fallback crops to its centre
-              poses instead of letterboxing. */}
+          {/* Square cover crop; focal point / admin crop control framing. */}
           <div className="relative aspect-square w-full overflow-hidden bg-void-lift/60">
             {mainArt ? (
               <ShimmerImage
@@ -35,7 +33,8 @@ export function CharacterCard({ character }: CharacterCardProps) {
                 fill
                 placeholder={placeholderFor(mainArt.src)}
                 sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 340px"
-                className="object-cover object-top transition duration-500 group-hover:scale-105"
+                className="object-cover transition duration-500 group-hover:scale-105"
+                style={{ objectPosition: mainArt.src.objectPosition }}
               />
             ) : (
               // No art yet — show the character's initial as a placeholder.

@@ -30,6 +30,7 @@ export function ProjectCard({ project }: { project: Project }) {
               placeholder={placeholderFor(project.cover)}
               sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 420px"
               className="object-cover transition duration-500 group-hover:scale-105"
+              style={{ objectPosition: project.cover.objectPosition }}
             />
           ) : (
             <div className="flex h-full w-full items-center justify-center bg-grid-soft bg-[size:34px_34px] opacity-70" />
