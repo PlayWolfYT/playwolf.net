@@ -1,17 +1,10 @@
 "use client";
 
-import {
-  $getSelection,
-  $isRangeSelection,
-  type LexicalEditor,
-} from "lexical";
+import { $getSelection, $isRangeSelection, type LexicalEditor } from "lexical";
 import { Blend } from "lucide-react";
 import { useEffect, useId, useState, type MouseEvent } from "react";
 
-import {
-  DEFAULT_GRADIENT_COLORS,
-  normalizeGradientColors,
-} from "@/lib/text-effects";
+import { DEFAULT_GRADIENT_COLORS, normalizeGradientColors } from "@/lib/text-effects";
 import {
   closeGradientPanel,
   getGradientPanelSession,

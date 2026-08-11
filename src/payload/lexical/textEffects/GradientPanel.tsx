@@ -94,9 +94,7 @@ export function GradientPanel() {
               value={HEX_COLOR.test(color) ? color : "#ffffff"}
               onChange={(event) =>
                 updateGradientPanelColors(
-                  colors.map((entry, i) =>
-                    i === index ? event.target.value : entry,
-                  ),
+                  colors.map((entry, i) => (i === index ? event.target.value : entry)),
                 )
               }
               aria-label={`Stop ${index + 1} swatch`}
@@ -107,9 +105,7 @@ export function GradientPanel() {
               spellCheck={false}
               onChange={(event) =>
                 updateGradientPanelColors(
-                  colors.map((entry, i) =>
-                    i === index ? event.target.value : entry,
-                  ),
+                  colors.map((entry, i) => (i === index ? event.target.value : entry)),
                 )
               }
               aria-label={`Stop ${index + 1} hex`}
@@ -118,9 +114,7 @@ export function GradientPanel() {
               type="button"
               onClick={() =>
                 updateGradientPanelColors(
-                  colors.length <= 2
-                    ? colors
-                    : colors.filter((_, i) => i !== index),
+                  colors.length <= 2 ? colors : colors.filter((_, i) => i !== index),
                 )
               }
               disabled={colors.length <= 2}
