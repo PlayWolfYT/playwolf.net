@@ -14,9 +14,7 @@ import React, { useEffect, useRef, useState } from "react";
 import ReactCrop, { type PercentCrop } from "react-image-crop";
 import "react-image-crop/dist/ReactCrop.css";
 
-import { frameForCollection } from "@/payload/uploadFrames";
-
-import "@payloadcms/ui/dist/elements/EditUpload/index.scss";
+import { frameForCollection, type UploadFrame } from "@/payload/uploadFrames";
 
 const baseClass = "edit-upload";
 
@@ -28,6 +26,11 @@ type FocalPosition = { x: number; y: number };
 export type EditUploadProps = {
   fileName: string;
   fileSrc: string;
+  /**
+   * Explicit frame from `FramedCollectionUpload`. When omitted, falls back to
+   * the document's collection slug (used if this component is ever aliased in).
+   */
+  frame?: UploadFrame;
   imageCacheTag?: string;
   initialCrop?: UploadEdits["crop"];
   initialFocalPoint?: FocalPosition;
@@ -90,6 +93,7 @@ function NumberInput({ name, onChange, ref, value }: NumberInputProps) {
 export const EditUpload: React.FC<EditUploadProps> = ({
   fileName,
   fileSrc,
+  frame: frameProp,
   imageCacheTag,
   initialCrop,
   initialFocalPoint,
@@ -100,7 +104,7 @@ export const EditUpload: React.FC<EditUploadProps> = ({
   const { closeModal } = useModal();
   const { t } = useTranslation();
   const { collectionSlug } = useDocumentInfo();
-  const frame = frameForCollection(collectionSlug);
+  const frame = frameProp ?? frameForCollection(collectionSlug);
 
   const [crop, setCrop] = useState<PercentCrop>(() => ({
     ...defaultCrop,

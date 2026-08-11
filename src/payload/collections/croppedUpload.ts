@@ -24,7 +24,7 @@ type CroppedUploadOptions = {
  * untouched original remains available for "Open full image".
  *
  * Each collection maps to a fixed on-site aspect ratio (`UPLOAD_FRAMES`); the
- * admin crop UI locks to that ratio via `AspectLockedEditUpload`.
+ * admin crop UI locks to that ratio via `FramedCollectionUpload`.
  */
 export function createCroppedUploadCollection({
   slug,
@@ -47,6 +47,11 @@ export function createCroppedUploadCollection({
       description,
       group: "Library",
       useAsTitle: "filename",
+      components: {
+        edit: {
+          Upload: "@/payload/components/FramedCollectionUpload#FramedCollectionUpload",
+        },
+      },
     },
     hooks: {
       afterChange,
