@@ -1,6 +1,3 @@
-import path from "node:path";
-import { fileURLToPath } from "node:url";
-
 import { withPayload } from "@payloadcms/next/withPayload";
 import type { NextConfig } from "next";
 
@@ -11,18 +8,6 @@ import type { NextConfig } from "next";
  * time, so changing it needs a rebuild.
  */
 const mediaOrigin = process.env.NEXT_PUBLIC_MEDIA_URL;
-
-const dirname = path.dirname(fileURLToPath(import.meta.url));
-
-/**
- * Payload's crop drawer has no aspect-ratio option. Swap in our EditUpload so
- * framed Library collections (friends, characters, projects, OG) lock the crop
- * to the on-site card ratio. See `src/payload/uploadFrames.ts`.
- */
-const aspectLockedEditUpload = path.resolve(
-  dirname,
-  "src/payload/components/AspectLockedEditUpload.tsx",
-);
 
 function remotePatterns(): NonNullable<NextConfig["images"]>["remotePatterns"] {
   if (!mediaOrigin) return [];
@@ -40,18 +25,6 @@ function remotePatterns(): NonNullable<NextConfig["images"]>["remotePatterns"] {
 const nextConfig: NextConfig = {
   /** Slim runtime image when using the bundled Dockerfile */
   output: "standalone",
-  turbopack: {
-    resolveAlias: {
-      "@payloadcms/ui/dist/elements/EditUpload/index.js": aspectLockedEditUpload,
-    },
-  },
-  webpack: (config) => {
-    config.resolve.alias = {
-      ...config.resolve.alias,
-      "@payloadcms/ui/dist/elements/EditUpload/index.js": aspectLockedEditUpload,
-    };
-    return config;
-  },
   /**
    * `cacheComponents` stays off: Payload does not support it yet. Content
    * freshness comes from the `revalidateTag` calls in
