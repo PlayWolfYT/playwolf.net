@@ -21,7 +21,12 @@ export default async function RefLayout({
           positions). Clipping lives here rather than on the shell: an
           `overflow` value other than `visible` on a scroll ancestor disables
           `position: sticky` for the header below. */}
-      <div className="pointer-events-none fixed inset-0 overflow-hidden" aria-hidden>
+      {/* `100lvh` keeps orb/decor positions stable when mobile browser chrome
+          shows/hides mid-scroll (plain `inset-0` would resize with the toolbar). */}
+      <div
+        className="pointer-events-none fixed inset-x-0 top-0 h-[100lvh] overflow-hidden"
+        aria-hidden
+      >
         <BrandBackdrop density="soft" />
         <BackdropDecor />
       </div>

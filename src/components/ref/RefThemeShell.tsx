@@ -50,7 +50,7 @@ export function RefThemeShell({
 
   return (
     <div
-      className="relative isolate flex min-h-screen flex-col bg-void"
+      className="relative isolate flex min-h-dvh flex-col bg-void"
       style={accent ? (accentVars(accent) as React.CSSProperties) : undefined}
     >
       {children}

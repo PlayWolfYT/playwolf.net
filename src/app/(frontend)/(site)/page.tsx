@@ -51,7 +51,7 @@ export default async function Home() {
 
         <BlurText
           text={settings.heroTitle ?? FALLBACK_TITLE}
-          className="mx-auto mt-6 max-w-3xl font-display text-4xl font-light leading-tight tracking-tight text-parchment sm:text-5xl"
+          className="mx-auto mt-6 max-w-3xl break-words font-display text-3xl font-light leading-tight tracking-tight text-parchment sm:text-5xl"
         />
 
         <Reveal delay={0.25} distance={14}>
@@ -100,7 +100,7 @@ export default async function Home() {
             {projects.length > 0 ? (
               <Link
                 href="/projects"
-                className="text-xs font-medium uppercase tracking-[0.2em] text-parchment-dim transition hover:text-parchment focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-glow-500"
+                className="inline-flex min-h-11 items-center text-xs font-medium uppercase tracking-[0.2em] text-parchment-dim transition hover:text-parchment focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-glow-500"
               >
                 All projects
               </Link>
@@ -136,7 +136,7 @@ export default async function Home() {
               <SectionHeading id="characters">Characters</SectionHeading>
               <Link
                 href="/ref"
-                className="text-xs font-medium uppercase tracking-[0.2em] text-parchment-dim transition hover:text-parchment focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-glow-500"
+                className="inline-flex min-h-11 items-center text-xs font-medium uppercase tracking-[0.2em] text-parchment-dim transition hover:text-parchment focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-glow-500"
               >
                 All references
               </Link>

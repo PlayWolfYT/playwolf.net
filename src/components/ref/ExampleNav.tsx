@@ -31,12 +31,13 @@ function ChevronIcon({ className = "" }: { className?: string }) {
 }
 
 const LINK_CLASS =
-  "inline-flex min-h-11 max-w-[45%] items-center gap-2 rounded-full border border-white/10 bg-void/70 px-4 text-sm text-parchment-muted transition hover:border-glow-500/40 hover:text-parchment focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-glow-500";
+  "inline-flex min-h-11 min-w-0 flex-1 items-center gap-2 rounded-full border border-white/10 bg-void/70 px-3 text-sm text-parchment-muted transition hover:border-glow-500/40 hover:text-parchment focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-glow-500 sm:max-w-[45%] sm:flex-none sm:px-4";
 
 /**
  * Step between the images of one profile without going back to the grid. The
  * titles are shown rather than bare arrows so the destination is knowable
- * before clicking — and so the links have a useful accessible name.
+ * before clicking — and so the links have a useful accessible name. On narrow
+ * screens titles hide and the links become "Prev"/"Next" so the row fits.
  */
 export function ExampleNav({
   basePath,
@@ -53,17 +54,18 @@ export function ExampleNav({
   return (
     <nav
       aria-label="Image"
-      className="mt-8 flex w-full items-center justify-between gap-3"
+      className="mt-8 flex w-full items-center justify-between gap-2 sm:gap-3"
     >
       <KeyNav prevHref={prevHref} nextHref={nextHref} />
 
       {previous ? (
         <Link href={`${basePath}/${previous.slug}`} rel="prev" className={LINK_CLASS}>
           <ChevronIcon />
-          <span className="truncate">{previous.title}</span>
+          <span className="sm:hidden">Prev</span>
+          <span className="hidden truncate sm:inline">{previous.title}</span>
         </Link>
       ) : (
-        <span aria-hidden />
+        <span className="min-w-0 flex-1 sm:max-w-[45%] sm:flex-none" aria-hidden />
       )}
 
       <span className="shrink-0 font-mono text-[0.65rem] uppercase tracking-[0.2em] text-parchment-dim">
@@ -76,11 +78,12 @@ export function ExampleNav({
           rel="next"
           className={`${LINK_CLASS} justify-end`}
         >
-          <span className="truncate">{next.title}</span>
+          <span className="sm:hidden">Next</span>
+          <span className="hidden truncate sm:inline">{next.title}</span>
           <ChevronIcon className="rotate-180" />
         </Link>
       ) : (
-        <span aria-hidden />
+        <span className="min-w-0 flex-1 sm:max-w-[45%] sm:flex-none" aria-hidden />
       )}
     </nav>
   );

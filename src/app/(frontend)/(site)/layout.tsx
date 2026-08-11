@@ -12,8 +12,12 @@ export default function SiteLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <div className="relative isolate flex min-h-screen flex-col bg-void">
-      <div className="pointer-events-none fixed inset-0 overflow-hidden" aria-hidden>
+    <div className="relative isolate flex min-h-dvh flex-col bg-void">
+      {/* `100lvh` keeps the layer stable when mobile browser chrome shows/hides. */}
+      <div
+        className="pointer-events-none fixed inset-x-0 top-0 h-[100lvh] overflow-hidden"
+        aria-hidden
+      >
         <BrandBackdrop density="soft" />
       </div>
 

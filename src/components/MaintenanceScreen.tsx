@@ -7,8 +7,13 @@ import { MaintenanceBackButton } from "@/components/MaintenanceBackButton";
  */
 export function MaintenanceScreen({ message }: { message?: string }) {
   return (
-    <main className="relative isolate flex min-h-screen flex-col items-center justify-center overflow-hidden bg-void px-6 py-16">
-      <BrandBackdrop density="full" />
+    <main className="relative isolate flex min-h-dvh flex-col items-center justify-center overflow-hidden bg-void px-6 py-16">
+      <div
+        className="pointer-events-none absolute inset-x-0 top-0 h-[100lvh] overflow-hidden"
+        aria-hidden
+      >
+        <BrandBackdrop density="full" />
+      </div>
 
       <div className="relative z-10 flex w-full max-w-lg flex-col items-center">
         <div className="mb-10 flex items-center justify-center gap-3">

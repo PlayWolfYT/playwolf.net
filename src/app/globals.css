@@ -15,8 +15,13 @@
   --accent-700: 11 125 189;
 }
 
+html {
+  /* Offset hash navigation past the sticky header (h-14 = 3.5rem). */
+  scroll-padding-top: calc(3.5rem + env(safe-area-inset-top, 0px));
+}
+
 body {
-  @apply min-h-screen bg-void antialiased text-parchment;
+  @apply min-h-dvh bg-void antialiased text-parchment;
 }
 
 /* The decoration on this site is almost entirely motion — drifting nebulae,

@@ -59,14 +59,14 @@ export function WipSlideshow({
             onClick={() =>
               setIndex((value) => (value - 1 + slides.length) % slides.length)
             }
-            className="rounded-full border border-white/10 px-4 py-1.5 text-xs text-parchment-muted transition hover:border-glow-500/40 hover:text-glow-300"
+            className="inline-flex min-h-11 items-center rounded-full border border-white/10 px-5 text-xs text-parchment-muted transition hover:border-glow-500/40 hover:text-glow-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-glow-500"
           >
             Previous
           </button>
           <button
             type="button"
             onClick={() => setIndex((value) => (value + 1) % slides.length)}
-            className="rounded-full border border-white/10 px-4 py-1.5 text-xs text-parchment-muted transition hover:border-glow-500/40 hover:text-glow-300"
+            className="inline-flex min-h-11 items-center rounded-full border border-white/10 px-5 text-xs text-parchment-muted transition hover:border-glow-500/40 hover:text-glow-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-glow-500"
           >
             Next
           </button>

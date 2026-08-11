@@ -75,7 +75,7 @@ export function ProfileSwitcher({
   );
 
   return (
-    <div className="sticky top-14 z-20 -mx-4 mb-10 border-b border-white/[0.07] bg-void/75 px-4 backdrop-blur-xl sm:-mx-8 sm:px-8">
+    <div className="sticky top-[calc(3.5rem+env(safe-area-inset-top,0px))] z-20 -mx-4 mb-10 border-b border-white/[0.07] bg-void/75 px-4 backdrop-blur-xl sm:-mx-8 sm:px-8">
       <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-x-4 gap-y-2 py-3">
         <div className="min-w-0">
           <h1 className="truncate font-display text-lg font-medium tracking-tight text-parchment sm:text-xl">
