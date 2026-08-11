@@ -187,10 +187,10 @@ export function LinkRow({
             target={isMail ? undefined : "_blank"}
             rel={isMail ? undefined : "noreferrer"}
             aria-label={link.label}
-            className={`group relative flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-void/70 text-parchment-muted transition hover:border-white/25 hover:bg-white/[0.06] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-glow-500 ${link.hoverClass}`}
+            className={`group/social relative flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-void/70 text-parchment-muted transition hover:border-white/25 hover:bg-white/[0.06] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-glow-500 ${link.hoverClass}`}
           >
             {link.icon}
-            <span className="pointer-events-none absolute bottom-full left-1/2 z-20 mb-2 max-w-[14rem] -translate-x-1/2 translate-y-1 whitespace-pre-line break-words rounded-md border border-white/10 bg-void-panel px-2 py-1 text-center text-[0.7rem] font-medium leading-snug text-parchment opacity-0 shadow-glow-sm transition duration-150 group-hover:translate-y-0 group-hover:opacity-100">
+            <span className="pointer-events-none absolute bottom-full left-1/2 z-20 mb-2 max-w-[14rem] -translate-x-1/2 translate-y-1 whitespace-pre-line break-words rounded-md border border-white/10 bg-void-panel px-2 py-1 text-center text-[0.7rem] font-medium leading-snug text-parchment opacity-0 shadow-glow-sm transition duration-150 group-hover/social:translate-y-0 group-hover/social:opacity-100">
               {link.label}
             </span>
           </a>
