@@ -224,7 +224,7 @@ export interface Media {
   };
 }
 /**
- * Featured friend portrait beside artwork. Crop is locked to 4:5 (about 960×1200). What you select is what appears on the site.
+ * Featured friend banner beside artwork. Crop is locked to 5:2 (about 680×272). What you select is what appears on the site.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "friend-images".
@@ -525,7 +525,7 @@ export interface Friend {
    */
   slug: string;
   /**
-   * Portrait beside featured artwork. Upload under Friend images — crop is locked to 4:5 to match the site card (~960×1200).
+   * Banner beside featured artwork. Upload under Friend images — crop is locked to 5:2 to match the site card (~680×270).
    */
   image?: (number | null) | FriendImage;
   description?: {

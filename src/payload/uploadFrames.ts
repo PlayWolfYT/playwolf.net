@@ -16,10 +16,10 @@ export type UploadFrame = {
 
 export const UPLOAD_FRAMES = {
   "friend-images": {
-    aspect: 4 / 5,
-    label: "4:5",
-    usage: "Featured friend portrait beside artwork",
-    referenceSize: { width: 960, height: 1200 },
+    aspect: 5 / 2,
+    label: "5:2",
+    usage: "Featured friend banner beside artwork",
+    referenceSize: { width: 680, height: 272 },
   },
   "character-images": {
     aspect: 1,
@@ -51,4 +51,18 @@ export function frameForCollection(slug: string | undefined): UploadFrame | unde
 export function frameAdminDescription(frame: UploadFrame): string {
   const { width, height } = frame.referenceSize;
   return `${frame.usage}. Crop is locked to ${frame.label} (about ${width}×${height}). What you select is what appears on the site.`;
+}
+
+/**
+ * Optional fallback when `AspectLockedEditUpload` is mounted without an
+ * explicit `frame` prop (e.g. relationship drawers reporting another slug).
+ */
+let activeUploadFrame: UploadFrame | undefined;
+
+export function setActiveUploadFrame(frame: UploadFrame | undefined): void {
+  activeUploadFrame = frame;
+}
+
+export function getActiveUploadFrame(): UploadFrame | undefined {
+  return activeUploadFrame;
 }

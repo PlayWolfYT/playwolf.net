@@ -4,6 +4,7 @@ import {
   $getState,
   $isRangeSelection,
   $isTextNode,
+  $setSelection,
   $setState,
   createState,
   type BaseSelection,
@@ -78,22 +79,37 @@ export function setTextEffect(
   editor: LexicalEditor,
   effect: TextEffect | undefined,
   colors?: string[],
+  /**
+   * Optional selection snapshot. Used by the portaled gradient panel after
+   * focusing inputs has collapsed the live native/Lexical selection.
+   */
+  selection?: BaseSelection | null,
 ) {
   editor.update(() => {
+    if (selection && $isRangeSelection(selection)) {
+      $setSelection(selection.clone());
+    }
     $forEachSelectedTextNode((textNode) => {
       $applyEffectToNode(textNode, effect, colors);
     });
   });
 }
 
-export function clearTextEffect(editor: LexicalEditor) {
-  setTextEffect(editor, undefined);
+export function clearTextEffect(
+  editor: LexicalEditor,
+  selection?: BaseSelection | null,
+) {
+  setTextEffect(editor, undefined, undefined, selection);
 }
 
-export function applyGradientColors(editor: LexicalEditor, colors: string[]) {
+export function applyGradientColors(
+  editor: LexicalEditor,
+  colors: string[],
+  selection?: BaseSelection | null,
+) {
   const stops = normalizeGradientColors(colors);
   if (!stops) return;
-  setTextEffect(editor, "gradient", stops);
+  setTextEffect(editor, "gradient", stops, selection);
 }
 
 /**

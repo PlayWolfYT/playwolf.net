@@ -40,13 +40,13 @@ export function FeaturedFriends({ example }: { example: Example }) {
               >
                 {friend.image ? (
                   <div
-                    className={`relative aspect-[4/5] overflow-hidden bg-void-lift/60 ${
+                    className={`relative aspect-[5/2] overflow-hidden bg-void-lift/60 ${
                       imageOnRight ? "md:order-2" : ""
                     }`}
                   >
                     <Image
                       src={friend.image}
-                      alt={`${friend.name} portrait`}
+                      alt={`${friend.name} banner`}
                       fill
                       placeholder={placeholderFor(friend.image)}
                       sizes="(max-width: 768px) 100vw, 50vw"

@@ -2,21 +2,48 @@
 
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 import { $getNodeByKey, $getState, TextNode } from "lexical";
-import { useEffect } from "react";
+import { useEffect, useId, useState } from "react";
 
 import { TEXT_EFFECT_STATE_KEY } from "@/lib/text-effects";
+import { GradientPanel } from "@/payload/lexical/textEffects/GradientPanel";
 import { cssForEffect, textEffectsState } from "@/payload/lexical/textEffects/state";
 
 function kebabToCamelCase(str: string): string {
   return str.replace(/-([a-z])/g, (_, letter: string) => letter.toUpperCase());
 }
 
+/** Only one Lexical field should portal the gradient dialog. */
+const gradientPanelHosts = new Set<string>();
+const gradientPanelHostListeners = new Set<() => void>();
+
+function primaryGradientPanelHost(): string | undefined {
+  return gradientPanelHosts.values().next().value;
+}
+
 /**
  * Mirrors Payload's TextStateFeature StatePlugin: push stored effect CSS onto
  * the text-node DOM for live preview. Gradient prefers custom stops when set.
+ *
+ * Also hosts the portaled gradient colour panel (once per page) so it survives
+ * floating-toolbar unmount when picker inputs take focus.
  */
 export function TextEffectsPlugin() {
   const [editor] = useLexicalComposerContext();
+  const hostId = useId();
+  const [isPanelHost, setIsPanelHost] = useState(false);
+
+  useEffect(() => {
+    gradientPanelHosts.add(hostId);
+    const sync = () => setIsPanelHost(primaryGradientPanelHost() === hostId);
+    gradientPanelHostListeners.add(sync);
+    sync();
+    for (const listener of gradientPanelHostListeners) listener();
+    return () => {
+      gradientPanelHosts.delete(hostId);
+      gradientPanelHostListeners.delete(sync);
+      for (const listener of gradientPanelHostListeners) listener();
+    };
+  }, [hostId]);
 
   useEffect(() => {
     return editor.registerMutationListener(TextNode, (mutatedNodes) => {
@@ -49,5 +76,5 @@ export function TextEffectsPlugin() {
     });
   }, [editor]);
 
-  return null;
+  return isPanelHost ? <GradientPanel /> : null;
 }

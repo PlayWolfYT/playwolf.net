@@ -16,7 +16,7 @@ const { afterChange, afterDelete } = revalidateHooks("media");
  * original, which would defeat the point. Focal point is kept, since it only
  * influences how the derivatives are framed.
  *
- * Framed UI images (friend portraits, character cards, project covers, OG)
+ * Framed UI images (friend banners, character cards, project covers, OG)
  * live in their own Library collections where crop is enabled.
  */
 export const Media: CollectionConfig = {
