@@ -65,6 +65,41 @@ body {
   }
 }
 
+@keyframes fx-shimmer {
+  0%,
+  15% {
+    background-position: 100% 50%;
+  }
+  70%,
+  100% {
+    background-position: -100% 50%;
+  }
+}
+
+@keyframes fx-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-0.16em);
+  }
+}
+
+@keyframes fx-pulse {
+  0%,
+  100% {
+    opacity: 0.75;
+    text-shadow: 0 0 4px rgb(var(--accent-400) / 0.35);
+  }
+  50% {
+    opacity: 1;
+    text-shadow:
+      0 0 8px rgb(var(--accent-300) / 0.85),
+      0 0 24px rgb(var(--accent-500) / 0.6);
+  }
+}
+
 .fx-rainbow {
   background-image: linear-gradient(
     90deg,
@@ -92,4 +127,52 @@ body {
   text-shadow:
     0 0 6px rgb(var(--accent-400) / 0.75),
     0 0 18px rgb(var(--accent-500) / 0.45);
+}
+
+.fx-shimmer {
+  background-image: linear-gradient(
+    105deg,
+    rgb(138 132 122) 20%,
+    rgb(247 244 236) 45%,
+    rgb(var(--accent-300)) 50%,
+    rgb(247 244 236) 55%,
+    rgb(138 132 122) 80%
+  );
+  background-size: 240% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: fx-shimmer 2.8s ease-in-out infinite;
+}
+
+.fx-float {
+  display: inline-block;
+  animation: fx-float 2.4s ease-in-out infinite;
+}
+
+.fx-pulse {
+  color: rgb(var(--accent-300));
+  animation: fx-pulse 2s ease-in-out infinite;
+}
+
+/*
+ * Default stops for `.fx-gradient`. Real colours are also written as full
+ * inline `background-image` / `background-clip` / `color` by the TipTap mark
+ * and the Lexical HTML bridge — don't use `var(--x, #a, #b)` fallbacks here:
+ * commas break CSS custom-property fallback parsing.
+ */
+.fx-gradient {
+  background-image: linear-gradient(90deg, #ff5f6d, #5cccff, #b47cff);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* TipTap placeholder (admin rich-text editor) */
+.tiptap p.is-editor-empty:first-child::before {
+  color: #a1a1aa;
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  pointer-events: none;
 }

@@ -2,11 +2,13 @@ import { describe, expect, test } from "bun:test";
 
 import {
   castWithSubject,
+  exampleThumb,
   facetOptions,
   getSheetImage,
   isProfileKey,
   matchesFilter,
   placeholderFor,
+  sortExamples,
   type Character,
   type Example,
   type Featured,
@@ -36,7 +38,18 @@ function item(
   return {
     character: character(characterSlug, characterSlug.toUpperCase()),
     profile,
-    example: { slug, title: slug, src: image, featuring: [], tags: [], ...rest },
+    example: {
+      slug,
+      title: slug,
+      src: image,
+      isWip: false,
+      overviewDisplay: "generated",
+      wipImages: [],
+      showWipHistory: false,
+      featuring: [],
+      tags: [],
+      ...rest,
+    },
   };
 }
 
@@ -172,6 +185,98 @@ describe("matchesFilter", () => {
     const untagged = item("wuff", "sfw", { slug: "bare" });
     expect(matchesFilter(untagged, { tag: "hug" })).toBe(false);
     expect(matchesFilter(untagged, { artist: "nib" })).toBe(false);
+  });
+
+  test("hides in-progress work unless it is asked for", () => {
+    const wip = item("wuff", "sfw", { slug: "cooking", isWip: true });
+    expect(matchesFilter(wip, {})).toBe(false);
+    expect(matchesFilter(wip, { includeWip: true })).toBe(true);
+  });
+});
+
+describe("sortExamples", () => {
+  test("keeps finished work ahead of WIP while preserving relative order", () => {
+    const examples: Example[] = [
+      {
+        slug: "a",
+        title: "a",
+        src: image,
+        isWip: false,
+        overviewDisplay: "generated",
+        wipImages: [],
+        showWipHistory: false,
+        featuring: [],
+        tags: [],
+      },
+      {
+        slug: "b",
+        title: "b",
+        isWip: true,
+        overviewDisplay: "generated",
+        wipImages: [],
+        showWipHistory: false,
+        featuring: [],
+        tags: [],
+      },
+      {
+        slug: "c",
+        title: "c",
+        src: image,
+        isWip: false,
+        overviewDisplay: "generated",
+        wipImages: [],
+        showWipHistory: false,
+        featuring: [],
+        tags: [],
+      },
+    ];
+    expect(sortExamples(examples).map((entry) => entry.slug)).toEqual(["a", "c", "b"]);
+  });
+});
+
+describe("exampleThumb", () => {
+  test("prefers the final image, then overview, then the first WIP sketch", () => {
+    const overview = { ...image, src: "/media/overview.png" };
+    const sketch = { ...image, src: "/media/sketch.png" };
+    expect(
+      exampleThumb({
+        slug: "x",
+        title: "x",
+        src: image,
+        overviewImage: overview,
+        isWip: true,
+        overviewDisplay: "wipImage",
+        wipImages: [{ src: sketch }],
+        showWipHistory: false,
+        featuring: [],
+        tags: [],
+      }),
+    ).toBe(image);
+    expect(
+      exampleThumb({
+        slug: "x",
+        title: "x",
+        overviewImage: overview,
+        isWip: true,
+        overviewDisplay: "wipImage",
+        wipImages: [{ src: sketch }],
+        showWipHistory: false,
+        featuring: [],
+        tags: [],
+      }),
+    ).toBe(overview);
+    expect(
+      exampleThumb({
+        slug: "x",
+        title: "x",
+        isWip: true,
+        overviewDisplay: "generated",
+        wipImages: [{ src: sketch }],
+        showWipHistory: false,
+        featuring: [],
+        tags: [],
+      }),
+    ).toBe(sketch);
   });
 });
 

@@ -231,15 +231,52 @@ export function getSheetImage(
   return { src: sheet.src, alt: sheet.title };
 }
 
+/** Commission bookkeeping — only populated for authenticated admin reads. */
+export type ExampleCommission = {
+  paid: boolean;
+  artistStarted: boolean;
+  lastArtistUpdateAt?: string;
+  lastArtistUpdateNote?: string;
+};
+
 /** A single piece of art within a character's profile gallery. */
 export type Example = {
   slug: string;
   title: string;
-  src: ImageRef;
+  /** Final deliverable; absent while an in-progress commission has none yet. */
+  src?: ImageRef;
+  isWip: boolean;
+  overviewDisplay: "generated" | "wipImage";
+  /** Image shown on overview cards when `overviewDisplay` is `wipImage`. */
+  overviewImage?: ImageRef;
+  wipImages: { src: ImageRef; caption?: string; addedAt?: string }[];
+  showWipHistory: boolean;
+  wipPlaceholder?: RefSheetWipOptions;
+  /** Present only when an authenticated path maps commission fields. */
+  commission?: ExampleCommission;
   artist?: Artist;
   featuring: Featured[];
   tags: Tag[];
 };
+
+/**
+ * Keep caller order for finished work, then append in-progress pieces.
+ * Callers that already sort by `order` should run this after mapping.
+ */
+export function sortExamples(examples: Example[]): Example[] {
+  const complete: Example[] = [];
+  const wip: Example[] = [];
+  for (const example of examples) {
+    if (example.isWip) wip.push(example);
+    else complete.push(example);
+  }
+  return [...complete, ...wip];
+}
+
+/** Best image to show for a card: final art, else overview / first WIP sketch. */
+export function exampleThumb(example: Example): ImageRef | undefined {
+  return example.src ?? example.overviewImage ?? example.wipImages[0]?.src;
+}
 
 /**
  * One full character profile (SFW or After Dark). The rating is implied by
@@ -313,6 +350,8 @@ export type FacetOption = {
 export type GalleryFilter = Partial<Record<FacetKey, string>> & {
   /** SFW work only unless explicitly widened. */
   includeNsfw?: boolean;
+  /** Finished work only unless explicitly widened. */
+  includeWip?: boolean;
 };
 
 /** Every slug an item can be found under, per facet. */
@@ -338,6 +377,7 @@ function facetValues(
 
 export function matchesFilter(item: GalleryItem, filter: GalleryFilter): boolean {
   if (item.profile === "nsfw" && !filter.includeNsfw) return false;
+  if (item.example.isWip && !filter.includeWip) return false;
 
   return FACET_KEYS.every((key) => {
     const wanted = filter[key];

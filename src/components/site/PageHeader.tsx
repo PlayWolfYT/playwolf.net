@@ -1,5 +1,7 @@
 import type { ReactNode } from "react";
 import { SparkStar } from "@/components/BrandBackdrop";
+import { Reveal } from "@/components/motion/Reveal";
+import { SplitTextReveal } from "@/components/motion/SplitTextReveal";
 
 /**
  * The heading treatment every non-landing page opens with — the same sparkle
@@ -25,19 +27,24 @@ export function PageHeader({
       </div>
 
       {eyebrow ? (
-        <p className="font-mono text-[0.65rem] uppercase tracking-[0.28em] text-glow-500">
-          {eyebrow}
-        </p>
+        <Reveal distance={10}>
+          <p className="font-mono text-[0.65rem] uppercase tracking-[0.28em] text-glow-500">
+            {eyebrow}
+          </p>
+        </Reveal>
       ) : null}
 
-      <h1 className="mt-4 font-display text-3xl font-light tracking-tight text-parchment sm:text-4xl">
-        {title}
-      </h1>
+      <SplitTextReveal
+        text={title}
+        className="mt-4 font-display text-3xl font-light tracking-tight text-parchment sm:text-4xl"
+      />
 
       {lede ? (
-        <p className="mx-auto mt-4 max-w-md text-sm leading-relaxed text-parchment-muted">
-          {lede}
-        </p>
+        <Reveal delay={0.16} distance={14}>
+          <p className="mx-auto mt-4 max-w-md text-sm leading-relaxed text-parchment-muted">
+            {lede}
+          </p>
+        </Reveal>
       ) : null}
 
       {children}

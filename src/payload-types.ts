@@ -538,7 +538,94 @@ export interface Artwork {
   slug: string;
   character: number | Character;
   profile: 'sfw' | 'nsfw';
-  image: number | Media;
+  /**
+   * In-progress commissions can ship without a final image and show WIP sketches instead.
+   */
+  lifecycle?: ('complete' | 'in_progress') | null;
+  /**
+   * Final artwork. Required once the piece is marked complete.
+   */
+  image?: (number | null) | Media;
+  commission?: {
+    paid?: boolean | null;
+    artistStarted?: boolean | null;
+    lastArtistUpdateAt?: string | null;
+    lastArtistUpdateNote?: string | null;
+  };
+  /**
+   * Progress sketches. Kept after completion when “Show WIP history” is on.
+   */
+  wipImages?:
+    | {
+        image: number | Media;
+        caption?: string | null;
+        addedAt?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * What the overview / gallery card shows while in progress.
+   */
+  overviewDisplay?: ('generated' | 'wipImage') | null;
+  /**
+   * Should be one of the WIP sketches above.
+   */
+  overviewWipImage?: (number | null) | Media;
+  wipPlaceholder?: {
+    badge?: string | null;
+    aspect?: ('4/3' | '3/2' | '16/9' | '1/1') | null;
+    iconCount?: number | null;
+    subtitle?: string | null;
+    /**
+     * Leave empty to use the built-in pool.
+     */
+    quotes?:
+      | {
+          text: string;
+          id?: string | null;
+        }[]
+      | null;
+    /**
+     * Scattered across the backdrop. Empty falls back to the drawing kit.
+     */
+    icons?:
+      | {
+          name: string;
+          id?: string | null;
+        }[]
+      | null;
+    /**
+     * Blended left-to-right across the frame. Empty follows the profile accent.
+     */
+    gradient?:
+      | {
+          color: string;
+          id?: string | null;
+        }[]
+      | null;
+    /**
+     * Milliseconds between quote swaps.
+     */
+    interval?: number | null;
+    /**
+     * 0–100 swaps the pacing bar for a determinate one.
+     */
+    progress?: number | null;
+  };
+  /**
+   * When the piece is finished, still show the WIP sketches on the public detail page.
+   */
+  showWipHistory?: boolean | null;
+  reminder?: {
+    enabled?: boolean | null;
+    interval?: number | null;
+    unit?: ('days' | 'weeks' | 'months') | null;
+    /**
+     * Filled automatically when reminders are enabled.
+     */
+    nextAt?: string | null;
+    lastSentAt?: string | null;
+  };
   artist?: (number | null) | Artist;
   /**
    * Everyone else in the picture. The character above is always featured.
@@ -979,7 +1066,64 @@ export interface ArtworksSelect<T extends boolean = true> {
   slug?: T;
   character?: T;
   profile?: T;
+  lifecycle?: T;
   image?: T;
+  commission?:
+    | T
+    | {
+        paid?: T;
+        artistStarted?: T;
+        lastArtistUpdateAt?: T;
+        lastArtistUpdateNote?: T;
+      };
+  wipImages?:
+    | T
+    | {
+        image?: T;
+        caption?: T;
+        addedAt?: T;
+        id?: T;
+      };
+  overviewDisplay?: T;
+  overviewWipImage?: T;
+  wipPlaceholder?:
+    | T
+    | {
+        badge?: T;
+        aspect?: T;
+        iconCount?: T;
+        subtitle?: T;
+        quotes?:
+          | T
+          | {
+              text?: T;
+              id?: T;
+            };
+        icons?:
+          | T
+          | {
+              name?: T;
+              id?: T;
+            };
+        gradient?:
+          | T
+          | {
+              color?: T;
+              id?: T;
+            };
+        interval?: T;
+        progress?: T;
+      };
+  showWipHistory?: T;
+  reminder?:
+    | T
+    | {
+        enabled?: T;
+        interval?: T;
+        unit?: T;
+        nextAt?: T;
+        lastSentAt?: T;
+      };
   artist?: T;
   featuring?: T;
   tags?: T;
@@ -1116,6 +1260,38 @@ export interface SiteSetting {
         id?: string | null;
       }[]
     | null;
+  notifications?: {
+    /**
+     * Which channels to use. “Both” tries each configured channel; if ntfy is not configured, SMTP is used as the fallback.
+     */
+    channel?: ('ntfy' | 'smtp' | 'both') | null;
+    ntfy?: {
+      /**
+       * e.g. https://ntfy.sh
+       */
+      serverUrl?: string | null;
+      topic?: string | null;
+      /**
+       * Optional access token (secret).
+       */
+      token?: string | null;
+    };
+    smtp?: {
+      host?: string | null;
+      port?: number | null;
+      /**
+       * Use TLS (typically for port 465).
+       */
+      secure?: boolean | null;
+      user?: string | null;
+      /**
+       * SMTP password (secret).
+       */
+      password?: string | null;
+      from?: string | null;
+      to?: string | null;
+    };
+  };
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -1138,6 +1314,29 @@ export interface SiteSettingsSelect<T extends boolean = true> {
         url?: T;
         description?: T;
         id?: T;
+      };
+  notifications?:
+    | T
+    | {
+        channel?: T;
+        ntfy?:
+          | T
+          | {
+              serverUrl?: T;
+              topic?: T;
+              token?: T;
+            };
+        smtp?:
+          | T
+          | {
+              host?: T;
+              port?: T;
+              secure?: T;
+              user?: T;
+              password?: T;
+              from?: T;
+              to?: T;
+            };
       };
   updatedAt?: T;
   createdAt?: T;

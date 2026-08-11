@@ -1,6 +1,7 @@
 import type { Field } from "payload";
 
 import { richTextEditor } from "../editor";
+import { withStudioCondition } from "./studioCondition";
 
 // Resolved by Next when the generated import map is compiled, not by the
 // Payload CLI — so these stay on the `@/` alias rather than a relative path.
@@ -11,11 +12,11 @@ const COLOR_PICKER = "@/payload/components/ColorPicker#ColorPicker";
 const ASPECTS = ["4/3", "3/2", "16/9", "1/1"] as const;
 
 /**
- * Placeholder shown in place of a reference sheet that doesn't exist yet.
- * Every knob here maps onto one property of `RefSheetWipOptions`, which
- * `SheetPlaceholder` already reads.
+ * Placeholder shown in place of a reference sheet (or artwork) that doesn't
+ * exist yet. Every knob here maps onto one property of `RefSheetWipOptions`,
+ * which `SheetPlaceholder` already reads. Reused by Artworks' `wipPlaceholder`.
  */
-const wipFields: Field[] = [
+export const wipFields: Field[] = [
   {
     type: "row",
     fields: [
@@ -135,45 +136,36 @@ const sheetField: Field = {
         { label: "Work in progress", value: "wip" },
       ],
     },
-    {
-      name: "title",
-      type: "text",
-      admin: {
-        condition: (_, siblingData) => siblingData?.kind !== "none",
+    withStudioCondition(
+      { name: "title", type: "text" },
+      { kind: "siblingNeq", field: "kind", value: "none" },
+      (_, siblingData) => siblingData?.kind !== "none",
+    ),
+    withStudioCondition(
+      { name: "image", type: "upload", relationTo: "media" },
+      { kind: "siblingEq", field: "kind", value: "image" },
+      (_, siblingData) => siblingData?.kind === "image",
+    ),
+    withStudioCondition(
+      { name: "description", type: "textarea" },
+      { kind: "siblingNeq", field: "kind", value: "none" },
+      (_, siblingData) => siblingData?.kind !== "none",
+    ),
+    withStudioCondition(
+      { name: "artist", type: "relationship", relationTo: "artists" },
+      { kind: "siblingNeq", field: "kind", value: "none" },
+      (_, siblingData) => siblingData?.kind !== "none",
+    ),
+    withStudioCondition(
+      {
+        name: "wip",
+        type: "group",
+        label: "Placeholder options",
+        fields: wipFields,
       },
-    },
-    {
-      name: "image",
-      type: "upload",
-      relationTo: "media",
-      admin: {
-        condition: (_, siblingData) => siblingData?.kind === "image",
-      },
-    },
-    {
-      name: "description",
-      type: "textarea",
-      admin: {
-        condition: (_, siblingData) => siblingData?.kind !== "none",
-      },
-    },
-    {
-      name: "artist",
-      type: "relationship",
-      relationTo: "artists",
-      admin: {
-        condition: (_, siblingData) => siblingData?.kind !== "none",
-      },
-    },
-    {
-      name: "wip",
-      type: "group",
-      label: "Placeholder options",
-      admin: {
-        condition: (_, siblingData) => siblingData?.kind === "wip",
-      },
-      fields: wipFields,
-    },
+      { kind: "siblingEq", field: "kind", value: "wip" },
+      (_, siblingData) => siblingData?.kind === "wip",
+    ),
   ],
 };
 

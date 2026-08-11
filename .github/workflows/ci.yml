@@ -5,9 +5,9 @@
 #   :<release tag>     e.g. v0.1.0 or v0.0.1-dev
 #   :sha-<full commit>
 #   :latest            only when the release target branch is `production`
-#   :latest-dev        only when the release target branch is `development`
+#   :latest-dev        only when the release target branch is `main` (staging)
 #
-# Create a Release from the GitHub UI (targeting `development` or `production`),
+# Create a Release from the GitHub UI (targeting `main` or `production`),
 # publish it, then pull e.g. docker pull ghcr.io/owner/playwolf.net:v0.0.1-dev
 #
 # Self-hosted runner: Git + Docker (Buildx). Bun via oven-sh/setup-bun.
@@ -16,9 +16,9 @@ name: CI
 
 on:
   push:
-    branches: [production, development]
+    branches: [main, production]
   pull_request:
-    branches: [production, development]
+    branches: [main, production]
   workflow_dispatch:
   release:
     types: [published]
@@ -137,7 +137,7 @@ jobs:
             if [ "$TARGET" = "production" ]; then
               echo "${IMG}:latest"
             fi
-            if [ "$TARGET" = "development" ]; then
+            if [ "$TARGET" = "main" ]; then
               echo "${IMG}:latest-dev"
             fi
             echo "EOF"

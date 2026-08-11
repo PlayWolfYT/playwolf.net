@@ -1,0 +1,15 @@
+# Optional override — publish web/umami on the host for local debugging or
+# when an external proxy (NPM) talks to fixed host ports instead of Coolify's
+# proxy. Do not use this on a Coolify host that runs both production and
+# staging from the same compose file; the binds will collide.
+#
+#   docker compose -f docker-compose.yml -f docker-compose.host-ports.yml up -d
+
+services:
+  web:
+    ports:
+      - "${WEB_PORT:-3000}:3000"
+
+  umami:
+    ports:
+      - "${UMAMI_PORT:-3001}:3000"

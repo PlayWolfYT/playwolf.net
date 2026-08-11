@@ -15,6 +15,7 @@ import type {
   Character,
   ContentLink,
   Example,
+  ExampleCommission,
   Featured,
   GalleryItem,
   ImageRef,
@@ -27,7 +28,7 @@ import type {
   Tag,
   WipAspect,
 } from "@/lib/content";
-import { castWithSubject, DEFAULT_SITE_SETTINGS } from "@/lib/content";
+import { castWithSubject, DEFAULT_SITE_SETTINGS, sortExamples } from "@/lib/content";
 import { getPayloadClient } from "@/lib/payload";
 import { CONTENT_TAG } from "@/payload/hooks/revalidate";
 import {
@@ -203,14 +204,45 @@ function toFeatured(artwork: StoredArtwork): Featured[] {
   );
 }
 
+function toWipImages(entries: StoredArtwork["wipImages"]): Example["wipImages"] {
+  return (entries ?? []).flatMap((entry) => {
+    const src = toImageRef(entry.image);
+    if (!src) return [];
+    return [
+      {
+        src,
+        caption: entry.caption ?? undefined,
+        addedAt: entry.addedAt ?? undefined,
+      },
+    ];
+  });
+}
+
+/**
+ * Public mapping — never includes `commission` (authenticated-only fields).
+ * In-progress pieces may omit a final image; overview / first WIP fill the gap
+ * for `overviewImage`, while `src` stays undefined until the final lands.
+ */
 function toExample(artwork: StoredArtwork): Example | undefined {
+  const isWip = artwork.lifecycle === "in_progress";
   const src = toImageRef(artwork.image);
-  if (!src) return undefined;
+  if (!isWip && !src) return undefined;
+
+  const wipImages = toWipImages(artwork.wipImages);
+  const overviewImage = toImageRef(artwork.overviewWipImage) ?? wipImages[0]?.src;
 
   return {
     slug: artwork.slug,
     title: artwork.title,
     src,
+    isWip,
+    overviewDisplay: artwork.overviewDisplay === "wipImage" ? "wipImage" : "generated",
+    overviewImage,
+    wipImages,
+    showWipHistory: Boolean(artwork.showWipHistory),
+    wipPlaceholder: isWip
+      ? toWipOptions(artwork.wipPlaceholder, artwork.profile)
+      : undefined,
     artist: toArtist(artwork.artist),
     featuring: toFeatured(artwork),
     tags: (artwork.tags ?? []).flatMap((tag) => toTag(tag) ?? []),
@@ -302,8 +334,9 @@ async function loadCharacters(): Promise<Character[]> {
   return characters.docs.map((stored) => {
     const buckets = byCharacter.get(stored.id) ?? { sfw: [], nsfw: [] };
     const profiles: Character["profiles"] = {
-      sfw: toProfile(stored.sfw, "sfw", buckets.sfw),
-      nsfw: toProfile(stored.nsfw, "nsfw", buckets.nsfw),
+      // Artworks query is already ordered; keep that within complete / WIP groups.
+      sfw: toProfile(stored.sfw, "sfw", sortExamples(buckets.sfw)),
+      nsfw: toProfile(stored.nsfw, "nsfw", sortExamples(buckets.nsfw)),
     };
 
     return {
@@ -359,6 +392,56 @@ export async function getExample(
 ): Promise<Example | undefined> {
   const profile = await getProfile(charSlug, key);
   return profile?.examples.find((example) => example.slug === slug);
+}
+
+function toCommission(
+  value: StoredArtwork["commission"],
+): ExampleCommission | undefined {
+  if (!value) return undefined;
+  return {
+    paid: Boolean(value.paid),
+    artistStarted: Boolean(value.artistStarted),
+    lastArtistUpdateAt: value.lastArtistUpdateAt ?? undefined,
+    lastArtistUpdateNote: value.lastArtistUpdateNote ?? undefined,
+  };
+}
+
+/**
+ * Commission bookkeeping for an artwork. Callers must gate on an authenticated
+ * session — the Local API read uses `overrideAccess` so field-level auth does
+ * not strip the group. Never feed this into the public cached character tree.
+ */
+export async function getArtworkAdminMeta(
+  characterSlug: string,
+  profile: ProfileKey,
+  slug: string,
+): Promise<ExampleCommission | undefined> {
+  const payload = await getPayloadClient();
+
+  const characters = await payload.find({
+    collection: "characters",
+    where: { slug: { equals: characterSlug } },
+    limit: 1,
+    depth: 0,
+  });
+  const character = characters.docs[0];
+  if (!character) return undefined;
+
+  const artworks = await payload.find({
+    collection: "artworks",
+    where: {
+      and: [
+        { slug: { equals: slug } },
+        { profile: { equals: profile } },
+        { character: { equals: character.id } },
+      ],
+    },
+    limit: 1,
+    depth: 0,
+    overrideAccess: true,
+  });
+
+  return toCommission(artworks.docs[0]?.commission);
 }
 
 export async function getAccentMap(): Promise<AccentMap> {

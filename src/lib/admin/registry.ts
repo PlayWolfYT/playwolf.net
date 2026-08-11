@@ -1,0 +1,171 @@
+import type { Field, SanitizedCollectionConfig, SanitizedGlobalConfig } from "payload";
+
+import {
+  collectRelationSlugs,
+  serializeFields,
+  type AdminCollectionSchema,
+  type AdminGlobalSchema,
+} from "@/lib/admin/schema";
+import { getPayloadClient } from "@/lib/payload";
+
+function entityLabel(
+  labels: unknown,
+  fallback: string,
+  plurality: "singular" | "plural",
+): string {
+  if (!labels || typeof labels !== "object") return fallback;
+  const value = (labels as Record<string, unknown>)[plurality];
+  if (typeof value === "string") return value;
+  if (value && typeof value === "object" && "en" in value) {
+    const en = (value as { en?: unknown }).en;
+    if (typeof en === "string") return en;
+  }
+  return fallback;
+}
+
+function titleCase(value: string): string {
+  return value
+    .replace(/([a-z])([A-Z])/g, "$1 $2")
+    .replace(/[-_]/g, " ")
+    .replace(/\b\w/g, (char) => char.toUpperCase());
+}
+
+/**
+ * Auth collections get `email` / `password` injected by Payload into the
+ * sanitized config. Password is create/update-only — expose it on the form
+ * when missing from serialized fields.
+ */
+function ensureAuthFields(fields: Field[], auth: boolean): Field[] {
+  if (!auth) return fields;
+  const names = new Set(
+    fields.flatMap((field) => ("name" in field && field.name ? [field.name] : [])),
+  );
+  const extras: Field[] = [];
+  if (!names.has("email")) {
+    extras.push({
+      name: "email",
+      type: "email",
+      required: true,
+    });
+  }
+  if (!names.has("password")) {
+    extras.push({
+      name: "password",
+      type: "text",
+      required: true,
+      admin: {
+        description:
+          "Set on create; leave blank when editing to keep the current password.",
+      },
+    });
+  }
+  return extras.length > 0 ? [...extras, ...fields] : fields;
+}
+
+function toCollectionSchema(config: SanitizedCollectionConfig): AdminCollectionSchema {
+  const auth = Boolean(config.auth);
+  const fields = serializeFields(ensureAuthFields(config.fields, auth)).map((field) =>
+    field.name === "password"
+      ? { ...field, type: "password" as const, required: false }
+      : field,
+  );
+
+  return {
+    kind: "collection",
+    slug: config.slug,
+    label: entityLabel(config.labels, titleCase(config.slug), "plural"),
+    singularLabel: entityLabel(config.labels, titleCase(config.slug), "singular"),
+    useAsTitle: config.admin?.useAsTitle ?? "id",
+    defaultColumns: config.admin?.defaultColumns ?? [config.admin?.useAsTitle ?? "id"],
+    upload: Boolean(config.upload),
+    auth,
+    fields,
+  };
+}
+
+function toGlobalSchema(config: SanitizedGlobalConfig): AdminGlobalSchema {
+  return {
+    kind: "global",
+    slug: config.slug,
+    label: typeof config.label === "string" ? config.label : titleCase(config.slug),
+    fields: serializeFields(config.fields),
+  };
+}
+
+export async function getCollectionSchema(
+  slug: string,
+): Promise<AdminCollectionSchema | null> {
+  if (!isStudioCollection(slug)) return null;
+  const payload = await getPayloadClient();
+  const config = payload.config.collections.find((entry) => entry.slug === slug);
+  return config ? toCollectionSchema(config) : null;
+}
+
+export async function getGlobalSchema(slug: string): Promise<AdminGlobalSchema | null> {
+  const payload = await getPayloadClient();
+  const config = payload.config.globals.find((entry) => entry.slug === slug);
+  return config ? toGlobalSchema(config) : null;
+}
+
+/** Payload's own bookkeeping collections — never surfaced in the studio. */
+function isStudioCollection(slug: string): boolean {
+  return !slug.startsWith("payload-");
+}
+
+const NAV_GROUP_ORDER = ["Overview", "Content", "People", "Library", "System"] as const;
+
+export async function listCollectionSchemas(): Promise<AdminCollectionSchema[]> {
+  const payload = await getPayloadClient();
+  return payload.config.collections
+    .filter((collection) => isStudioCollection(collection.slug))
+    .map(toCollectionSchema);
+}
+
+export async function listGlobalSchemas(): Promise<AdminGlobalSchema[]> {
+  const payload = await getPayloadClient();
+  return payload.config.globals.map(toGlobalSchema);
+}
+
+function groupFor(slug: string): string {
+  if (slug === "users" || slug === "siteSettings") return "System";
+  if (slug === "media" || slug === "tags") return "Library";
+  if (slug === "artists" || slug === "friends") return "People";
+  return "Content";
+}
+
+/** Nav entries derived from the live Payload config (collections + globals). */
+export async function getAdminNavFromConfig(): Promise<
+  { href: string; label: string; group: string }[]
+> {
+  const [collections, globals] = await Promise.all([
+    listCollectionSchemas(),
+    listGlobalSchemas(),
+  ]);
+
+  const items = [
+    { href: "/admin", label: "Dashboard", group: "Overview" },
+    ...collections.map((collection) => ({
+      href: `/admin/collections/${collection.slug}`,
+      label: collection.label,
+      group: groupFor(collection.slug),
+    })),
+    ...globals.map((global) => ({
+      href: `/admin/globals/${global.slug}`,
+      label: global.label,
+      group: "System",
+    })),
+  ];
+
+  // Keep each group contiguous so sidebar headers stay unique and readable.
+  return items.sort((a, b) => {
+    const groupDelta =
+      NAV_GROUP_ORDER.indexOf(a.group as (typeof NAV_GROUP_ORDER)[number]) -
+      NAV_GROUP_ORDER.indexOf(b.group as (typeof NAV_GROUP_ORDER)[number]);
+    if (groupDelta !== 0) return groupDelta;
+    if (a.href === "/admin") return -1;
+    if (b.href === "/admin") return 1;
+    return a.label.localeCompare(b.label);
+  });
+}
+
+export { collectRelationSlugs };

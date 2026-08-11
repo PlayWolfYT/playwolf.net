@@ -18,6 +18,8 @@ type RefImageProps = {
   showBackButton?: boolean;
   /** Fallback for the back button when there is no history */
   backHref?: string;
+  /** Show the diagonal WIP tape on the artwork. */
+  isWip?: boolean;
 };
 
 /** Full-view single image embed. */
@@ -30,6 +32,7 @@ export function RefImage({
   artist,
   showBackButton = true,
   backHref = "/ref",
+  isWip = false,
 }: RefImageProps) {
   const hasHeader = Boolean(title || description);
 
@@ -50,7 +53,7 @@ export function RefImage({
         </header>
       ) : null}
 
-      <ArtworkCard src={src} alt={alt} artist={artist} />
+      <ArtworkCard src={src} alt={alt} artist={artist} isWip={isWip} />
 
       <div className="mt-6 flex flex-col items-center gap-3">
         {children}

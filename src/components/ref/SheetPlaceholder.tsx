@@ -3,6 +3,7 @@ import dynamicIconImports from "lucide-react/dynamicIconImports";
 import { SparkStar } from "@/components/BrandBackdrop";
 import { ArtistBar } from "@/components/ref/ArtistBar";
 import { WipQuoteCycler } from "@/components/ref/WipQuoteCycler";
+import { WipTape } from "@/components/ref/WipTape";
 import { hexToRgb, type Rgb } from "@/lib/accent";
 import type { RefSheetWip, WipIconName } from "@/lib/content";
 
@@ -212,12 +213,17 @@ export async function SheetPlaceholder({ sheet }: SheetPlaceholderProps) {
 
   return (
     <figure className="mx-auto w-full max-w-4xl">
-      <div className="rounded-3xl bg-gradient-to-br from-glow-500/45 via-white/[0.07] to-glow-700/30 p-px shadow-glow-md">
+      <div className="group rounded-3xl bg-gradient-to-br from-glow-500/45 via-white/[0.07] to-glow-700/30 p-px shadow-glow-md transition hover:from-glow-500/55">
         <div className="overflow-hidden rounded-[calc(1.5rem-1px)] bg-void">
           <div
             className="relative w-full overflow-hidden px-6 py-10 sm:px-10 sm:py-14"
             style={{ aspectRatio: aspect }}
           >
+            {sheet.kind === "wip" ? (
+              <div className="pointer-events-none absolute inset-0 z-20 origin-center transition duration-500 group-hover:scale-[1.02]">
+                <WipTape />
+              </div>
+            ) : null}
             {/* Stage atmosphere */}
             <div
               className="pointer-events-none absolute inset-0 bg-gradient-to-br from-void-lift via-void-panel to-void"
