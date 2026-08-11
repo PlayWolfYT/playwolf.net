@@ -79,7 +79,7 @@ export function GradientEffectPicker({
       {open ? (
         <div
           id={panelId}
-          className="absolute left-0 top-full z-30 mt-1 w-64 rounded-lg border border-zinc-200 bg-white p-3 shadow-lg"
+          className="absolute bottom-full left-0 z-50 mb-1 w-64 rounded-lg border border-zinc-200 bg-white p-3 shadow-lg"
         >
           <p className="text-xs font-medium text-zinc-800">Gradient colours</p>
           <p className="mt-0.5 text-[0.7rem] leading-snug text-zinc-500">
