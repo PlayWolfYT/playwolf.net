@@ -119,7 +119,11 @@ function toImageRef(
     height: media.height,
   };
 
-  const derivative = media.sizes?.display ?? media.sizes?.card;
+  // Prefer the locked on-site `frame` size when present (friends / cards /
+  // covers / OG), then the wide display master, then card.
+  const sizes = media.sizes;
+  const framed = sizes && "frame" in sizes ? sizes.frame : undefined;
+  const derivative = framed ?? sizes?.display ?? sizes?.card;
   const usable =
     derivative?.url && derivative.width && derivative.height
       ? { src: derivative.url, width: derivative.width, height: derivative.height }

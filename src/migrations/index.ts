@@ -4,6 +4,7 @@ import * as migration_20260801_142319_maintenance_excluded_paths from './2026080
 import * as migration_20260803_093124_artwork_subject_featuring from './20260803_093124_artwork_subject_featuring';
 import * as migration_20260810_173959_artwork_wip_commissions_notifications from './20260810_173959_artwork_wip_commissions_notifications';
 import * as migration_20260811_191914_croppable_image_collections from './20260811_191914_croppable_image_collections';
+import * as migration_20260811_201308_framed_upload_sizes from './20260811_201308_framed_upload_sizes';
 
 export const migrations = [
   {
@@ -34,6 +35,11 @@ export const migrations = [
   {
     up: migration_20260811_191914_croppable_image_collections.up,
     down: migration_20260811_191914_croppable_image_collections.down,
-    name: '20260811_191914_croppable_image_collections'
+    name: '20260811_191914_croppable_image_collections',
+  },
+  {
+    up: migration_20260811_201308_framed_upload_sizes.up,
+    down: migration_20260811_201308_framed_upload_sizes.down,
+    name: '20260811_201308_framed_upload_sizes'
   },
 ];

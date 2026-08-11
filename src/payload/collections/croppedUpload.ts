@@ -3,16 +3,16 @@ import type { CollectionConfig } from "payload";
 import { anyone, authenticated } from "../access";
 import { generateBlurPlaceholder } from "../hooks/blurPlaceholder";
 import { revalidateHooks } from "../hooks/revalidate";
+import {
+  frameAdminDescription,
+  type FramedCollectionSlug,
+  UPLOAD_FRAMES,
+} from "../uploadFrames";
 
 type CroppedUploadOptions = {
-  slug: string;
+  slug: FramedCollectionSlug;
   /** Singular label in the admin nav, e.g. "Friend image". */
   labels: { singular: string; plural: string };
-  /**
-   * Why this collection exists — shown as the collection description and used
-   * in field helper text on the documents that point here.
-   */
-  description: string;
 };
 
 /**
@@ -22,13 +22,17 @@ type CroppedUploadOptions = {
  *
  * Artwork and reference sheets stay on `media`, where crop is off so the
  * untouched original remains available for "Open full image".
+ *
+ * Each collection maps to a fixed on-site aspect ratio (`UPLOAD_FRAMES`); the
+ * admin crop UI locks to that ratio via `AspectLockedEditUpload`.
  */
 export function createCroppedUploadCollection({
   slug,
   labels,
-  description,
 }: CroppedUploadOptions): CollectionConfig {
   const { afterChange, afterDelete } = revalidateHooks(slug);
+  const frame = UPLOAD_FRAMES[slug];
+  const description = frameAdminDescription(frame);
 
   return {
     slug,
@@ -60,6 +64,15 @@ export function createCroppedUploadCollection({
           width: 480,
           withoutEnlargement: true,
           formatOptions: { format: "webp", options: { quality: 78 } },
+        },
+        {
+          // Exact on-site frame — shown in admin "Preview sizes" and used as a
+          // reference for how the public card crops.
+          name: "frame",
+          width: frame.referenceSize.width,
+          height: frame.referenceSize.height,
+          withoutEnlargement: true,
+          formatOptions: { format: "webp", options: { quality: 82 } },
         },
         {
           name: "card",
@@ -101,27 +114,19 @@ export function createCroppedUploadCollection({
 export const FriendImages = createCroppedUploadCollection({
   slug: "friend-images",
   labels: { singular: "Friend image", plural: "Friend images" },
-  description:
-    "Portraits for featured friends. Crop and focal point frame the card; the stored file is the cropped result.",
 });
 
 export const CharacterImages = createCroppedUploadCollection({
   slug: "character-images",
   labels: { singular: "Character image", plural: "Character images" },
-  description:
-    "Character overview / card portraits (main art). Reference sheets stay in Media so the full sheet is preserved.",
 });
 
 export const ProjectImages = createCroppedUploadCollection({
   slug: "project-images",
   labels: { singular: "Project image", plural: "Project images" },
-  description:
-    "Project cover images. Crop to the card frame; artwork and sheets stay in Media.",
 });
 
 export const SiteImages = createCroppedUploadCollection({
   slug: "site-images",
   labels: { singular: "Site image", plural: "Site images" },
-  description:
-    "Site-wide images such as the default social preview. Crop to the intended share frame.",
 });
