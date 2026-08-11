@@ -10,6 +10,12 @@ import { migrations } from "./migrations";
 import { Artists } from "./payload/collections/Artists";
 import { Artworks } from "./payload/collections/Artworks";
 import { Characters } from "./payload/collections/Characters";
+import {
+  CharacterImages,
+  FriendImages,
+  ProjectImages,
+  SiteImages,
+} from "./payload/collections/croppedUpload";
 import { Friends } from "./payload/collections/Friends";
 import { Media } from "./payload/collections/Media";
 import { Projects } from "./payload/collections/Projects";
@@ -35,7 +41,13 @@ const payloadSecret = process.env.PAYLOAD_SECRET ?? "";
  */
 const storage = s3Storage({
   bucket: process.env.S3_BUCKET ?? "playwolf-media",
-  collections: { media: true },
+  collections: {
+    media: true,
+    "friend-images": true,
+    "character-images": true,
+    "project-images": true,
+    "site-images": true,
+  },
   config: {
     credentials: {
       accessKeyId: process.env.S3_ACCESS_KEY_ID ?? "",
@@ -57,7 +69,20 @@ export default buildConfig({
     },
     user: Users.slug,
   },
-  collections: [Users, Media, Artists, Friends, Tags, Characters, Artworks, Projects],
+  collections: [
+    Users,
+    Media,
+    FriendImages,
+    CharacterImages,
+    ProjectImages,
+    SiteImages,
+    Artists,
+    Friends,
+    Tags,
+    Characters,
+    Artworks,
+    Projects,
+  ],
   db: postgresAdapter({
     pool: {
       connectionString: databaseUrl,

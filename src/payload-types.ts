@@ -69,6 +69,10 @@ export interface Config {
   collections: {
     users: User;
     media: Media;
+    'friend-images': FriendImage;
+    'character-images': CharacterImage;
+    'project-images': ProjectImage;
+    'site-images': SiteImage;
     artists: Artist;
     friends: Friend;
     tags: Tag;
@@ -84,6 +88,10 @@ export interface Config {
   collectionsSelect: {
     users: UsersSelect<false> | UsersSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
+    'friend-images': FriendImagesSelect<false> | FriendImagesSelect<true>;
+    'character-images': CharacterImagesSelect<false> | CharacterImagesSelect<true>;
+    'project-images': ProjectImagesSelect<false> | ProjectImagesSelect<true>;
+    'site-images': SiteImagesSelect<false> | SiteImagesSelect<true>;
     artists: ArtistsSelect<false> | ArtistsSelect<true>;
     friends: FriendsSelect<false> | FriendsSelect<true>;
     tags: TagsSelect<false> | TagsSelect<true>;
@@ -216,6 +224,222 @@ export interface Media {
   };
 }
 /**
+ * Portraits for featured friends. Crop and focal point frame the card; the stored file is the cropped result.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "friend-images".
+ */
+export interface FriendImage {
+  id: number;
+  /**
+   * Describes the image for screen readers and when it fails to load.
+   */
+  alt?: string | null;
+  /**
+   * Generated on upload and used as the `next/image` blur placeholder.
+   */
+  blurDataURL?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+  sizes?: {
+    thumbnail?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    card?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    display?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+  };
+}
+/**
+ * Character overview / card portraits (main art). Reference sheets stay in Media so the full sheet is preserved.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "character-images".
+ */
+export interface CharacterImage {
+  id: number;
+  /**
+   * Describes the image for screen readers and when it fails to load.
+   */
+  alt?: string | null;
+  /**
+   * Generated on upload and used as the `next/image` blur placeholder.
+   */
+  blurDataURL?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+  sizes?: {
+    thumbnail?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    card?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    display?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+  };
+}
+/**
+ * Project cover images. Crop to the card frame; artwork and sheets stay in Media.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "project-images".
+ */
+export interface ProjectImage {
+  id: number;
+  /**
+   * Describes the image for screen readers and when it fails to load.
+   */
+  alt?: string | null;
+  /**
+   * Generated on upload and used as the `next/image` blur placeholder.
+   */
+  blurDataURL?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+  sizes?: {
+    thumbnail?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    card?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    display?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+  };
+}
+/**
+ * Site-wide images such as the default social preview. Crop to the intended share frame.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "site-images".
+ */
+export interface SiteImage {
+  id: number;
+  /**
+   * Describes the image for screen readers and when it fails to load.
+   */
+  alt?: string | null;
+  /**
+   * Generated on upload and used as the `next/image` blur placeholder.
+   */
+  blurDataURL?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+  sizes?: {
+    thumbnail?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    card?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    display?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+  };
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "artists".
  */
@@ -269,9 +493,9 @@ export interface Friend {
    */
   slug: string;
   /**
-   * Portrait shown beside featured artwork. Adjust its focal point in the selected media item to control the visible crop.
+   * Portrait shown beside featured artwork. Upload under Friend images — crop and focal point control the visible frame.
    */
-  image?: (number | null) | Media;
+  image?: (number | null) | FriendImage;
   description?: {
     root: {
       type: string;
@@ -358,7 +582,10 @@ export interface Character {
    * Hero image for the overview card and embeds. Falls back to the first image reference sheet when empty.
    */
   mainArt?: {
-    image?: (number | null) | Media;
+    /**
+     * Overview / card portrait. Upload under Character images to crop the frame. Reference sheets stay on Media.
+     */
+    image?: (number | null) | CharacterImage;
     /**
      * Defaults to the character's name.
      */
@@ -396,6 +623,9 @@ export interface Character {
     sheet?: {
       kind?: ('none' | 'image' | 'wip') | null;
       title?: string | null;
+      /**
+       * Full reference sheet. Stored in Media without cropping so the original stays intact.
+       */
       image?: (number | null) | Media;
       description?: string | null;
       artist?: (number | null) | Artist;
@@ -473,6 +703,9 @@ export interface Character {
     sheet?: {
       kind?: ('none' | 'image' | 'wip') | null;
       title?: string | null;
+      /**
+       * Full reference sheet. Stored in Media without cropping so the original stays intact.
+       */
       image?: (number | null) | Media;
       description?: string | null;
       artist?: (number | null) | Artist;
@@ -665,7 +898,10 @@ export interface Project {
    * One or two lines, shown on the card and in link previews.
    */
   summary?: string | null;
-  coverImage?: (number | null) | Media;
+  /**
+   * Card / hero cover. Upload under Project images so you can crop to the frame.
+   */
+  coverImage?: (number | null) | ProjectImage;
   /**
    * The full write-up, shown on the project's own page.
    */
@@ -756,6 +992,22 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'media';
         value: number | Media;
+      } | null)
+    | ({
+        relationTo: 'friend-images';
+        value: number | FriendImage;
+      } | null)
+    | ({
+        relationTo: 'character-images';
+        value: number | CharacterImage;
+      } | null)
+    | ({
+        relationTo: 'project-images';
+        value: number | ProjectImage;
+      } | null)
+    | ({
+        relationTo: 'site-images';
+        value: number | SiteImage;
       } | null)
     | ({
         relationTo: 'artists';
@@ -853,6 +1105,218 @@ export interface UsersSelect<T extends boolean = true> {
 export interface MediaSelect<T extends boolean = true> {
   alt?: T;
   caption?: T;
+  blurDataURL?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+  sizes?:
+    | T
+    | {
+        thumbnail?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+        card?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+        display?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+      };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "friend-images_select".
+ */
+export interface FriendImagesSelect<T extends boolean = true> {
+  alt?: T;
+  blurDataURL?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+  sizes?:
+    | T
+    | {
+        thumbnail?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+        card?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+        display?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+      };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "character-images_select".
+ */
+export interface CharacterImagesSelect<T extends boolean = true> {
+  alt?: T;
+  blurDataURL?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+  sizes?:
+    | T
+    | {
+        thumbnail?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+        card?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+        display?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+      };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "project-images_select".
+ */
+export interface ProjectImagesSelect<T extends boolean = true> {
+  alt?: T;
+  blurDataURL?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+  sizes?:
+    | T
+    | {
+        thumbnail?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+        card?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+        display?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+      };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "site-images_select".
+ */
+export interface SiteImagesSelect<T extends boolean = true> {
+  alt?: T;
   blurDataURL?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -1229,9 +1693,9 @@ export interface SiteSetting {
     [k: string]: unknown;
   } | null;
   /**
-   * Default social preview image.
+   * Default social preview image. Upload under Site images to crop the share frame (roughly 1200×630).
    */
-  ogImage?: (number | null) | Media;
+  ogImage?: (number | null) | SiteImage;
   links?:
     | {
         kind:

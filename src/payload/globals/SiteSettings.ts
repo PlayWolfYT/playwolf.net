@@ -108,9 +108,10 @@ export const SiteSettings: GlobalConfig = {
             {
               name: "ogImage",
               type: "upload",
-              relationTo: "media",
+              relationTo: "site-images",
               admin: {
-                description: "Default social preview image.",
+                description:
+                  "Default social preview image. Upload under Site images to crop the share frame (roughly 1200×630).",
               },
             },
           ],

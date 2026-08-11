@@ -46,7 +46,11 @@ export const Projects: CollectionConfig = {
     {
       name: "coverImage",
       type: "upload",
-      relationTo: "media",
+      relationTo: "project-images",
+      admin: {
+        description:
+          "Card / hero cover. Upload under Project images so you can crop to the frame.",
+      },
     },
     {
       name: "body",

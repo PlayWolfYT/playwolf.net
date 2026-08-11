@@ -7,14 +7,17 @@ import { revalidateHooks } from "../hooks/revalidate";
 const { afterChange, afterDelete } = revalidateHooks("media");
 
 /**
- * Every image on the site. The uploaded bytes are stored untouched — that copy
- * is what "Open full image" links to — and the derivatives below are the only
- * thing `next/image` is ever pointed at, so the optimizer never has to decode
- * a 15 MB PNG on a cache miss.
+ * Artwork and reference-sheet library. The uploaded bytes are stored untouched
+ * — that copy is what "Open full image" links to — and the derivatives below
+ * are the only thing `next/image` is ever pointed at, so the optimizer never
+ * has to decode a 15 MB PNG on a cache miss.
  *
  * Cropping is deliberately off: Payload's crop tool rewrites the stored
  * original, which would defeat the point. Focal point is kept, since it only
  * influences how the derivatives are framed.
+ *
+ * Framed UI images (friend portraits, character cards, project covers, OG)
+ * live in their own Library collections where crop is enabled.
  */
 export const Media: CollectionConfig = {
   slug: "media",

@@ -4,9 +4,13 @@ import type {
   Artist as StoredArtist,
   Artwork as StoredArtwork,
   Character as StoredCharacter,
+  CharacterImage as StoredCharacterImage,
   Friend as StoredFriend,
+  FriendImage as StoredFriendImage,
   Media as StoredMedia,
   Project as StoredProject,
+  ProjectImage as StoredProjectImage,
+  SiteImage as StoredSiteImage,
   Tag as StoredTag,
 } from "@/payload-types";
 import type {
@@ -90,13 +94,21 @@ function toTag(value: number | StoredTag): Tag | undefined {
   return tag ? { label: tag.label, slug: tag.slug } : undefined;
 }
 
+/** Any upload collection we render through `ImageRef` (media + crop libraries). */
+type StoredUpload =
+  | StoredMedia
+  | StoredFriendImage
+  | StoredCharacterImage
+  | StoredProjectImage
+  | StoredSiteImage;
+
 /**
  * Picks the largest bounded derivative as the render source, falling back to
  * the upload itself — `withoutEnlargement` means an image smaller than every
  * configured size produces no derivatives at all.
  */
 function toImageRef(
-  value: number | StoredMedia | null | undefined,
+  value: number | StoredUpload | null | undefined,
 ): ImageRef | undefined {
   const media = resolved(value);
   if (!media?.url || !media.width || !media.height) return undefined;
