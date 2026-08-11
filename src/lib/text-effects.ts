@@ -63,6 +63,35 @@ export const TEXT_EFFECTS = {
         "0 0 6px rgba(92, 204, 255, 0.75), 0 0 18px rgba(58, 190, 249, 0.45)",
     },
   },
+  shimmer: {
+    label: "Shimmer",
+    className: "fx-shimmer",
+    css: {
+      "background-image":
+        "linear-gradient(105deg, #8a847a 20%, #f7f4ec 45%, #8ad9ff 50%, #f7f4ec 55%, #8a847a 80%)",
+      "background-size": "240% 100%",
+      "-webkit-background-clip": "text",
+      "background-clip": "text",
+      color: "transparent",
+      animation: "fx-shimmer 2.8s ease-in-out infinite",
+    },
+  },
+  float: {
+    label: "Float",
+    className: "fx-float",
+    css: {
+      display: "inline-block",
+      animation: "fx-float 2.4s ease-in-out infinite",
+    },
+  },
+  pulse: {
+    label: "Pulse",
+    className: "fx-pulse",
+    css: {
+      color: "#8ad9ff",
+      animation: "fx-pulse 2s ease-in-out infinite",
+    },
+  },
   gradient: {
     label: "Gradient",
     className: "fx-gradient",

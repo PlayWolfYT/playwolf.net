@@ -60,7 +60,14 @@ describe("gradient helpers", () => {
     expect(parseGradientColorsFromAttr("#aaa,#bbb")).toEqual(["#aaa", "#bbb"]);
   });
 
-  test("gradient maps to fx-gradient", () => {
+  test("maps every editor effect to its public class", () => {
+    expect(textEffectClass("rainbow")).toBe("fx-rainbow");
+    expect(textEffectClass("shake")).toBe("fx-shake");
+    expect(textEffectClass("glow")).toBe("fx-glow");
+    expect(textEffectClass("shimmer")).toBe("fx-shimmer");
+    expect(textEffectClass("float")).toBe("fx-float");
+    expect(textEffectClass("pulse")).toBe("fx-pulse");
     expect(textEffectClass("gradient")).toBe("fx-gradient");
+    expect(textEffectClass("unknown")).toBeUndefined();
   });
 });

@@ -1,5 +1,6 @@
 import { ArtworkCard } from "@/components/ref/ArtworkCard";
 import { ExampleGrid } from "@/components/ref/ExampleGrid";
+import { Reveal } from "@/components/motion/Reveal";
 import { OpenImageLink } from "@/components/ref/OpenImageLink";
 import { SheetPlaceholder } from "@/components/ref/SheetPlaceholder";
 import { RichTextContent } from "@/lib/rich-text";
@@ -38,15 +39,17 @@ export function ProfileView({ profile, profileKey, basePath }: ProfileViewProps)
       ) : null}
 
       {profile.description ? (
-        <section className="mx-auto mt-10 max-w-2xl rounded-2xl border border-glow-500/25 bg-glow-500/10 px-6 py-5 text-center shadow-inner-glow">
-          <h2 className="font-display text-xs font-medium uppercase tracking-[0.28em] text-parchment-dim">
-            About
-          </h2>
-          <RichTextContent
-            className="mt-3 text-sm leading-relaxed text-parchment-muted"
-            value={profile.description}
-          />
-        </section>
+        <Reveal>
+          <section className="mx-auto mt-10 max-w-2xl rounded-2xl border border-glow-500/25 bg-glow-500/10 px-6 py-5 text-center shadow-inner-glow">
+            <h2 className="font-display text-xs font-medium uppercase tracking-[0.28em] text-parchment-dim">
+              About
+            </h2>
+            <RichTextContent
+              className="mt-3 text-sm leading-relaxed text-parchment-muted"
+              value={profile.description}
+            />
+          </section>
+        </Reveal>
       ) : null}
 
       <div className="mt-14">

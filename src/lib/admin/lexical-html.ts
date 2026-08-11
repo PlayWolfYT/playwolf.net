@@ -2,7 +2,8 @@
  * Bridge between Payload Lexical JSON and HTML for TipTap editors.
  * Uses a tiny tag tokenizer so conversion works on the server (no DOM).
  *
- * Text effects (rainbow / shake / glow / gradient) round-trip as
+ * Registered text effects (rainbow / shake / glow / shimmer / float / pulse /
+ * gradient) round-trip as
  * `<span class="fx-*">` and Lexical `$` state (`{ effect: "rainbow" }`).
  * Gradient colour stops live under `$gradientColors`, the Lexical text
  * node's `style` field (full inline gradient CSS), and

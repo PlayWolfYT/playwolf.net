@@ -6,6 +6,7 @@ import Underline from "@tiptap/extension-underline";
 import { EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import {
+  Activity,
   Bold,
   Code2,
   Heading2,
@@ -15,8 +16,10 @@ import {
   List,
   ListOrdered,
   Minus,
+  MoveUp,
   Quote,
   Redo2,
+  ScanLine,
   Sparkles,
   Strikethrough,
   Underline as UnderlineIcon,
@@ -75,12 +78,22 @@ function ToolbarButton({
   );
 }
 
-const FIXED_EFFECTS = ["rainbow", "shake", "glow"] as const satisfies TextEffect[];
+const FIXED_EFFECTS = [
+  "rainbow",
+  "shake",
+  "glow",
+  "shimmer",
+  "float",
+  "pulse",
+] as const satisfies TextEffect[];
 
 const EFFECT_ICONS: Record<(typeof FIXED_EFFECTS)[number], React.ReactNode> = {
   rainbow: <Sparkles className="h-4 w-4" />,
   shake: <Waves className="h-4 w-4" />,
   glow: <Zap className="h-4 w-4" />,
+  shimmer: <ScanLine className="h-4 w-4" />,
+  float: <MoveUp className="h-4 w-4" />,
+  pulse: <Activity className="h-4 w-4" />,
 };
 
 /**
