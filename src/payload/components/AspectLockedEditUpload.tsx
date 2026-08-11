@@ -1,20 +1,31 @@
 "use client";
 
 /**
- * Drop-in replacement for Payload's EditUpload (wired via next.config alias).
- * When the active collection has an entry in `UPLOAD_FRAMES`, the crop rectangle
- * is locked to that aspect ratio so editors see the same frame as the site.
+ * Crop drawer used by `FramedCollectionUpload`. Locks the crop rectangle to
+ * the framed Library collection's on-site aspect ratio.
+ *
+ * Import `useModal` from `@payloadcms/ui` so it shares Payload's ModalProvider
+ * context (a direct `@faceless-ui/modal` import breaks close/open).
  */
 
 import type { UploadEdits } from "payload";
 
-import { useModal } from "@faceless-ui/modal";
-import { Button, PlusIcon, useDocumentInfo, useTranslation } from "@payloadcms/ui";
+import {
+  Button,
+  PlusIcon,
+  useDocumentInfo,
+  useModal,
+  useTranslation,
+} from "@payloadcms/ui";
 import React, { useEffect, useRef, useState } from "react";
 import ReactCrop, { type PercentCrop } from "react-image-crop";
 import "react-image-crop/dist/ReactCrop.css";
 
-import { frameForCollection, type UploadFrame } from "@/payload/uploadFrames";
+import {
+  frameForCollection,
+  getActiveUploadFrame,
+  type UploadFrame,
+} from "@/payload/uploadFrames";
 
 const baseClass = "edit-upload";
 
@@ -104,7 +115,8 @@ export const EditUpload: React.FC<EditUploadProps> = ({
   const { closeModal } = useModal();
   const { t } = useTranslation();
   const { collectionSlug } = useDocumentInfo();
-  const frame = frameProp ?? frameForCollection(collectionSlug);
+  const frame =
+    frameProp ?? getActiveUploadFrame() ?? frameForCollection(collectionSlug);
 
   const [crop, setCrop] = useState<PercentCrop>(() => ({
     ...defaultCrop,
