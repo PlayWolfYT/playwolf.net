@@ -1,13 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono, Outfit } from "next/font/google";
-import { cookies, headers } from "next/headers";
-import { MaintenanceScreen } from "@/components/MaintenanceScreen";
-import { Analytics } from "@/components/site/Analytics";
+import { cookies } from "next/headers";
 import { NsfwConsentProvider } from "@/components/site/NsfwConsent";
-import { SkipToContent } from "@/components/site/SkipToContent";
-import { isPathExcludedFromMaintenance, PATHNAME_HEADER } from "@/lib/maintenance";
 import { NSFW_CONSENT_COOKIE } from "@/lib/nsfw";
-import { getSiteSettings } from "@/lib/references";
 import "../globals.css";
 
 const geistSans = Geist({
@@ -65,9 +60,10 @@ export const viewport: Viewport = {
 };
 
 /**
- * Every public page is rendered per request. The maintenance gate below reads
- * the database on each one, so none of them could be prerendered anyway — and
- * the production image is built without a database to prerender against.
+ * Every public page is rendered per request. The maintenance gate in
+ * `template.tsx` reads the database on each navigation, so none of them could
+ * be prerendered anyway — and the production image is built without a database
+ * to prerender against.
  *
  * This is cheaper than it sounds: the reads behind it are cached and purged by
  * Payload's write hooks, so a request costs a render rather than a query.
@@ -75,27 +71,17 @@ export const viewport: Viewport = {
 export const dynamic = "force-dynamic";
 
 /**
- * Maintenance mode is enforced here rather than on the home page, so it covers
- * every public route at once. Path prefixes listed in site settings
- * (`maintenanceExcludedPaths`, default `/ref`) stay reachable. Payload's own
- * routes live in a different group and are unaffected, which is what keeps
- * `/admin` reachable to turn it back off again.
+ * Shell only: fonts, consent provider, document chrome. Maintenance mode is
+ * enforced in `template.tsx` so soft navigations re-check the current path.
+ * Payload's own routes live in a different group and are unaffected, which
+ * keeps `/admin` reachable to turn maintenance back off.
  */
 export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const [settings, cookieStore, headerStore] = await Promise.all([
-    getSiteSettings(),
-    cookies(),
-    headers(),
-  ]);
-  const { maintenanceMode, maintenanceMessage, maintenanceExcludedPaths } = settings;
-  const pathname = headerStore.get(PATHNAME_HEADER) ?? "/";
-  const showMaintenance =
-    maintenanceMode &&
-    !isPathExcludedFromMaintenance(pathname, maintenanceExcludedPaths);
+  const cookieStore = await cookies();
   const nsfwConsent = cookieStore.get(NSFW_CONSENT_COOKIE)?.value === "1";
 
   return (
@@ -104,15 +90,9 @@ export default async function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} ${outfit.variable} font-sans`}
         suppressHydrationWarning
       >
-        {showMaintenance ? (
-          <MaintenanceScreen message={maintenanceMessage} />
-        ) : (
-          <NsfwConsentProvider initialConsent={nsfwConsent}>
-            <SkipToContent />
-            {children}
-            <Analytics />
-          </NsfwConsentProvider>
-        )}
+        <NsfwConsentProvider initialConsent={nsfwConsent}>
+          {children}
+        </NsfwConsentProvider>
       </body>
     </html>
   );

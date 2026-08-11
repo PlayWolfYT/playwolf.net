@@ -1,10 +1,220 @@
-/* Admin-only styles. Kept separate from the frontend's Tailwind sheet so
-   Payload's own design tokens stay intact.
+/* Admin-only styles (Payload docs: customize via this root stylesheet + CSS
+   variables / BEM). Kept separate from the frontend Tailwind sheet. */
 
-   The keyframes below back the inline `animation` declarations that
-   `TextStateFeature` writes for the rich-text effects (see
-   `src/lib/text-effects.ts`); without them the editor preview would be static
-   while the published page animates. */
+/* ── Brand theme ───────────────────────────────────────────────────────────
+   Accent matches the site's electric cyan. Elevation stays near Payload's
+   defaults so the panel stays readable; only the interactive blue shifts. */
+
+:root {
+  --color-success-500: rgb(21, 135, 186);
+  --color-success-600: rgb(11, 110, 153);
+
+  /* Newer Payload field/button hooks (ignored when absent). */
+  --button-radius: 6px;
+  --field-border-radius: 6px;
+  --popup-radius: 8px;
+}
+
+html[data-theme="light"] {
+  --color-success-250: rgb(125, 204, 248);
+  --color-success-500: rgb(26, 166, 235);
+  --theme-success-500: rgb(26, 166, 235);
+  --theme-success-600: rgb(11, 125, 189);
+}
+
+html[data-theme="dark"] {
+  --color-success-250: rgb(92, 204, 255);
+  --color-success-500: rgb(58, 190, 249);
+  --theme-success-500: rgb(58, 190, 249);
+  --theme-success-600: rgb(92, 204, 255);
+}
+
+/* Nav / brand wordmark weight */
+.nav__brand {
+  letter-spacing: 0.02em;
+}
+
+.btn--style-primary {
+  --color-success-500: rgb(26, 166, 235);
+}
+
+/* ColorPicker field (custom Payload Field component) */
+.color-picker {
+  margin-bottom: var(--base);
+}
+
+.color-picker .react-colorful {
+  width: 160px;
+  height: 160px;
+}
+
+/* Lexical text-effects gradient picker (inline toolbar) */
+.text-effects-gradient {
+  position: relative;
+}
+
+.text-effects-gradient__toggle {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  border-radius: var(--style-radius-s, 4px);
+  color: var(--theme-elevation-800);
+  cursor: pointer;
+  display: inline-flex;
+  height: 28px;
+  justify-content: center;
+  min-width: 28px;
+  padding: 0 4px;
+
+  &:hover,
+  &[aria-pressed="true"],
+  &[aria-expanded="true"] {
+    background: var(--theme-elevation-100);
+    color: var(--theme-elevation-1000);
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.4;
+  }
+}
+
+.text-effects-gradient__panel {
+  background: var(--theme-elevation-0);
+  border: 1px solid var(--theme-elevation-150);
+  border-radius: var(--popup-radius, 8px);
+  bottom: calc(100% + 6px);
+  box-shadow: 0 8px 24px rgb(0 0 0 / 0.12);
+  left: 0;
+  padding: 12px;
+  position: absolute;
+  width: 260px;
+  z-index: 20;
+}
+
+.text-effects-gradient__title {
+  color: var(--theme-elevation-900);
+  font-size: 12px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.text-effects-gradient__hint {
+  color: var(--theme-elevation-600);
+  font-size: 11px;
+  line-height: 1.35;
+  margin: 4px 0 0;
+}
+
+.text-effects-gradient__preview {
+  border: 1px solid var(--theme-elevation-150);
+  border-radius: 6px;
+  height: 22px;
+  margin-top: 10px;
+  width: 100%;
+}
+
+.text-effects-gradient__stops {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  list-style: none;
+  margin: 10px 0 0;
+  padding: 0;
+}
+
+.text-effects-gradient__stop {
+  align-items: center;
+  display: flex;
+  gap: 6px;
+
+  input[type="color"] {
+    background: var(--theme-elevation-0);
+    border: 1px solid var(--theme-elevation-200);
+    border-radius: 4px;
+    cursor: pointer;
+    height: 30px;
+    padding: 2px;
+    width: 36px;
+  }
+
+  input[type="text"] {
+    background: var(--theme-input-bg, var(--theme-elevation-0));
+    border: 1px solid var(--theme-elevation-200);
+    border-radius: 6px;
+    color: var(--theme-elevation-1000);
+    flex: 1;
+    font-family: var(--font-mono, ui-monospace, monospace);
+    font-size: 12px;
+    padding: 6px 8px;
+  }
+
+  button {
+    background: transparent;
+    border: 0;
+    border-radius: 4px;
+    color: var(--theme-elevation-600);
+    cursor: pointer;
+    font-size: 14px;
+    line-height: 1;
+    padding: 4px 6px;
+
+    &:hover:not(:disabled) {
+      background: var(--theme-elevation-100);
+      color: var(--theme-elevation-900);
+    }
+
+    &:disabled {
+      opacity: 0.3;
+    }
+  }
+}
+
+.text-effects-gradient__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+
+  button {
+    background: var(--theme-elevation-50);
+    border: 1px solid var(--theme-elevation-150);
+    border-radius: 6px;
+    color: var(--theme-elevation-800);
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 500;
+    padding: 5px 8px;
+
+    &:hover:not(:disabled) {
+      background: var(--theme-elevation-100);
+    }
+
+    &:disabled {
+      cursor: not-allowed;
+      opacity: 0.4;
+    }
+  }
+}
+
+.text-effects-gradient__apply {
+  background: rgb(26, 166, 235) !important;
+  border-color: rgb(26, 166, 235) !important;
+  color: #fff !important;
+
+  &:hover:not(:disabled) {
+    background: rgb(11, 125, 189) !important;
+  }
+}
+
+.text-effects-gradient__clear {
+  background: transparent !important;
+  border-color: transparent !important;
+  color: var(--theme-error-500, #c84444) !important;
+}
+
+/* ── Rich-text TextStateFeature live preview ───────────────────────────────
+   Keyframes for inline `animation` values from `src/lib/text-effects.ts`. */
 
 @keyframes fx-rainbow {
   from {
@@ -28,5 +238,40 @@
   }
   75% {
     transform: translate(0.04em, 0.03em) rotate(-0.6deg);
+  }
+}
+
+@keyframes fx-shimmer {
+  0%,
+  15% {
+    background-position: 100% 50%;
+  }
+  70%,
+  100% {
+    background-position: -100% 50%;
+  }
+}
+
+@keyframes fx-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-0.16em);
+  }
+}
+
+@keyframes fx-pulse {
+  0%,
+  100% {
+    opacity: 0.75;
+    text-shadow: 0 0 4px rgba(92, 204, 255, 0.35);
+  }
+  50% {
+    opacity: 1;
+    text-shadow:
+      0 0 8px rgba(138, 217, 255, 0.85),
+      0 0 24px rgba(58, 190, 249, 0.6);
   }
 }

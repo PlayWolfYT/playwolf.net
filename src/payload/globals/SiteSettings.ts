@@ -1,9 +1,10 @@
 import type { FieldAccess, GlobalConfig } from "payload";
 
+import { sendNotification } from "../../lib/notify";
 import { anyone, authenticated } from "../access";
 import { richTextEditor } from "../editor";
 import { linksField } from "../fields/links";
-import { withStudioCondition } from "../fields/studioCondition";
+import { withAdminCondition } from "../fields/adminCondition";
 import { revalidateGlobalAfterChange } from "../hooks/revalidate";
 
 /** Secrets stay off unauthenticated reads (REST/GraphQL/local without a user). */
@@ -27,6 +28,32 @@ export const SiteSettings: GlobalConfig = {
   hooks: {
     afterChange: [revalidateGlobalAfterChange("siteSettings")],
   },
+  endpoints: [
+    {
+      path: "/test-notification",
+      method: "post",
+      handler: async (req) => {
+        if (!req.user) {
+          return Response.json({ error: "Unauthorized." }, { status: 401 });
+        }
+
+        const settings = await req.payload.findGlobal({
+          slug: "siteSettings",
+          overrideAccess: true,
+          req,
+        });
+
+        const result = await sendNotification(settings.notifications, {
+          title: "playwolf.net test notification",
+          message:
+            "This is a test notification from the Site Settings admin. If you received it, delivery is working.",
+          priority: 3,
+        });
+
+        return Response.json(result, { status: result.ok ? 200 : 502 });
+      },
+    },
+  ],
   fields: [
     {
       type: "tabs",
@@ -43,12 +70,11 @@ export const SiteSettings: GlobalConfig = {
                   "Serves the maintenance screen to visitors. The admin stays reachable.",
               },
             },
-            withStudioCondition(
+            withAdminCondition(
               { name: "maintenanceMessage", type: "textarea" },
-              { kind: "rootTruthy", field: "maintenanceMode" },
               (data) => Boolean(data?.maintenanceMode),
             ),
-            withStudioCondition(
+            withAdminCondition(
               {
                 name: "maintenanceExcludedPaths",
                 type: "text",
@@ -59,7 +85,6 @@ export const SiteSettings: GlobalConfig = {
                     "Path prefixes that stay reachable during maintenance (exact match or subpaths). Defaults to /ref. Clear the list to put every public route behind the screen.",
                 },
               },
-              { kind: "rootTruthy", field: "maintenanceMode" },
               (data) => Boolean(data?.maintenanceMode),
             ),
           ],
@@ -97,6 +122,17 @@ export const SiteSettings: GlobalConfig = {
         {
           label: "Notifications",
           fields: [
+            {
+              name: "testNotification",
+              type: "ui",
+              label: "Test notification",
+              admin: {
+                components: {
+                  Field:
+                    "@/payload/components/TestNotificationButton#TestNotificationButton",
+                },
+              },
+            },
             {
               name: "notifications",
               type: "group",

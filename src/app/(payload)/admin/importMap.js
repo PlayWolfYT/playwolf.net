@@ -14,9 +14,10 @@ import { OrderedListFeatureClient as OrderedListFeatureClient_e70f5e05f09f93e00b
 import { HorizontalRuleFeatureClient as HorizontalRuleFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
 import { LinkFeatureClient as LinkFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
 import { InlineToolbarFeatureClient as InlineToolbarFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
-import { TextStateFeatureClient as TextStateFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
+import { TextEffectsFeatureClient as TextEffectsFeatureClient_d513deefb47bcf2cece10f0197c51b55 } from '@/payload/lexical/textEffects/feature.client'
 import { ColorPicker as ColorPicker_f772357a6881d7587c9d743ce8b90802 } from '@/payload/components/ColorPicker'
 import { IconPicker as IconPicker_e9e2bf969415f060c7a102f3cdbba7fa } from '@/payload/components/IconPicker'
+import { TestNotificationButton as TestNotificationButton_b28b746fc72afc26dbe302aa66aaed07 } from '@/payload/components/TestNotificationButton'
 import { S3ClientUploadHandler as S3ClientUploadHandler_f97aa6c64367fa259c5bc0567239ef24 } from '@payloadcms/storage-s3/client'
 import { CollectionCards as CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1 } from '@payloadcms/next/rsc'
 
@@ -38,9 +39,10 @@ export const importMap = {
   "@payloadcms/richtext-lexical/client#HorizontalRuleFeatureClient": HorizontalRuleFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
   "@payloadcms/richtext-lexical/client#LinkFeatureClient": LinkFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
   "@payloadcms/richtext-lexical/client#InlineToolbarFeatureClient": InlineToolbarFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
-  "@payloadcms/richtext-lexical/client#TextStateFeatureClient": TextStateFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
+  "@/payload/lexical/textEffects/feature.client#TextEffectsFeatureClient": TextEffectsFeatureClient_d513deefb47bcf2cece10f0197c51b55,
   "@/payload/components/ColorPicker#ColorPicker": ColorPicker_f772357a6881d7587c9d743ce8b90802,
   "@/payload/components/IconPicker#IconPicker": IconPicker_e9e2bf969415f060c7a102f3cdbba7fa,
+  "@/payload/components/TestNotificationButton#TestNotificationButton": TestNotificationButton_b28b746fc72afc26dbe302aa66aaed07,
   "@payloadcms/storage-s3/client#S3ClientUploadHandler": S3ClientUploadHandler_f97aa6c64367fa259c5bc0567239ef24,
   "@payloadcms/next/rsc#CollectionCards": CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1
 }

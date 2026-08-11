@@ -5,7 +5,7 @@ import { addInterval, type ReminderUnit } from "@/lib/reminders";
 import { anyone, authenticated } from "../access";
 import { wipFields } from "../fields/profile";
 import { slugField } from "../fields/slug";
-import { withStudioCondition } from "../fields/studioCondition";
+import { withAdminCondition } from "../fields/adminCondition";
 import { bySlug, revalidateHooks } from "../hooks/revalidate";
 
 const { afterChange, afterDelete } = revalidateHooks("artworks", {
@@ -196,7 +196,7 @@ export const Artworks: CollectionConfig = {
         description: "Final artwork. Required once the piece is marked complete.",
       },
     },
-    withStudioCondition(
+    withAdminCondition(
       {
         name: "commission",
         type: "group",
@@ -232,7 +232,6 @@ export const Artworks: CollectionConfig = {
           },
         ],
       },
-      { kind: "siblingEq", field: "lifecycle", value: "in_progress" },
       (_, siblingData) => siblingData?.lifecycle === "in_progress",
     ),
     {
@@ -265,7 +264,7 @@ export const Artworks: CollectionConfig = {
         },
       ],
     },
-    withStudioCondition(
+    withAdminCondition(
       {
         name: "overviewDisplay",
         type: "select",
@@ -278,10 +277,9 @@ export const Artworks: CollectionConfig = {
           description: "What the overview / gallery card shows while in progress.",
         },
       },
-      { kind: "siblingEq", field: "lifecycle", value: "in_progress" },
       (_, siblingData) => siblingData?.lifecycle === "in_progress",
     ),
-    withStudioCondition(
+    withAdminCondition(
       {
         name: "overviewWipImage",
         type: "upload",
@@ -290,25 +288,17 @@ export const Artworks: CollectionConfig = {
           description: "Should be one of the WIP sketches above.",
         },
       },
-      {
-        kind: "and",
-        conditions: [
-          { kind: "siblingEq", field: "lifecycle", value: "in_progress" },
-          { kind: "siblingEq", field: "overviewDisplay", value: "wipImage" },
-        ],
-      },
       (_, siblingData) =>
         siblingData?.lifecycle === "in_progress" &&
         siblingData?.overviewDisplay === "wipImage",
     ),
-    withStudioCondition(
+    withAdminCondition(
       {
         name: "wipPlaceholder",
         type: "group",
         label: "Placeholder options",
         fields: wipFields,
       },
-      { kind: "siblingEq", field: "lifecycle", value: "in_progress" },
       (_, siblingData) => siblingData?.lifecycle === "in_progress",
     ),
     {
@@ -321,7 +311,7 @@ export const Artworks: CollectionConfig = {
           "When the piece is finished, still show the WIP sketches on the public detail page.",
       },
     },
-    withStudioCondition(
+    withAdminCondition(
       {
         name: "reminder",
         type: "group",
@@ -379,7 +369,6 @@ export const Artworks: CollectionConfig = {
           },
         ],
       },
-      { kind: "siblingEq", field: "lifecycle", value: "in_progress" },
       (_, siblingData) => siblingData?.lifecycle === "in_progress",
     ),
     {
