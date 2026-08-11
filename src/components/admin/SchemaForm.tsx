@@ -26,7 +26,11 @@ import {
   saveCollectionDocumentAction,
   saveGlobalDocumentAction,
 } from "@/lib/admin/actions/documents";
-import { isStudioRichText, type StudioRichText } from "@/lib/admin/document";
+import {
+  isStudioRichText,
+  toDateTimeLocalValue,
+  type StudioRichText,
+} from "@/lib/admin/document";
 import { matchStudioCondition, type AdminField } from "@/lib/admin/schema";
 
 type SchemaFormProps = {
@@ -395,11 +399,14 @@ export function SchemaForm({
       }
 
       if (field.type === "date") {
+        // Form state holds the datetime-local string itself. Converting to ISO
+        // on every keystroke rewrites the controlled value and clears the
+        // browser's pending digit buffer (day "1"+"7" became "7", not "17").
         const dateValue =
-          typeof value === "string" && value
-            ? value.slice(0, 16)
+          typeof value === "string"
+            ? value
             : value instanceof Date
-              ? value.toISOString().slice(0, 16)
+              ? toDateTimeLocalValue(value)
               : "";
         return (
           <Field
@@ -417,9 +424,7 @@ export function SchemaForm({
               onChange={(event) =>
                 patch(
                   fieldPath,
-                  event.target.value
-                    ? new Date(event.target.value).toISOString()
-                    : null,
+                  event.target.value === "" ? null : event.target.value,
                 )
               }
             />

@@ -11,6 +11,29 @@ import type { RichTextValue } from "@/lib/content";
 export type { StudioRichText };
 export { isStudioRichText };
 
+/**
+ * Format a Date / ISO string as `YYYY-MM-DDTHH:mm` in local wall time for
+ * `<input type="datetime-local">`. Keeping that string in form state (instead
+ * of round-tripping through `toISOString()` on every keystroke) preserves the
+ * browser's multi-digit segment buffer — e.g. typing 1 then 7 into the day
+ * becomes 17, not 07.
+ */
+export function toDateTimeLocalValue(value: unknown): string {
+  if (value == null || value === "") return "";
+  const date = value instanceof Date ? value : new Date(String(value));
+  if (Number.isNaN(date.getTime())) return "";
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+}
+
+/** Parse a datetime-local string (local wall time) to ISO UTC for Payload. */
+export function fromDateTimeLocalValue(value: string): string | null {
+  if (!value) return null;
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return null;
+  return date.toISOString();
+}
+
 function idOf(value: unknown): number | string | null {
   if (typeof value === "number" && Number.isFinite(value)) return value;
   if (typeof value === "string" && value.trim() !== "") {
@@ -128,6 +151,18 @@ export function documentToFormValues(
         continue;
       }
 
+      if (field.type === "date") {
+        const sourceValue =
+          raw === undefined && field.defaultValue !== undefined
+            ? field.defaultValue
+            : raw;
+        into[field.name] =
+          sourceValue == null || sourceValue === ""
+            ? null
+            : toDateTimeLocalValue(sourceValue) || null;
+        continue;
+      }
+
       if (raw === undefined && field.defaultValue !== undefined) {
         into[field.name] = field.defaultValue;
         continue;
@@ -219,6 +254,19 @@ export function formValuesToDocument(
         } else {
           const parsed = Number(raw);
           into[field.name] = Number.isFinite(parsed) ? parsed : null;
+        }
+        continue;
+      }
+
+      if (field.type === "date") {
+        if (raw == null || raw === "") {
+          into[field.name] = null;
+        } else if (typeof raw === "string") {
+          into[field.name] = fromDateTimeLocalValue(raw);
+        } else if (raw instanceof Date) {
+          into[field.name] = Number.isNaN(raw.getTime()) ? null : raw.toISOString();
+        } else {
+          into[field.name] = null;
         }
         continue;
       }

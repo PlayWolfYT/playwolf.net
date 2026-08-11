@@ -1,7 +1,12 @@
 import { describe, expect, test } from "bun:test";
 import type { Field } from "payload";
 
-import { documentToFormValues, formValuesToDocument } from "@/lib/admin/document";
+import {
+  documentToFormValues,
+  formValuesToDocument,
+  fromDateTimeLocalValue,
+  toDateTimeLocalValue,
+} from "@/lib/admin/document";
 import { serializeFields } from "@/lib/admin/schema";
 import { matchStudioCondition } from "@/payload/fields/studioCondition";
 
@@ -150,6 +155,49 @@ describe("document round-trip", () => {
       count: 3,
       artist: 9,
       tags: [1, 2],
+    });
+  });
+});
+
+describe("datetime-local form values", () => {
+  const fields = serializeFields([
+    {
+      name: "lastArtistUpdateAt",
+      type: "date",
+      admin: { date: { pickerAppearance: "dayAndTime" } },
+    },
+  ]);
+
+  test("toDateTimeLocalValue uses local wall time, not UTC slice", () => {
+    const local = new Date(2026, 7, 17, 9, 5);
+    expect(toDateTimeLocalValue(local)).toBe("2026-08-17T09:05");
+    expect(toDateTimeLocalValue(local.toISOString())).toBe("2026-08-17T09:05");
+  });
+
+  test("documentToFormValues keeps a datetime-local string for the input", () => {
+    const local = new Date(2026, 7, 17, 14, 30);
+    const values = documentToFormValues(
+      { lastArtistUpdateAt: local.toISOString() },
+      fields,
+    );
+    expect(values.lastArtistUpdateAt).toBe("2026-08-17T14:30");
+  });
+
+  test("formValuesToDocument converts datetime-local back to ISO", () => {
+    const data = formValuesToDocument(
+      { lastArtistUpdateAt: "2026-08-17T14:30" },
+      fields,
+    );
+    expect(data.lastArtistUpdateAt).toBe(fromDateTimeLocalValue("2026-08-17T14:30"));
+    expect(data.lastArtistUpdateAt).toBe(new Date(2026, 7, 17, 14, 30).toISOString());
+  });
+
+  test("empty date clears to null both ways", () => {
+    expect(documentToFormValues({ lastArtistUpdateAt: null }, fields)).toEqual({
+      lastArtistUpdateAt: null,
+    });
+    expect(formValuesToDocument({ lastArtistUpdateAt: "" }, fields)).toEqual({
+      lastArtistUpdateAt: null,
     });
   });
 });
