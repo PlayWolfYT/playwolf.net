@@ -69,7 +69,7 @@ export const Characters: CollectionConfig = {
           relationTo: "character-images",
           admin: {
             description:
-              "Overview / card portrait. Upload under Character images to crop the frame. Reference sheets stay on Media.",
+              "Overview / card portrait. Upload under Character images — crop is locked to 1:1 to match the card. Reference sheets stay on Media.",
           },
         },
         {

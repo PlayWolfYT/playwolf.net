@@ -36,11 +36,11 @@ export function FeaturedFriends({ example }: { example: Example }) {
             <li key={friend.slug}>
               <article
                 id={`friend-${friend.slug}`}
-                className="scroll-mt-24 overflow-hidden rounded-3xl border border-white/[0.07] bg-gradient-to-br from-void-lift/90 to-void-panel/70 shadow-glow-sm backdrop-blur-xl md:grid md:min-h-72 md:grid-cols-2"
+                className="scroll-mt-24 overflow-hidden rounded-3xl border border-white/[0.07] bg-gradient-to-br from-void-lift/90 to-void-panel/70 shadow-glow-sm backdrop-blur-xl md:grid md:grid-cols-2 md:items-stretch"
               >
                 {friend.image ? (
                   <div
-                    className={`relative min-h-64 overflow-hidden bg-void-lift/60 md:min-h-full ${
+                    className={`relative aspect-[4/5] overflow-hidden bg-void-lift/60 ${
                       imageOnRight ? "md:order-2" : ""
                     }`}
                   >
