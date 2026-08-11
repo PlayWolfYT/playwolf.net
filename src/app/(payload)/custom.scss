@@ -83,13 +83,15 @@ html[data-theme="dark"] {
   background: var(--theme-elevation-0);
   border: 1px solid var(--theme-elevation-150);
   border-radius: var(--popup-radius, 8px);
-  bottom: calc(100% + 6px);
   box-shadow: 0 8px 24px rgb(0 0 0 / 0.12);
-  left: 0;
   padding: 12px;
-  position: absolute;
   width: 260px;
-  z-index: 20;
+  z-index: 1000;
+}
+
+/* Portaled to document.body so it survives floating-toolbar unmount. */
+.text-effects-gradient__panel--portal {
+  position: fixed;
 }
 
 .text-effects-gradient__title {

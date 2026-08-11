@@ -23,8 +23,9 @@ type CroppedUploadOptions = {
  * Artwork and reference sheets stay on `media`, where crop is off so the
  * untouched original remains available for "Open full image".
  *
- * Each collection maps to a fixed on-site aspect ratio (`UPLOAD_FRAMES`); the
- * admin crop UI locks to that ratio via `FramedCollectionUpload`.
+ * Each collection maps to a fixed on-site aspect ratio (`UPLOAD_FRAMES`).
+ * `FramedCollectionUpload` replaces the stock Upload so the crop drawer uses
+ * `AspectLockedEditUpload` with that frame.
  */
 export function createCroppedUploadCollection({
   slug,

@@ -3,13 +3,15 @@
 /**
  * Replaces Payload's default collection Upload for framed Libraries so the
  * crop drawer uses `AspectLockedEditUpload` with an explicit aspect ratio.
- * (Webpack/Turbopack aliases cannot intercept Payload's relative EditUpload
- * import, which is why the earlier next.config alias never took effect.)
+ *
+ * Important: import `useModal` from `@payloadcms/ui` (not `@faceless-ui/modal`).
+ * Payload's ModalProvider is the copy bundled into the UI package; a direct
+ * `@faceless-ui/modal` import gets a different React context, so `openModal`
+ * is undefined ("p is not a function") on Edit Image.
  */
 
 import type { FormState, SanitizedCollectionConfig, UploadEdits } from "payload";
 
-import { useModal } from "@faceless-ui/modal";
 import {
   Button,
   Drawer,
@@ -25,11 +27,14 @@ import {
   useField,
   useForm,
   useFormProcessing,
+  useModal,
   useTranslation,
-  useUploadControls,
   useUploadEdits,
 } from "@payloadcms/ui";
-import { UploadControlsProvider } from "@payloadcms/ui/providers/UploadControls";
+import {
+  UploadControlsProvider,
+  useUploadControls,
+} from "@payloadcms/ui/providers/UploadControls";
 import { formatAdminURL, isImage } from "payload/shared";
 import React, { Fragment, useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
