@@ -25,11 +25,11 @@ from `.env`. Do **not** use `docker-compose.dev.yml` on Coolify.
 
 The Cloud VM does not have Docker. Three long-running processes are involved:
 
-| Service                           | Purpose                                            | How it runs in this VM                                      | Port                                  |
-| --------------------------------- | -------------------------------------------------- | ----------------------------------------------------------- | ------------------------------------- |
-| Next.js + Payload (`bun run dev`) | The app, custom admin (`/admin`), REST/GraphQL API | started manually                                            | `3000`                                |
-| PostgreSQL 16                     | All Payload collections + `siteSettings`           | apt-installed cluster, **not** started by the update script | `5432`                                |
-| Garage (S3)                       | Object storage for media uploads                   | static binary at `/tmp/garage`, config in `~/.garage`       | `3900` (S3), `3901` RPC, `3903` admin |
+| Service                           | Purpose                                             | How it runs in this VM                                      | Port                                  |
+| --------------------------------- | --------------------------------------------------- | ----------------------------------------------------------- | ------------------------------------- |
+| Next.js + Payload (`bun run dev`) | The app, Payload admin (`/admin`), REST/GraphQL API | started manually                                            | `3000`                                |
+| PostgreSQL 16                     | All Payload collections + `siteSettings`            | apt-installed cluster, **not** started by the update script | `5432`                                |
+| Garage (S3)                       | Object storage for media uploads                    | static binary at `/tmp/garage`, config in `~/.garage`       | `3900` (S3), `3901` RPC, `3903` admin |
 
 Postgres and Garage are only needed at runtime. The environment's `start` script now
 brings both up on every boot (idempotently) and syncs the local Garage S3 key into `.env`,
@@ -60,9 +60,9 @@ fails at _upload time_, so the app still boots and renders without Garage runnin
   pushes schema changes directly on first connect — do **not** run `bun run migrate` locally
   (migrations only apply in production via `prodMigrations`). The first request after boot
   is slow ("Pulling schema from database…") while it syncs.
-- **First `/admin` visit on an empty DB** shows the custom admin's "create first user" form —
+- **First `/admin` visit on an empty DB** shows Payload's create-first-user form —
   there is no seed/CLI step. `smoke-seed.ts` seeds sample content but does not create a user.
-  The stock Payload admin UI is removed; `/admin` is a schema-driven studio over the Local API.
+  Admin styling lives in `src/app/(payload)/custom.scss` (CSS variables / BEM per Payload docs).
 - **Commission reminders** hit `GET/POST /api/cron/commission-reminders` with
   `Authorization: Bearer $CRON_SECRET` (or `x-cron-secret`). Schedule daily in Coolify.
 - **Frontend content is cached with `unstable_cache`** and refreshed via `revalidateTag`

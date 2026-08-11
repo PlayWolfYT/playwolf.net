@@ -1,7 +1,7 @@
 import type { Field } from "payload";
 
 import { richTextEditor } from "../editor";
-import { withStudioCondition } from "./studioCondition";
+import { withAdminCondition } from "./adminCondition";
 
 // Resolved by Next when the generated import map is compiled, not by the
 // Payload CLI — so these stay on the `@/` alias rather than a relative path.
@@ -136,34 +136,29 @@ const sheetField: Field = {
         { label: "Work in progress", value: "wip" },
       ],
     },
-    withStudioCondition(
+    withAdminCondition(
       { name: "title", type: "text" },
-      { kind: "siblingNeq", field: "kind", value: "none" },
       (_, siblingData) => siblingData?.kind !== "none",
     ),
-    withStudioCondition(
+    withAdminCondition(
       { name: "image", type: "upload", relationTo: "media" },
-      { kind: "siblingEq", field: "kind", value: "image" },
       (_, siblingData) => siblingData?.kind === "image",
     ),
-    withStudioCondition(
+    withAdminCondition(
       { name: "description", type: "textarea" },
-      { kind: "siblingNeq", field: "kind", value: "none" },
       (_, siblingData) => siblingData?.kind !== "none",
     ),
-    withStudioCondition(
+    withAdminCondition(
       { name: "artist", type: "relationship", relationTo: "artists" },
-      { kind: "siblingNeq", field: "kind", value: "none" },
       (_, siblingData) => siblingData?.kind !== "none",
     ),
-    withStudioCondition(
+    withAdminCondition(
       {
         name: "wip",
         type: "group",
         label: "Placeholder options",
         fields: wipFields,
       },
-      { kind: "siblingEq", field: "kind", value: "wip" },
       (_, siblingData) => siblingData?.kind === "wip",
     ),
   ],
