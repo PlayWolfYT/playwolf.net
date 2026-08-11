@@ -224,7 +224,7 @@ export interface Media {
   };
 }
 /**
- * Portraits for featured friends. Crop and focal point frame the card; the stored file is the cropped result.
+ * Featured friend portrait beside artwork. Crop is locked to 4:5 (about 960×1200). What you select is what appears on the site.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "friend-images".
@@ -259,6 +259,14 @@ export interface FriendImage {
       filesize?: number | null;
       filename?: string | null;
     };
+    frame?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
     card?: {
       url?: string | null;
       width?: number | null;
@@ -278,7 +286,7 @@ export interface FriendImage {
   };
 }
 /**
- * Character overview / card portraits (main art). Reference sheets stay in Media so the full sheet is preserved.
+ * Character overview card. Crop is locked to 1:1 (about 1200×1200). What you select is what appears on the site.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "character-images".
@@ -313,6 +321,14 @@ export interface CharacterImage {
       filesize?: number | null;
       filename?: string | null;
     };
+    frame?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
     card?: {
       url?: string | null;
       width?: number | null;
@@ -332,7 +348,7 @@ export interface CharacterImage {
   };
 }
 /**
- * Project cover images. Crop to the card frame; artwork and sheets stay in Media.
+ * Project cover on /projects. Crop is locked to 16:9 (about 1600×900). What you select is what appears on the site.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "project-images".
@@ -367,6 +383,14 @@ export interface ProjectImage {
       filesize?: number | null;
       filename?: string | null;
     };
+    frame?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
     card?: {
       url?: string | null;
       width?: number | null;
@@ -386,7 +410,7 @@ export interface ProjectImage {
   };
 }
 /**
- * Site-wide images such as the default social preview. Crop to the intended share frame.
+ * Default social / Open Graph preview. Crop is locked to 1.91:1 (about 1200×630). What you select is what appears on the site.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "site-images".
@@ -414,6 +438,14 @@ export interface SiteImage {
   focalY?: number | null;
   sizes?: {
     thumbnail?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    frame?: {
       url?: string | null;
       width?: number | null;
       height?: number | null;
@@ -493,7 +525,7 @@ export interface Friend {
    */
   slug: string;
   /**
-   * Portrait shown beside featured artwork. Upload under Friend images — crop and focal point control the visible frame.
+   * Portrait beside featured artwork. Upload under Friend images — crop is locked to 4:5 to match the site card (~960×1200).
    */
   image?: (number | null) | FriendImage;
   description?: {
@@ -583,7 +615,7 @@ export interface Character {
    */
   mainArt?: {
     /**
-     * Overview / card portrait. Upload under Character images to crop the frame. Reference sheets stay on Media.
+     * Overview / card portrait. Upload under Character images — crop is locked to 1:1 to match the card. Reference sheets stay on Media.
      */
     image?: (number | null) | CharacterImage;
     /**
@@ -899,7 +931,7 @@ export interface Project {
    */
   summary?: string | null;
   /**
-   * Card / hero cover. Upload under Project images so you can crop to the frame.
+   * Card / hero cover. Upload under Project images — crop is locked to 16:9 to match the project cards.
    */
   coverImage?: (number | null) | ProjectImage;
   /**
@@ -1183,6 +1215,16 @@ export interface FriendImagesSelect<T extends boolean = true> {
               filesize?: T;
               filename?: T;
             };
+        frame?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
         card?:
           | T
           | {
@@ -1227,6 +1269,16 @@ export interface CharacterImagesSelect<T extends boolean = true> {
     | T
     | {
         thumbnail?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+        frame?:
           | T
           | {
               url?: T;
@@ -1289,6 +1341,16 @@ export interface ProjectImagesSelect<T extends boolean = true> {
               filesize?: T;
               filename?: T;
             };
+        frame?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
         card?:
           | T
           | {
@@ -1333,6 +1395,16 @@ export interface SiteImagesSelect<T extends boolean = true> {
     | T
     | {
         thumbnail?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+        frame?:
           | T
           | {
               url?: T;
@@ -1693,7 +1765,7 @@ export interface SiteSetting {
     [k: string]: unknown;
   } | null;
   /**
-   * Default social preview image. Upload under Site images to crop the share frame (roughly 1200×630).
+   * Default social preview. Upload under Site images — crop is locked to 1.91:1 (1200×630).
    */
   ogImage?: (number | null) | SiteImage;
   links?:
