@@ -1,3 +1,4 @@
+import { FramedCollectionUpload as FramedCollectionUpload_b064e9bca111c472b3d235f91786edb8 } from '@/payload/components/FramedCollectionUpload'
 import { LinkRowLabel as LinkRowLabel_43de0e37a61ccfd58b4c0198aff5fb7e } from '@/payload/components/LinkRowLabel'
 import { RscEntryLexicalCell as RscEntryLexicalCell_44fe37237e0ebf4470c9990d8cb7b07e } from '@payloadcms/richtext-lexical/rsc'
 import { RscEntryLexicalField as RscEntryLexicalField_44fe37237e0ebf4470c9990d8cb7b07e } from '@payloadcms/richtext-lexical/rsc'
@@ -23,6 +24,7 @@ import { CollectionCards as CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1 } f
 
 /** @type import('payload').ImportMap */
 export const importMap = {
+  "@/payload/components/FramedCollectionUpload#FramedCollectionUpload": FramedCollectionUpload_b064e9bca111c472b3d235f91786edb8,
   "@/payload/components/LinkRowLabel#LinkRowLabel": LinkRowLabel_43de0e37a61ccfd58b4c0198aff5fb7e,
   "@payloadcms/richtext-lexical/rsc#RscEntryLexicalCell": RscEntryLexicalCell_44fe37237e0ebf4470c9990d8cb7b07e,
   "@payloadcms/richtext-lexical/rsc#RscEntryLexicalField": RscEntryLexicalField_44fe37237e0ebf4470c9990d8cb7b07e,
