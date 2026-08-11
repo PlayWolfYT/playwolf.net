@@ -64,6 +64,19 @@ describe("lexicalToHtml / htmlToLexical", () => {
     expect(lexicalToHtml(lexical)).toContain('class="fx-rainbow"');
   });
 
+  test("round-trips every animated WYSIWYG effect", () => {
+    for (const effect of ["shake", "glow", "shimmer", "float", "pulse"] as const) {
+      const lexical = htmlToLexical(
+        `<p><span class="fx-${effect}">Animated</span></p>`,
+      );
+      const paragraph = (lexical.root.children as Array<{ children?: unknown[] }>)[0];
+      const text = paragraph?.children?.[0] as Record<string, unknown>;
+      const state = text?.[NODE_STATE_KEY] as Record<string, unknown> | undefined;
+      expect(state?.[TEXT_EFFECT_STATE_KEY]).toBe(effect);
+      expect(lexicalToHtml(lexical)).toContain(`class="fx-${effect}"`);
+    }
+  });
+
   test("preserves horizontal rules", () => {
     const html = "<p>Above</p><hr><p>Below</p>";
     const lexical = htmlToLexical(html);

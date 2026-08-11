@@ -1,3 +1,5 @@
+import { Aurora } from "@/components/motion/Aurora";
+
 type BrandBackdropProps = {
   /** Larger orbs + stronger rim for the maintenance hero */
   density?: "full" | "soft";
@@ -8,6 +10,7 @@ export function BrandBackdrop({ density = "full" }: BrandBackdropProps) {
 
   return (
     <>
+      <Aurora />
       <div
         className="pointer-events-none absolute inset-0 bg-[size:56px_56px] bg-grid-soft opacity-90"
         aria-hidden
