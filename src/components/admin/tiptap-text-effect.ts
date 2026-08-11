@@ -3,7 +3,7 @@ import { Mark, mergeAttributes } from "@tiptap/core";
 import {
   DEFAULT_GRADIENT_COLORS,
   TEXT_EFFECTS,
-  gradientStopsStyle,
+  gradientTextStyle,
   isTextEffect,
   normalizeGradientColors,
   parseGradientColorsFromAttr,
@@ -24,7 +24,7 @@ declare module "@tiptap/core" {
 /**
  * TipTap mark that maps onto Payload's TextStateFeature `effect` keys via
  * the public `fx-*` class names. The `gradient` effect also carries colour
- * stops (`colors`) as a CSS variable + data attribute for round-trips.
+ * stops (`colors`) as full inline gradient CSS + data attribute for round-trips.
  */
 export const TextEffectMark = Mark.create({
   name: "textEffect",
@@ -82,7 +82,8 @@ export const TextEffectMark = Mark.create({
       const colors = normalizeGradientColors(HTMLAttributes.colors) ?? [
         ...DEFAULT_GRADIENT_COLORS,
       ];
-      attrs.style = gradientStopsStyle(colors);
+      // Full inline CSS so the editor paints without CSS-variable fallbacks.
+      attrs.style = gradientTextStyle(colors);
       attrs["data-gradient-colors"] = colors.join(",");
     }
 

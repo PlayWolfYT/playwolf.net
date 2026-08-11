@@ -94,12 +94,14 @@ body {
     0 0 18px rgb(var(--accent-500) / 0.45);
 }
 
-/* Custom colour stops come from `--fx-gradient-stops` (set inline). */
+/*
+ * Default stops for `.fx-gradient`. Real colours are also written as full
+ * inline `background-image` / `background-clip` / `color` by the TipTap mark
+ * and the Lexical HTML bridge — don't use `var(--x, #a, #b)` fallbacks here:
+ * commas break CSS custom-property fallback parsing.
+ */
 .fx-gradient {
-  background-image: linear-gradient(
-    90deg,
-    var(--fx-gradient-stops, #ff5f6d, #5cccff, #b47cff)
-  );
+  background-image: linear-gradient(90deg, #ff5f6d, #5cccff, #b47cff);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;

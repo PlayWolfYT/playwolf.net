@@ -4,9 +4,10 @@
  *
  * Text effects (rainbow / shake / glow / gradient) round-trip as
  * `<span class="fx-*">` and Lexical `$` state (`{ effect: "rainbow" }`).
- * Gradient colour stops live under `$gradientColors` and as
- * `--fx-gradient-stops` / `data-gradient-colors` in HTML. Extra span
- * classes/styles ride along as `$htmlClass` / `$htmlStyle`.
+ * Gradient colour stops live under `$gradientColors`, the Lexical text
+ * node's `style` field (full inline gradient CSS), and
+ * `data-gradient-colors` in HTML. Extra span classes/styles ride along as
+ * `$htmlClass` / `$htmlStyle`.
  */
 
 import type { RichTextValue } from "@/lib/content";
@@ -15,7 +16,7 @@ import {
   NODE_STATE_KEY,
   TEXT_EFFECT_STATE_KEY,
   TEXT_EFFECTS,
-  gradientStopsStyle,
+  gradientTextStyle,
   isTextEffect,
   normalizeGradientColors,
   parseGradientColorsFromAttr,
@@ -107,6 +108,9 @@ function textNode(
   if (extras?.effect) state[TEXT_EFFECT_STATE_KEY] = extras.effect;
   if (extras?.gradientColors?.length) {
     state[GRADIENT_COLORS_STATE_KEY] = extras.gradientColors;
+    // Also park the full CSS on Lexical's native `style` field so colour
+    // stops survive if unknown `$` keys are stripped on save.
+    node.style = gradientTextStyle(extras.gradientColors);
   }
   if (extras?.htmlClass) state.htmlClass = extras.htmlClass;
   if (extras?.htmlStyle) state.htmlStyle = extras.htmlStyle;
@@ -184,10 +188,16 @@ function nodeToHtml(node: LexNode): string {
         classes.push(...state.htmlClass.trim().split(/\s+/));
       }
 
-      const gradientColors = normalizeGradientColors(state[GRADIENT_COLORS_STATE_KEY]);
+      const gradientColors =
+        normalizeGradientColors(state[GRADIENT_COLORS_STATE_KEY]) ??
+        parseGradientColorsFromStyle(
+          typeof node.style === "string" ? node.style : undefined,
+        );
       const styleParts: string[] = [];
       if (effect === "gradient" && gradientColors) {
-        styleParts.push(gradientStopsStyle(gradientColors));
+        styleParts.push(gradientTextStyle(gradientColors));
+      } else if (typeof node.style === "string" && node.style.trim()) {
+        styleParts.push(node.style.trim());
       }
       if (typeof state.htmlStyle === "string" && state.htmlStyle.trim()) {
         styleParts.push(state.htmlStyle.trim());
@@ -371,9 +381,14 @@ export function htmlToLexical(html: string): RichTextValue {
         const gradientColors =
           parseGradientColorsFromAttr(attrs["data-gradient-colors"]) ??
           parseGradientColorsFromStyle(attrs.style);
-        // Drop the CSS variable from leftover style — it lives in $gradientColors.
+        // Drop gradient CSS from leftover style — it lives in $gradientColors
+        // / the Lexical text `style` field.
         const leftoverStyle = (attrs.style ?? "")
           .replace(/--fx-gradient-stops\s*:\s*[^;]+;?/gi, "")
+          .replace(/background-image\s*:\s*linear-gradient\([^)]*\)\s*;?/gi, "")
+          .replace(/-webkit-background-clip\s*:\s*[^;]+;?/gi, "")
+          .replace(/background-clip\s*:\s*[^;]+;?/gi, "")
+          .replace(/color\s*:\s*transparent\s*;?/gi, "")
           .replace(/;\s*;/g, ";")
           .replace(/^;|;$/g, "")
           .trim();
