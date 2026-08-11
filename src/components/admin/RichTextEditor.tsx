@@ -185,13 +185,14 @@ export function RichTextEditor({
 
   return (
     <div
-      className={`overflow-hidden rounded-lg border border-zinc-300 bg-white shadow-sm ${
+      className={`rounded-lg border border-zinc-300 bg-white shadow-sm ${
         disabled
           ? "opacity-60"
           : "focus-within:border-sky-500 focus-within:ring-2 focus-within:ring-sky-500/20"
       }`}
     >
-      <div className="flex flex-wrap items-center gap-0.5 border-b border-zinc-200 bg-zinc-50 px-1.5 py-1">
+      {/* Toolbar stays overflow-visible so popovers (gradient picker) aren't clipped. */}
+      <div className="relative z-20 flex flex-wrap items-center gap-0.5 rounded-t-lg border-b border-zinc-200 bg-zinc-50 px-1.5 py-1">
         <ToolbarButton
           label="Bold"
           active={editor.isActive("bold")}
@@ -329,21 +330,25 @@ export function RichTextEditor({
         </ToolbarButton>
       </div>
 
-      {sourceMode ? (
-        <textarea
-          id={id}
-          value={value}
-          disabled={disabled}
-          spellCheck={false}
-          onChange={(event) => {
-            onChange(event.target.value);
-            editor.commands.setContent(event.target.value || "", { emitUpdate: false });
-          }}
-          className="min-h-[10rem] w-full resize-y bg-zinc-50 px-3 py-2.5 font-mono text-[0.8rem] leading-relaxed text-zinc-900 outline-none"
-        />
-      ) : (
-        <EditorContent editor={editor} />
-      )}
+      <div className="overflow-hidden rounded-b-lg">
+        {sourceMode ? (
+          <textarea
+            id={id}
+            value={value}
+            disabled={disabled}
+            spellCheck={false}
+            onChange={(event) => {
+              onChange(event.target.value);
+              editor.commands.setContent(event.target.value || "", {
+                emitUpdate: false,
+              });
+            }}
+            className="min-h-[10rem] w-full resize-y bg-zinc-50 px-3 py-2.5 font-mono text-[0.8rem] leading-relaxed text-zinc-900 outline-none"
+          />
+        ) : (
+          <EditorContent editor={editor} />
+        )}
+      </div>
     </div>
   );
 }
