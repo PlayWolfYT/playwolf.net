@@ -48,6 +48,171 @@ html[data-theme="dark"] {
   height: 160px;
 }
 
+/* Lexical text-effects gradient picker (inline toolbar) */
+.text-effects-gradient {
+  position: relative;
+}
+
+.text-effects-gradient__toggle {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  border-radius: var(--style-radius-s, 4px);
+  color: var(--theme-elevation-800);
+  cursor: pointer;
+  display: inline-flex;
+  height: 28px;
+  justify-content: center;
+  min-width: 28px;
+  padding: 0 4px;
+
+  &:hover,
+  &[aria-pressed="true"],
+  &[aria-expanded="true"] {
+    background: var(--theme-elevation-100);
+    color: var(--theme-elevation-1000);
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.4;
+  }
+}
+
+.text-effects-gradient__panel {
+  background: var(--theme-elevation-0);
+  border: 1px solid var(--theme-elevation-150);
+  border-radius: var(--popup-radius, 8px);
+  bottom: calc(100% + 6px);
+  box-shadow: 0 8px 24px rgb(0 0 0 / 0.12);
+  left: 0;
+  padding: 12px;
+  position: absolute;
+  width: 260px;
+  z-index: 20;
+}
+
+.text-effects-gradient__title {
+  color: var(--theme-elevation-900);
+  font-size: 12px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.text-effects-gradient__hint {
+  color: var(--theme-elevation-600);
+  font-size: 11px;
+  line-height: 1.35;
+  margin: 4px 0 0;
+}
+
+.text-effects-gradient__preview {
+  border: 1px solid var(--theme-elevation-150);
+  border-radius: 6px;
+  height: 22px;
+  margin-top: 10px;
+  width: 100%;
+}
+
+.text-effects-gradient__stops {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  list-style: none;
+  margin: 10px 0 0;
+  padding: 0;
+}
+
+.text-effects-gradient__stop {
+  align-items: center;
+  display: flex;
+  gap: 6px;
+
+  input[type="color"] {
+    background: var(--theme-elevation-0);
+    border: 1px solid var(--theme-elevation-200);
+    border-radius: 4px;
+    cursor: pointer;
+    height: 30px;
+    padding: 2px;
+    width: 36px;
+  }
+
+  input[type="text"] {
+    background: var(--theme-input-bg, var(--theme-elevation-0));
+    border: 1px solid var(--theme-elevation-200);
+    border-radius: 6px;
+    color: var(--theme-elevation-1000);
+    flex: 1;
+    font-family: var(--font-mono, ui-monospace, monospace);
+    font-size: 12px;
+    padding: 6px 8px;
+  }
+
+  button {
+    background: transparent;
+    border: 0;
+    border-radius: 4px;
+    color: var(--theme-elevation-600);
+    cursor: pointer;
+    font-size: 14px;
+    line-height: 1;
+    padding: 4px 6px;
+
+    &:hover:not(:disabled) {
+      background: var(--theme-elevation-100);
+      color: var(--theme-elevation-900);
+    }
+
+    &:disabled {
+      opacity: 0.3;
+    }
+  }
+}
+
+.text-effects-gradient__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+
+  button {
+    background: var(--theme-elevation-50);
+    border: 1px solid var(--theme-elevation-150);
+    border-radius: 6px;
+    color: var(--theme-elevation-800);
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 500;
+    padding: 5px 8px;
+
+    &:hover:not(:disabled) {
+      background: var(--theme-elevation-100);
+    }
+
+    &:disabled {
+      cursor: not-allowed;
+      opacity: 0.4;
+    }
+  }
+}
+
+.text-effects-gradient__apply {
+  background: rgb(26, 166, 235) !important;
+  border-color: rgb(26, 166, 235) !important;
+  color: #fff !important;
+
+  &:hover:not(:disabled) {
+    background: rgb(11, 125, 189) !important;
+  }
+}
+
+.text-effects-gradient__clear {
+  background: transparent !important;
+  border-color: transparent !important;
+  color: var(--theme-error-500, #c84444) !important;
+}
+
 /* ── Rich-text TextStateFeature live preview ───────────────────────────────
    Keyframes for inline `animation` values from `src/lib/text-effects.ts`. */
 

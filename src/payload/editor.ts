@@ -10,19 +10,11 @@ import {
   OrderedListFeature,
   ParagraphFeature,
   StrikethroughFeature,
-  TextStateFeature,
   UnderlineFeature,
   UnorderedListFeature,
 } from "@payloadcms/richtext-lexical";
 
-import { TEXT_EFFECT_STATE_KEY, TEXT_EFFECTS } from "../lib/text-effects";
-
-const textEffectState = Object.fromEntries(
-  Object.entries(TEXT_EFFECTS).map(([key, effect]) => [
-    key,
-    { label: effect.label, css: effect.css },
-  ]),
-);
+import { TextEffectsFeature } from "./lexical/textEffects/feature.server";
 
 /**
  * Editor used by every rich-text field. Deliberately narrow: prose plus the
@@ -43,6 +35,6 @@ export const richTextEditor = lexicalEditor({
     HorizontalRuleFeature(),
     LinkFeature({ enabledCollections: [] }),
     InlineToolbarFeature(),
-    TextStateFeature({ state: { [TEXT_EFFECT_STATE_KEY]: textEffectState } }),
+    TextEffectsFeature(),
   ],
 });
