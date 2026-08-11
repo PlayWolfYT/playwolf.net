@@ -141,7 +141,15 @@ const sheetField: Field = {
       (_, siblingData) => siblingData?.kind !== "none",
     ),
     withAdminCondition(
-      { name: "image", type: "upload", relationTo: "media" },
+      {
+        name: "image",
+        type: "upload",
+        relationTo: "media",
+        admin: {
+          description:
+            "Full reference sheet. Stored in Media without cropping so the original stays intact.",
+        },
+      },
       (_, siblingData) => siblingData?.kind === "image",
     ),
     withAdminCondition(
