@@ -79,15 +79,12 @@ export function GradientEffectPicker({
       {open ? (
         <div
           id={panelId}
-<<<<<<< HEAD
           // Keep TipTap selection when clicking buttons; allow inputs to focus.
           onMouseDown={(event) => {
             const target = event.target as HTMLElement | null;
             if (target?.closest("input, textarea, select, label")) return;
             event.preventDefault();
           }}
-=======
->>>>>>> origin/main
           className="absolute bottom-full left-0 z-50 mb-1 w-64 rounded-lg border border-zinc-200 bg-white p-3 shadow-lg"
         >
           <p className="text-xs font-medium text-zinc-800">Gradient colours</p>
