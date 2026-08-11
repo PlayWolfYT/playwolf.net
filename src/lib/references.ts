@@ -59,6 +59,7 @@ export {
 } from "@/lib/sheet-wip";
 
 import { PROFILE_KEYS } from "@/lib/content";
+import { pickUploadRenderSource } from "@/lib/uploadSource";
 
 /* ------------------------------------------------------------------ *
  * Mapping: stored shape → the shape components consume
@@ -103,9 +104,10 @@ type StoredUpload =
   | StoredSiteImage;
 
 /**
- * Picks the largest bounded derivative as the render source, falling back to
- * the upload itself — `withoutEnlargement` means an image smaller than every
- * configured size produces no derivatives at all.
+ * Picks the render source for an upload. Framed libraries bake the admin crop
+ * into the main file / matching derivatives — see `pickUploadRenderSource`.
+ * Their focal point must not drive a second `object-cover` crop on the site.
+ * Unframed `media` still uses focal → `objectPosition` for gallery cover slots.
  */
 function toImageRef(
   value: number | StoredUpload | null | undefined,
@@ -119,20 +121,22 @@ function toImageRef(
     height: media.height,
   };
 
-  // Prefer the locked on-site `frame` size when present (friends / cards /
-  // covers / OG), then the wide display master, then card.
-  const sizes = media.sizes;
-  const framed = sizes && "frame" in sizes ? sizes.frame : undefined;
-  const derivative = framed ?? sizes?.display ?? sizes?.card;
-  const usable =
-    derivative?.url && derivative.width && derivative.height
-      ? { src: derivative.url, width: derivative.width, height: derivative.height }
-      : { src: original.url, width: original.width, height: original.height };
+  const picked = pickUploadRenderSource({
+    original: { src: original.url, width: original.width, height: original.height },
+    sizes: media.sizes,
+  });
 
   return {
-    ...usable,
+    src: picked.src,
+    width: picked.width,
+    height: picked.height,
     blurDataURL: media.blurDataURL ?? undefined,
-    objectPosition: `${media.focalX ?? 50}% ${media.focalY ?? 50}%`,
+    objectPosition: picked.isFramed
+      ? "50% 50%"
+      : `${media.focalX ?? 50}% ${media.focalY ?? 50}%`,
+    // Same filename is reused on re-crop (`overwriteExistingFiles`); bypass the
+    // month-long `/_next/image` cache so the banner matches the file URL.
+    unoptimized: picked.isFramed || undefined,
     original,
   };
 }

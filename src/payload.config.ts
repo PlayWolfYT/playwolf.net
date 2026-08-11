@@ -23,6 +23,7 @@ import { Tags } from "./payload/collections/Tags";
 import { Users } from "./payload/collections/Users";
 import { richTextEditor } from "./payload/editor";
 import { SiteSettings } from "./payload/globals/SiteSettings";
+import { S3_BUCKET, s3ClientConfig } from "./payload/s3";
 
 const dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -35,12 +36,11 @@ const databaseUrl = process.env.DATABASE_URL ?? "";
 const payloadSecret = process.env.PAYLOAD_SECRET ?? "";
 
 /**
- * Garage is S3-compatible but, like every self-hosted S3, addresses buckets by
- * path rather than by subdomain — hence `forcePathStyle`. Its region is
- * cosmetic; it just has to match what the bucket was created with.
+ * Bucket and client settings come from `./payload/s3` so the sidecar store for
+ * pristine originals talks to exactly the same endpoint and credentials.
  */
 const storage = s3Storage({
-  bucket: process.env.S3_BUCKET ?? "playwolf-media",
+  bucket: S3_BUCKET,
   collections: {
     media: true,
     "friend-images": true,
@@ -48,15 +48,7 @@ const storage = s3Storage({
     "project-images": true,
     "site-images": true,
   },
-  config: {
-    credentials: {
-      accessKeyId: process.env.S3_ACCESS_KEY_ID ?? "",
-      secretAccessKey: process.env.S3_SECRET_ACCESS_KEY ?? "",
-    },
-    endpoint: process.env.S3_ENDPOINT ?? "http://garage:3900",
-    forcePathStyle: true,
-    region: process.env.S3_REGION ?? "garage",
-  },
+  config: s3ClientConfig,
 });
 
 export default buildConfig({

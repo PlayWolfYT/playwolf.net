@@ -4,6 +4,12 @@
  * Crop drawer used by `FramedCollectionUpload`. Locks the crop rectangle to
  * the framed Library collection's on-site aspect ratio.
  *
+ * The image sits centred in a padded "stage" so the selection can extend past
+ * the original's edges (filled later by the framed-crop hook). Crop state in
+ * the UI is stage-percent; on save it is converted to original-percent for
+ * persistence, and the focal point is re-expressed as a percentage of the
+ * cropped result — the space Payload's `createImageSizes` applies it in.
+ *
  * Import `useModal` from `@payloadcms/ui` so it shares Payload's ModalProvider
  * context (a direct `@faceless-ui/modal` import breaks close/open).
  */
@@ -21,6 +27,16 @@ import React, { useEffect, useRef, useState } from "react";
 import ReactCrop, { type PercentCrop } from "react-image-crop";
 import "react-image-crop/dist/ReactCrop.css";
 
+import {
+  focalPointInCrop,
+  maxAspectRect,
+  normalizeRect,
+  originalRectToStage,
+  stageRectToOriginal,
+  stageSizeForSource,
+  type Rect,
+  type Size,
+} from "@/payload/cropGeometry";
 import {
   frameForCollection,
   getActiveUploadFrame,
@@ -43,7 +59,12 @@ export type EditUploadProps = {
    */
   frame?: UploadFrame;
   imageCacheTag?: string;
+  /** Original-percent crop from `uploadEdits` or the persisted `data.crop`. */
   initialCrop?: UploadEdits["crop"];
+  /**
+   * Focal point as a percentage of the cropped result (Payload / persisted
+   * `focalX`/`focalY`). Converted into stage space for the draggable handle.
+   */
   initialFocalPoint?: FocalPosition;
   onSave?: (uploadEdits: UploadEdits) => void;
   showCrop?: boolean;
@@ -58,25 +79,65 @@ const defaultCrop: PercentCrop = {
   y: 0,
 };
 
-/** Largest centred crop of `aspect` that fits inside the image. */
-function maxAspectCrop(
-  imageWidth: number,
-  imageHeight: number,
-  aspect: number,
+/** Checkerboard so transparent pad regions read as "empty" in the drawer. */
+const CHECKERBOARD_STYLE: React.CSSProperties = {
+  backgroundColor: "#c8c8c8",
+  backgroundImage: [
+    "linear-gradient(45deg, #aeaeb2 25%, transparent 25%)",
+    "linear-gradient(-45deg, #aeaeb2 25%, transparent 25%)",
+    "linear-gradient(45deg, transparent 75%, #aeaeb2 75%)",
+    "linear-gradient(-45deg, transparent 75%, #aeaeb2 75%)",
+  ].join(", "),
+  backgroundPosition: "0 0, 0 8px, 8px -8px, -8px 0",
+  backgroundSize: "16px 16px",
+};
+
+function toPercentCrop(rect: Rect): PercentCrop {
+  return {
+    unit: "%",
+    x: rect.x,
+    y: rect.y,
+    width: rect.width,
+    height: rect.height,
+  };
+}
+
+function seedStageCrop(
+  initialCrop: UploadEdits["crop"] | undefined,
+  maxOutset: number,
 ): PercentCrop {
-  if (!imageWidth || !imageHeight || !aspect) return defaultCrop;
-  const imageAspect = imageWidth / imageHeight;
-  if (imageAspect > aspect) {
-    const width = (aspect / imageAspect) * 100;
-    return { unit: "%", width, height: 100, x: (100 - width) / 2, y: 0 };
-  }
-  const height = (imageAspect / aspect) * 100;
-  return { unit: "%", width: 100, height, x: 0, y: (100 - height) / 2 };
+  if (!initialCrop) return defaultCrop;
+  return toPercentCrop(originalRectToStage(normalizeRect(initialCrop), maxOutset));
+}
+
+/** Cropped-result percent → stage percent via the current stage crop. */
+function seedStageFocal(
+  initialFocal: FocalPosition | undefined,
+  stageCrop: PercentCrop,
+): FocalPosition {
+  const focal = { x: 50, y: 50, ...initialFocal };
+  return {
+    x: stageCrop.x + (focal.x / 100) * stageCrop.width,
+    y: stageCrop.y + (focal.y / 100) * stageCrop.height,
+  };
 }
 
 function appendCacheTag(url: string, tag?: string): string {
   if (!url || !tag) return url;
   return `${url}${url.includes("?") ? "&" : "?"}${tag}`;
+}
+
+/**
+ * Transparent SVG with the stage's pixel size. Used as an in-flow sizer so
+ * ReactCrop's shrink-to-fit layout gets a real box — an absolutely positioned
+ * preview alone collapses the stage to 0×0.
+ */
+function stageSizerSrc(size: Size): string {
+  const width = Math.max(1, Math.round(size.width));
+  const height = Math.max(1, Math.round(size.height));
+  return `data:image/svg+xml,${encodeURIComponent(
+    `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}"></svg>`,
+  )}`;
 }
 
 type NumberInputProps = {
@@ -117,16 +178,14 @@ export const EditUpload: React.FC<EditUploadProps> = ({
   const { collectionSlug } = useDocumentInfo();
   const frame =
     frameProp ?? getActiveUploadFrame() ?? frameForCollection(collectionSlug);
+  const maxOutset = frame?.maxOutset ?? 0;
 
-  const [crop, setCrop] = useState<PercentCrop>(() => ({
-    ...defaultCrop,
-    ...(initialCrop as PercentCrop | undefined),
-  }));
-  const [focalPosition, setFocalPosition] = useState<FocalPosition>(() => ({
-    x: 50,
-    y: 50,
-    ...initialFocalPoint,
-  }));
+  const [crop, setCrop] = useState<PercentCrop>(() =>
+    seedStageCrop(initialCrop, maxOutset),
+  );
+  const [focalPosition, setFocalPosition] = useState<FocalPosition>(() =>
+    seedStageFocal(initialFocalPoint, seedStageCrop(initialCrop, maxOutset)),
+  );
   const [checkBounds, setCheckBounds] = useState(false);
   const [uncroppedPixelHeight, setUncroppedPixelHeight] = useState(0);
   const [uncroppedPixelWidth, setUncroppedPixelWidth] = useState(0);
@@ -138,6 +197,19 @@ export const EditUpload: React.FC<EditUploadProps> = ({
   const heightInputRef = useRef<HTMLInputElement | null>(null);
   const widthInputRef = useRef<HTMLInputElement | null>(null);
 
+  const stage = stageSizeForSource(
+    { width: uncroppedPixelWidth, height: uncroppedPixelHeight },
+    maxOutset,
+  );
+  // Original occupies the centre of the stage; inset/size are stage-percent.
+  const imageInsetPercent = (maxOutset / (1 + 2 * maxOutset)) * 100;
+  const imageSizePercent = (1 / (1 + 2 * maxOutset)) * 100;
+
+  const stageBackground: React.CSSProperties =
+    frame?.padBackground && frame.padBackground !== "transparent"
+      ? { backgroundColor: frame.padBackground }
+      : CHECKERBOARD_STYLE;
+
   const onImageLoad = (event: React.SyntheticEvent<HTMLImageElement>) => {
     const { naturalHeight, naturalWidth } = event.currentTarget;
     setUncroppedPixelHeight(naturalHeight);
@@ -146,8 +218,14 @@ export const EditUpload: React.FC<EditUploadProps> = ({
 
     if (!frame || !showCrop) return;
 
+    const stageBox = stageSizeForSource(
+      { width: naturalWidth, height: naturalHeight },
+      maxOutset,
+    );
+
     // Fresh uploads (or an old free-form crop) snap to the site frame once we
-    // know pixel dimensions so the selection matches the public card.
+    // know pixel dimensions so the selection matches the public card. Compare
+    // in original space — that is what `initialCrop` is stored as.
     const current = initialCrop
       ? {
           width: ((initialCrop.width ?? 100) / 100) * naturalWidth,
@@ -156,7 +234,7 @@ export const EditUpload: React.FC<EditUploadProps> = ({
       : null;
     const currentAspect = current ? current.width / (current.height || 1) : null;
     if (!current || Math.abs((currentAspect ?? 0) - frame.aspect) > 0.02) {
-      setCrop(maxAspectCrop(naturalWidth, naturalHeight, frame.aspect));
+      setCrop(toPercentCrop(maxAspectRect(stageBox, frame.aspect)));
     }
   };
 
@@ -169,25 +247,26 @@ export const EditUpload: React.FC<EditUploadProps> = ({
   }) => {
     const intValue = Number.parseInt(value, 10);
     if (!Number.isFinite(intValue) || intValue <= 0) return;
+    if (!stage.width || !stage.height) return;
 
     if (frame) {
       // Keep the locked ratio: changing one side derives the other, then
-      // re-centres within the image bounds.
+      // re-centres within the stage bounds.
       let widthPx =
         dimension === "width" ? intValue : Math.round(intValue * frame.aspect);
       let heightPx =
         dimension === "height" ? intValue : Math.round(intValue / frame.aspect);
 
-      widthPx = Math.min(widthPx, uncroppedPixelWidth);
-      heightPx = Math.min(heightPx, uncroppedPixelHeight);
+      widthPx = Math.min(widthPx, stage.width);
+      heightPx = Math.min(heightPx, stage.height);
       if (widthPx / heightPx > frame.aspect) {
         widthPx = Math.round(heightPx * frame.aspect);
       } else {
         heightPx = Math.round(widthPx / frame.aspect);
       }
 
-      const width = (widthPx / uncroppedPixelWidth) * 100;
-      const height = (heightPx / uncroppedPixelHeight) * 100;
+      const width = (widthPx / stage.width) * 100;
+      const height = (heightPx / stage.height) * 100;
       setCrop({
         unit: "%",
         width,
@@ -199,8 +278,7 @@ export const EditUpload: React.FC<EditUploadProps> = ({
     }
 
     const percentage =
-      100 *
-      (intValue / (dimension === "width" ? uncroppedPixelWidth : uncroppedPixelHeight));
+      100 * (intValue / (dimension === "width" ? stage.width : stage.height));
     if (percentage <= 0 || percentage > 100) return;
     setCrop({ ...crop, [dimension]: percentage });
   };
@@ -213,25 +291,50 @@ export const EditUpload: React.FC<EditUploadProps> = ({
     value: string;
   }) => {
     const intValue = Number.parseInt(value, 10);
-    if (intValue >= 0 && intValue <= 100) {
-      setFocalPosition((prev) => ({ ...prev, [coordinate]: intValue }));
-    }
+    if (intValue < 0 || intValue > 100) return;
+    // Inputs show cropped-result percent; the handle lives in stage space.
+    const cropped = focalPointInCrop(focalPosition, crop);
+    const next = { ...cropped, [coordinate]: intValue };
+    setFocalPosition({
+      x: crop.x + (next.x / 100) * crop.width,
+      y: crop.y + (next.y / 100) * crop.height,
+    });
   };
 
+  const fileSrcToUse = fileSrc ? appendCacheTag(fileSrc, imageCacheTag) : fileSrc;
+  // Stage-percent × stage pixels == the extract size in original pixels.
+  const cropWidthPx = ((crop.width / 100) * stage.width).toFixed(0);
+  const cropHeightPx = ((crop.height / 100) * stage.height).toFixed(0);
+  const stageAspect =
+    stage.width > 0 && stage.height > 0 ? stage.width / stage.height : undefined;
+
   const saveEdits = () => {
+    const stageCropRect: Rect = {
+      x: crop.x,
+      y: crop.y,
+      width: crop.width,
+      height: crop.height,
+    };
+    const originalCrop = stageRectToOriginal(stageCropRect, maxOutset);
+    // Focal handle is stage-percent; Payload wants cropped-result percent.
+    const croppedFocal = focalPointInCrop(focalPosition, stageCropRect);
+
     onSave?.({
-      crop: crop || undefined,
-      focalPoint: focalPosition,
-      heightInPixels: Number(heightInputRef.current?.value ?? uncroppedPixelHeight),
-      widthInPixels: Number(widthInputRef.current?.value ?? uncroppedPixelWidth),
+      crop: { ...originalCrop, unit: "%" },
+      focalPoint: croppedFocal,
+      heightInPixels: Number(heightInputRef.current?.value ?? cropHeightPx),
+      widthInPixels: Number(widthInputRef.current?.value ?? cropWidthPx),
     });
     closeModal(editDrawerSlug);
   };
 
-  const onDragEnd = React.useCallback(({ x, y }: FocalPosition) => {
-    setFocalPosition({ x, y });
-    setCheckBounds(false);
-  }, []);
+  const onDragEnd = React.useCallback(
+    ({ x, y }: FocalPosition) => {
+      setFocalPosition({ x, y });
+      setCheckBounds(false);
+    },
+    [setCheckBounds],
+  );
 
   const centerFocalPoint = () => {
     const wrap = focalWrapRef.current;
@@ -252,16 +355,12 @@ export const EditUpload: React.FC<EditUploadProps> = ({
   };
 
   const resetCrop = () => {
-    if (frame && uncroppedPixelWidth && uncroppedPixelHeight) {
-      setCrop(maxAspectCrop(uncroppedPixelWidth, uncroppedPixelHeight, frame.aspect));
+    if (frame && stage.width && stage.height) {
+      setCrop(toPercentCrop(maxAspectRect(stage, frame.aspect)));
       return;
     }
     setCrop(defaultCrop);
   };
-
-  const fileSrcToUse = fileSrc ? appendCacheTag(fileSrc, imageCacheTag) : fileSrc;
-  const cropWidthPx = ((crop.width / 100) * uncroppedPixelWidth).toFixed(0);
-  const cropHeightPx = ((crop.height / 100) * uncroppedPixelHeight).toFixed(0);
 
   return (
     <div className={baseClass}>
@@ -295,7 +394,7 @@ export const EditUpload: React.FC<EditUploadProps> = ({
             className={`${baseClass}__focal-wrapper`}
             ref={focalWrapRef}
             style={{
-              aspectRatio: `${uncroppedPixelWidth / uncroppedPixelHeight}`,
+              aspectRatio: stageAspect ? `${stageAspect}` : undefined,
             }}
           >
             {showCrop ? (
@@ -309,14 +408,43 @@ export const EditUpload: React.FC<EditUploadProps> = ({
                   <div className={`${baseClass}__crop-window`} ref={cropRef} />
                 )}
               >
-                {/* Payload's crop drawer uses a plain img; next/image is not used in admin. */}
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  alt={t("upload:setCropArea")}
-                  onLoad={onImageLoad}
-                  ref={imageRef}
-                  src={fileSrcToUse}
-                />
+                <div className={`${baseClass}__stage`} style={stageBackground}>
+                  {/*
+                    In-flow sizer establishes the stage box for ReactCrop. The
+                    preview img is absolute in the centre; without a sizer the
+                    stage collapses to 0×0 and the drawer looks empty/black.
+                  */}
+                  {imageLoaded ? (
+                    // eslint-disable-next-line @next/next/no-img-element -- layout sizer, not content
+                    <img
+                      alt=""
+                      aria-hidden
+                      className={`${baseClass}__stage-sizer`}
+                      height={stage.height}
+                      src={stageSizerSrc(stage)}
+                      width={stage.width}
+                    />
+                  ) : null}
+                  {/* Payload's crop drawer uses a plain img; next/image is not used in admin. */}
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    alt={t("upload:setCropArea")}
+                    className={imageLoaded ? `${baseClass}__stage-image` : undefined}
+                    onLoad={onImageLoad}
+                    ref={imageRef}
+                    src={fileSrcToUse}
+                    style={
+                      imageLoaded
+                        ? {
+                            left: `${imageInsetPercent}%`,
+                            top: `${imageInsetPercent}%`,
+                            width: `${imageSizePercent}%`,
+                            height: `${imageSizePercent}%`,
+                          }
+                        : { display: "block", maxWidth: "100%" }
+                    }
+                  />
+                </div>
               </ReactCrop>
             ) : (
               // eslint-disable-next-line @next/next/no-img-element -- admin crop preview
@@ -403,14 +531,14 @@ export const EditUpload: React.FC<EditUploadProps> = ({
                     onChange={(value) =>
                       fineTuneFocalPosition({ coordinate: "x", value })
                     }
-                    value={focalPosition.x.toFixed(0)}
+                    value={focalPointInCrop(focalPosition, crop).x.toFixed(0)}
                   />
                   <NumberInput
                     name="Y %"
                     onChange={(value) =>
                       fineTuneFocalPosition({ coordinate: "y", value })
                     }
-                    value={focalPosition.y.toFixed(0)}
+                    value={focalPointInCrop(focalPosition, crop).y.toFixed(0)}
                   />
                 </div>
               </div>

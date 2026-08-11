@@ -305,3 +305,39 @@ html[data-theme="dark"] {
       0 0 24px rgba(58, 190, 249, 0.6);
   }
 }
+
+/* Framed crop drawer: padded stage needs an in-flow sizer (see
+   AspectLockedEditUpload). Keep max-height flowing so tall originals still fit. */
+.edit-upload {
+  &__reactCrop {
+    max-height: 100%;
+  }
+
+  .ReactCrop__child-wrapper {
+    max-height: inherit;
+  }
+
+  &__stage {
+    position: relative;
+    display: block;
+    max-width: 100%;
+    max-height: inherit;
+    line-height: 0;
+  }
+
+  &__stage-sizer {
+    display: block;
+    width: auto;
+    height: auto;
+    max-width: 100%;
+    max-height: inherit;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  &__stage-image {
+    position: absolute;
+    display: block;
+    max-width: none;
+  }
+}

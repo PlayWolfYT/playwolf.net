@@ -24,16 +24,18 @@ export function CharacterCard({ character }: CharacterCardProps) {
         className="group block h-full overflow-hidden rounded-3xl border border-white/[0.07] bg-gradient-to-br from-void-lift/90 to-void-panel/70 p-px shadow-glow-sm backdrop-blur-xl transition hover:border-glow-500/40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-glow-500"
       >
         <div className="h-full overflow-hidden rounded-[calc(1.5rem-1px)] shadow-inner-glow">
-          {/* Square cover crop; focal point / admin crop control framing. */}
+          {/* Pre-cropped 1:1 frame; objectPosition is centered in toImageRef. */}
           <div className="relative aspect-square w-full overflow-hidden bg-void-lift/60">
             {mainArt ? (
               <ShimmerImage
-                src={mainArt.src}
+                src={mainArt.src.src}
                 alt={mainArt.alt}
                 fill
+                unoptimized={mainArt.src.unoptimized}
                 placeholder={placeholderFor(mainArt.src)}
+                blurDataURL={mainArt.src.blurDataURL}
                 sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 340px"
-                className="object-cover transition duration-500 group-hover:scale-105"
+                className="object-contain transition duration-500 group-hover:scale-105"
                 style={{ objectPosition: mainArt.src.objectPosition }}
               />
             ) : (

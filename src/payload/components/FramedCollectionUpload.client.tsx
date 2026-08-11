@@ -315,6 +315,26 @@ function FramedUploadInner({
   const acceptMimeTypes = uploadConfig.mimeTypes?.join(", ");
   const imageCacheTag = uploadConfig?.cacheTags && data?.updatedAt;
 
+  // Crop drawer edits the pristine original when a sidecar exists; fall back to
+  // the stored (already-cropped) file for legacy docs until the first re-save
+  // adopts it, and to the local object URL for not-yet-saved uploads.
+  const sourceKey =
+    data?.source && typeof data.source === "object" && "key" in data.source
+      ? (data.source as { key?: string | null }).key
+      : undefined;
+  const persistedCrop =
+    data?.crop && typeof data.crop === "object" ? data.crop : undefined;
+  const editFileSrc = (() => {
+    if (value && fileSrc) return fileSrc;
+    if (id && sourceKey) {
+      return formatAdminURL({
+        apiRoute: api,
+        path: `/original/${collectionSlug}/${id}` as `/${string}`,
+      });
+    }
+    return data?.url || fileSrc || "";
+  })();
+
   return (
     <div className={[fieldBaseClass, baseClass].filter(Boolean).join(" ")}>
       <FieldError message={errorMessage} showError={showError} />
@@ -458,10 +478,10 @@ function FramedUploadInner({
           <Drawer Header={null} slug={editDrawerSlug}>
             <EditUpload
               fileName={value?.name || data?.filename}
-              fileSrc={data?.url || fileSrc || ""}
+              fileSrc={editFileSrc}
               frame={frame}
               imageCacheTag={imageCacheTag}
-              initialCrop={uploadEdits?.crop ?? undefined}
+              initialCrop={uploadEdits?.crop ?? persistedCrop ?? undefined}
               initialFocalPoint={{
                 x: uploadEdits?.focalPoint?.x || data?.focalX || 50,
                 y: uploadEdits?.focalPoint?.y || data?.focalY || 50,

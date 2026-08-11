@@ -36,22 +36,28 @@ export function FeaturedFriends({ example }: { example: Example }) {
             <li key={friend.slug}>
               <article
                 id={`friend-${friend.slug}`}
-                className="scroll-mt-24 overflow-hidden rounded-3xl border border-white/[0.07] bg-gradient-to-br from-void-lift/90 to-void-panel/70 shadow-glow-sm backdrop-blur-xl md:grid md:grid-cols-2 md:items-stretch"
+                className="scroll-mt-24 overflow-hidden rounded-3xl border border-white/[0.07] bg-gradient-to-br from-void-lift/90 to-void-panel/70 shadow-glow-sm backdrop-blur-xl md:grid md:grid-cols-2 md:items-center"
               >
                 {friend.image ? (
                   <div
-                    className={`relative aspect-[5/2] overflow-hidden bg-void-lift/60 ${
+                    className={`relative aspect-[5/2] w-full overflow-hidden bg-void-lift/60 ${
                       imageOnRight ? "md:order-2" : ""
                     }`}
                   >
+                    {/*
+                      Pre-baked 5:2 crop. Serve the file URL directly (no
+                      `/_next/image`) and use contain so layout cannot apply a
+                      second cover-crop on top of the admin selection.
+                    */}
                     <Image
-                      src={friend.image}
+                      src={friend.image.src}
                       alt={`${friend.name} banner`}
                       fill
+                      unoptimized={friend.image.unoptimized}
                       placeholder={placeholderFor(friend.image)}
+                      blurDataURL={friend.image.blurDataURL}
                       sizes="(max-width: 768px) 100vw, 50vw"
-                      className="object-cover"
-                      style={{ objectPosition: friend.image.objectPosition }}
+                      className="object-contain object-center"
                     />
                   </div>
                 ) : null}

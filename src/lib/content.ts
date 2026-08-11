@@ -31,6 +31,12 @@ export type ImageRef = {
   blurDataURL?: string;
   /** CSS position derived from Payload's adjustable media focal point. */
   objectPosition: string;
+  /**
+   * Framed library uploads are overwritten in place on re-crop. Skip the
+   * `/_next/image` optimizer so the site always shows the same bytes as the
+   * Payload file URL (optimizer entries are cached for a month by URL).
+   */
+  unoptimized?: boolean;
   original: {
     url: string;
     width: number;
