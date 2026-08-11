@@ -16,10 +16,10 @@ export type UploadFrame = {
 
 export const UPLOAD_FRAMES = {
   "friend-images": {
-    aspect: 4 / 5,
-    label: "4:5",
-    usage: "Featured friend portrait beside artwork",
-    referenceSize: { width: 960, height: 1200 },
+    aspect: 5 / 2,
+    label: "5:2",
+    usage: "Featured friend banner beside artwork",
+    referenceSize: { width: 680, height: 272 },
   },
   "character-images": {
     aspect: 1,

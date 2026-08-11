@@ -40,7 +40,7 @@ export const Friends: CollectionConfig = {
       relationTo: "friend-images",
       admin: {
         description:
-          "Portrait beside featured artwork. Upload under Friend images — crop is locked to 4:5 to match the site card (~960×1200).",
+          "Banner beside featured artwork. Upload under Friend images — crop is locked to 5:2 to match the site card (~680×270).",
       },
     },
     {
