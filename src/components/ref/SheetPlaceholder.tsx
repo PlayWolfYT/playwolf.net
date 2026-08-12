@@ -233,7 +233,7 @@ export async function SheetPlaceholder({ sheet }: SheetPlaceholderProps) {
               style={{ aspectRatio: "var(--wip-aspect)" }}
             />
 
-            <div className="relative col-start-1 row-start-1 flex min-h-full w-full flex-col px-6 pb-10 pt-14 sm:absolute sm:inset-0 sm:px-10 sm:py-14">
+            <div className="relative col-start-1 row-start-1 flex min-h-full w-full flex-col items-center px-6 pb-10 pt-14 sm:absolute sm:inset-0 sm:px-10 sm:py-14">
               {sheet.kind === "wip" ? (
                 <div className="pointer-events-none absolute inset-0 z-20 origin-center transition duration-500 group-hover:scale-[1.02]">
                   <WipTape />
@@ -339,10 +339,11 @@ export async function SheetPlaceholder({ sheet }: SheetPlaceholderProps) {
                 {badge}
               </span>
 
-              {/* Content column — min-h-full so it can grow past the aspect floor */}
-              <div className="relative z-10 flex min-h-full flex-col items-center justify-center text-center">
+              {/* Content column — min-h-full so it can grow past the aspect floor;
+                  w-full keeps text-center relative to the frame, not the text width. */}
+              <div className="relative z-10 flex w-full min-h-full flex-col items-center justify-center text-center">
                 <h2
-                  className={`break-words bg-clip-text font-display text-2xl font-medium tracking-tight text-transparent sm:text-3xl ${
+                  className={`w-full break-words bg-clip-text font-display text-2xl font-medium tracking-tight text-transparent sm:text-3xl ${
                     tinted
                       ? ""
                       : "bg-gradient-to-r from-parchment via-glow-300 to-parchment"
@@ -352,17 +353,20 @@ export async function SheetPlaceholder({ sheet }: SheetPlaceholderProps) {
                   {sheet.title}
                 </h2>
 
-                <div className="mt-4 flex items-center gap-3" aria-hidden>
+                <div
+                  className="mt-4 flex items-center justify-center gap-3"
+                  aria-hidden
+                >
                   <span className="h-px w-12 bg-gradient-to-r from-transparent to-glow-500/50 sm:w-16" />
                   <SparkStar className="h-3 w-3 animate-twinkle text-glow-400/80" />
                   <span className="h-px w-12 bg-gradient-to-l from-transparent to-glow-500/50 sm:w-16" />
                 </div>
 
-                <p className="mt-5 font-mono text-[0.62rem] uppercase tracking-[0.24em] text-parchment-dim">
+                <p className="mt-5 w-full font-mono text-[0.62rem] uppercase tracking-[0.24em] text-parchment-dim">
                   {subtitle}
                 </p>
 
-                <div className="mt-5 flex flex-col items-center">
+                <div className="mt-5 flex w-full flex-col items-center">
                   <WipQuoteCycler quotes={quotes} interval={interval} />
                 </div>
               </div>
