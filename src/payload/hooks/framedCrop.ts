@@ -93,7 +93,11 @@ export const framedCropBeforeOperation: CollectionBeforeOperationHook = async ({
   const file = req.file;
   const hasNewFile = Boolean(file?.data?.length);
   const uploadEdits = readUploadEdits(req);
+  // Admin sends uploadEdits via qs; after qs.parse every number is a string.
+  // Stock Payload cropImage coerces those strings — we must too, or we miss
+  // the crop, skip clearing uploadEdits.crop, and sharp dies on left < 0.
   const incomingCrop = cropFromUploadEdits(uploadEdits) ?? cropFromData(mutating.data);
+  const hasUploadEditsCrop = hasCropProperty(uploadEdits);
 
   // Bulk updates have no id; without a new file there is nothing for us to do.
   if (operation === "update" && mutating.id == null && !hasNewFile) {
@@ -110,8 +114,9 @@ export const framedCropBeforeOperation: CollectionBeforeOperationHook = async ({
     incomingCrop != null &&
     !rectsAlmostEqual(incomingCrop, previousCrop ?? FULL_FRAME_RECT);
 
-  // Alt-text edits (and other non-file saves) leave uploadEdits.crop unset.
-  if (!hasNewFile && !cropChanged) {
+  // Alt-text edits leave uploadEdits.crop unset. Any present crop (even a
+  // no-op re-save) must still go through us so Payload never sees OOB percents.
+  if (!hasNewFile && !cropChanged && !hasUploadEditsCrop) {
     return args;
   }
 
@@ -197,11 +202,9 @@ export const framedCropBeforeOperation: CollectionBeforeOperationHook = async ({
   };
 
   // Bypass Payload's stock cropImage — our buffer is already the final crop.
-  if (uploadEdits) {
-    delete uploadEdits.crop;
-    delete uploadEdits.widthInPixels;
-    delete uploadEdits.heightInPixels;
-  }
+  // Mutate the same object `parseUploadEditsFromReqOrIncomingData` returns
+  // (it re-reads req.query.uploadEdits), so generateFileData must not see crop.
+  clearStockCropEdits(req);
 
   mutating.data.crop = rect;
 
@@ -242,47 +245,58 @@ function isFramedSlug(slug: string): slug is FramedCollectionSlug {
 
 function readUploadEdits(req: PayloadRequest): UploadEditsQuery | undefined {
   const raw = req.query?.uploadEdits;
-  if (!raw || typeof raw !== "object") return undefined;
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return undefined;
   return raw as UploadEditsQuery;
 }
 
-function cropFromUploadEdits(uploadEdits: UploadEditsQuery | undefined): Rect | null {
-  const crop = uploadEdits?.crop;
-  if (!crop) return null;
-  if (
-    !Number.isFinite(crop.x) ||
-    !Number.isFinite(crop.y) ||
-    !Number.isFinite(crop.width) ||
-    !Number.isFinite(crop.height)
-  ) {
-    return null;
+function hasCropProperty(uploadEdits: UploadEditsQuery | undefined): boolean {
+  return Boolean(uploadEdits && "crop" in uploadEdits && uploadEdits.crop != null);
+}
+
+/** Strip the fields generateFileData forwards into stock cropImage. */
+function clearStockCropEdits(req: PayloadRequest): void {
+  const uploadEdits = readUploadEdits(req);
+  if (!uploadEdits) return;
+  delete uploadEdits.crop;
+  delete uploadEdits.widthInPixels;
+  delete uploadEdits.heightInPixels;
+}
+
+/**
+ * qs.parse leaves numeric query values as strings. Number.isFinite rejects
+ * those, so callers must coerce before validating.
+ */
+function toFiniteNumber(value: unknown): number | null {
+  if (typeof value === "number") {
+    return Number.isFinite(value) ? value : null;
   }
-  return {
-    x: crop.x as number,
-    y: crop.y as number,
-    width: crop.width as number,
-    height: crop.height as number,
-  };
+  if (typeof value === "string" && value.trim() !== "") {
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : null;
+  }
+  return null;
+}
+
+function rectFromUnknown(crop: unknown): Rect | null {
+  if (!crop || typeof crop !== "object") return null;
+  const raw = crop as Record<string, unknown>;
+  const x = toFiniteNumber(raw.x);
+  const y = toFiniteNumber(raw.y);
+  const width = toFiniteNumber(raw.width);
+  const height = toFiniteNumber(raw.height);
+  if (x == null || y == null || width == null || height == null) return null;
+  return { x, y, width, height };
+}
+
+/** Exported for unit tests — admin uploadEdits arrive as qs string coords. */
+export function cropFromUploadEdits(
+  uploadEdits: UploadEditsQuery | undefined,
+): Rect | null {
+  return rectFromUnknown(uploadEdits?.crop);
 }
 
 function cropFromData(data: { crop?: unknown } | null | undefined): Rect | null {
-  const crop = data?.crop;
-  if (!crop || typeof crop !== "object") return null;
-  const rect = crop as Partial<Rect>;
-  if (
-    !Number.isFinite(rect.x) ||
-    !Number.isFinite(rect.y) ||
-    !Number.isFinite(rect.width) ||
-    !Number.isFinite(rect.height)
-  ) {
-    return null;
-  }
-  return {
-    x: rect.x as number,
-    y: rect.y as number,
-    width: rect.width as number,
-    height: rect.height as number,
-  };
+  return rectFromUnknown(data?.crop);
 }
 
 async function loadOriginalDoc(
@@ -508,6 +522,23 @@ async function cropToWebp({
   sourceSize: { width: number; height: number };
 }): Promise<Buffer> {
   const { pad, extract } = padAndExtractForRect(rect, sourceSize);
+
+  // Defensive: sharp.extract rejects negatives outright. padAndExtractForRect
+  // is supposed to guarantee non-negative offsets after extend — never bypass.
+  if (
+    extract.left < 0 ||
+    extract.top < 0 ||
+    !Number.isInteger(extract.left) ||
+    !Number.isInteger(extract.top) ||
+    !Number.isInteger(extract.width) ||
+    !Number.isInteger(extract.height)
+  ) {
+    throw new Error(
+      `framedCrop: refusing sharp.extract with left=${extract.left} top=${extract.top} ` +
+        `width=${extract.width} height=${extract.height} (must be non-negative integers)`,
+    );
+  }
+
   const background = sharpBackground(frame.padBackground);
 
   const extended = await sharp(source)
