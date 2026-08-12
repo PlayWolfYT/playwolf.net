@@ -2,6 +2,11 @@
 # `bun run dev` on the host can reach them. Bind to 127.0.0.1 only; do not
 # expose these ports on the LAN.
 #
+# Host ports for Garage are 7900 (S3) / 7903 (admin), not the container's
+# 3900 / 3903. Windows Hyper-V often reserves 3828–3927 (and nearby ranges),
+# which makes binding 127.0.0.1:3900/3903 fail with "access permissions".
+# Container-internal ports stay 3900/3903 for compose networking.
+#
 # Dev-only. Never layer this file on a Coolify host (production or staging);
 # those stacks keep db/garage internal to the Docker network.
 #
@@ -15,5 +20,5 @@ services:
 
   garage:
     ports:
-      - "127.0.0.1:3900:3900"
-      - "127.0.0.1:3903:3903"
+      - "127.0.0.1:7900:3900"
+      - "127.0.0.1:7903:3903"

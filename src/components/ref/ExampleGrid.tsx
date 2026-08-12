@@ -4,6 +4,7 @@ import type { Example } from "@/lib/content";
 import { exampleThumb, placeholderFor } from "@/lib/content";
 import { BackButton } from "@/components/ref/BackButton";
 import { ShimmerImage } from "@/components/ref/ShimmerImage";
+import { VersionBadge } from "@/components/ref/VersionBadge";
 import { WipTape } from "@/components/ref/WipTape";
 
 type ExampleGridProps = {
@@ -118,6 +119,7 @@ export function ExampleGrid({
                         <WipTape />
                       ) : null}
                     </div>
+                    <VersionBadge example={example} />
                   </div>
                   {caption}
                 </Link>

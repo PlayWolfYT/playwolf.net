@@ -1,4 +1,5 @@
-import type { Artist, ImageRef } from "@/lib/content";
+import type { AltSlide, Artist, ImageRef } from "@/lib/content";
+import { AltCarousel } from "@/components/ref/AltCarousel";
 import { ArtworkCard } from "@/components/ref/ArtworkCard";
 import { BackButton } from "@/components/ref/BackButton";
 import { OpenImageLink } from "@/components/ref/OpenImageLink";
@@ -20,6 +21,8 @@ type RefImageProps = {
   backHref?: string;
   /** Show the diagonal WIP tape on the artwork. */
   isWip?: boolean;
+  /** Alternate versions; when present the image becomes a carousel. */
+  alts?: AltSlide[];
 };
 
 /** Full-view single image embed. */
@@ -33,6 +36,7 @@ export function RefImage({
   showBackButton = true,
   backHref = "/ref",
   isWip = false,
+  alts = [],
 }: RefImageProps) {
   const hasHeader = Boolean(title || description);
 
@@ -53,13 +57,27 @@ export function RefImage({
         </header>
       ) : null}
 
-      <ArtworkCard src={src} alt={alt} artist={artist} isWip={isWip} />
+      {alts.length > 0 ? (
+        <>
+          <AltCarousel alt={alt} main={{ src, artist, isWip }} alts={alts} />
+          <div className="mt-6 flex flex-col items-center gap-3">
+            {children}
+            {showBackButton ? <BackButton fallbackHref={backHref} /> : null}
+          </div>
+        </>
+      ) : (
+        <>
+          <ArtworkCard src={src} alt={alt} artist={artist} isWip={isWip} />
 
-      <div className="mt-6 flex flex-col items-center gap-3">
-        {children}
-        <OpenImageLink image={src} />
-        {showBackButton ? <BackButton fallbackHref={backHref} /> : null}
-      </div>
+          <div className="mt-6 flex flex-col items-center gap-3">
+            {children}
+            <div className="flex flex-wrap items-center justify-center gap-3">
+              <OpenImageLink image={src} />
+            </div>
+            {showBackButton ? <BackButton fallbackHref={backHref} /> : null}
+          </div>
+        </>
+      )}
     </section>
   );
 }

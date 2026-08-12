@@ -16,7 +16,8 @@ bun run dev            # Next.js + Payload on http://localhost:3000
 
 `bun run dev:up` layers [`docker-compose.dev.yml`](docker-compose.dev.yml) on
 [`docker-compose.yml`](docker-compose.yml) so Postgres (`5432`) and Garage
-(`3900` S3 / `3903` admin) are published on loopback only, then runs
+(`7900` S3 / `7903` admin on the host → container `3900` / `3903`) are
+published on loopback only, then runs
 [`scripts/garage-bootstrap.ts`](scripts/garage-bootstrap.ts) to assign the
 single-node layout, create the `playwolf-media` bucket, and import the pinned
 local S3 credentials from `.env`.

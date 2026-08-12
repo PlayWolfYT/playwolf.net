@@ -81,7 +81,7 @@ async function probeSharpTransparentPad(): Promise<void> {
 async function probePayloadPipeline(): Promise<void> {
   // Garage is on loopback for local scripts; compose uses the service name.
   if (!process.env.S3_ENDPOINT || process.env.S3_ENDPOINT.includes("garage:")) {
-    process.env.S3_ENDPOINT = "http://localhost:3900";
+    process.env.S3_ENDPOINT = "http://localhost:7900";
   }
 
   const payload = await getPayload({ config });

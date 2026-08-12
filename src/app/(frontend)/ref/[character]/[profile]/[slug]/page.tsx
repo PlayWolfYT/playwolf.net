@@ -92,6 +92,7 @@ export default async function ExamplePage({ params }: PageProps) {
           artist={example.artist}
           backHref={backHref}
           isWip={example.isWip}
+          alts={example.alts}
         >
           <ArtworkChips example={example} />
         </RefImage>
@@ -119,6 +120,7 @@ export default async function ExamplePage({ params }: PageProps) {
           artist={example.artist}
           backHref={backHref}
           isWip={example.isWip}
+          alts={example.alts}
         >
           <ArtworkChips example={example} />
         </RefImage>

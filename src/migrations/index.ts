@@ -6,6 +6,7 @@ import * as migration_20260810_173959_artwork_wip_commissions_notifications from
 import * as migration_20260811_191914_croppable_image_collections from './20260811_191914_croppable_image_collections';
 import * as migration_20260811_201308_framed_upload_sizes from './20260811_201308_framed_upload_sizes';
 import * as migration_20260812_005200_framed_crop_source from './20260812_005200_framed_crop_source';
+import * as migration_20260812_105447_alt_versions from './20260812_105447_alt_versions';
 
 export const migrations = [
   {
@@ -41,11 +42,16 @@ export const migrations = [
   {
     up: migration_20260811_201308_framed_upload_sizes.up,
     down: migration_20260811_201308_framed_upload_sizes.down,
-    name: '20260811_201308_framed_upload_sizes'
+    name: '20260811_201308_framed_upload_sizes',
   },
   {
     up: migration_20260812_005200_framed_crop_source.up,
     down: migration_20260812_005200_framed_crop_source.down,
     name: '20260812_005200_framed_crop_source',
+  },
+  {
+    up: migration_20260812_105447_alt_versions.up,
+    down: migration_20260812_105447_alt_versions.down,
+    name: '20260812_105447_alt_versions'
   },
 ];

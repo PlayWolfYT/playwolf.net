@@ -214,7 +214,7 @@ async function main(): Promise<void> {
   loadEnvFile(resolve(root, ".env"));
 
   const bucket = process.env.S3_BUCKET?.trim() || "playwolf-media";
-  const endpoint = process.env.S3_ENDPOINT?.trim() || "http://localhost:3900";
+  const endpoint = process.env.S3_ENDPOINT?.trim() || "http://localhost:7900";
   const keyId = requireEnv("S3_ACCESS_KEY_ID");
   const secret = requireEnv("S3_SECRET_ACCESS_KEY");
 
