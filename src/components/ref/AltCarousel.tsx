@@ -63,7 +63,9 @@ export function AltCarousel({ alt, main, alts }: AltCarouselProps) {
     ...alts.map((slide) => ({
       image: slide.image,
       label: slide.label,
-      artist: slide.artist,
+      // Inline alts share the main piece's credit; linked counterpart
+      // artworks carry their own artist when present.
+      artist: slide.artist ?? main.artist,
       isWip: false,
       sourceHref: slide.sourceHref,
       sourceTitle: slide.sourceTitle,
