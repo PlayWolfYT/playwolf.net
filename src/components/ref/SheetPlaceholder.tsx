@@ -211,29 +211,22 @@ export async function SheetPlaceholder({ sheet }: SheetPlaceholderProps) {
     ? { backgroundImage: `linear-gradient(90deg, ${gradient.join(", ")})` }
     : undefined;
 
-  // Aspect ratio as a CSS custom property so mobile can treat it as a floor
-  // (grid spacer) while `sm+` locks the frame to the exact ratio.
+  // Aspect ratio is locked from `sm` up. On mobile the frame sizes to its
+  // content instead — a wide ratio like 16/9 as a grid spacer was expanding
+  // the min-content width past the viewport.
   const frameStyle = {
     "--wip-aspect": `${frameWidth} / ${frameHeight}`,
   } as CSSProperties;
 
   return (
-    <figure className="mx-auto w-full max-w-4xl">
+    <figure className="mx-auto w-full min-w-0 max-w-4xl">
       <div className="group rounded-3xl bg-gradient-to-br from-glow-500/45 via-white/[0.07] to-glow-700/30 p-px shadow-glow-md transition hover:from-glow-500/55">
         <div className="overflow-hidden rounded-[calc(1.5rem-1px)] bg-void">
           <div
-            className="relative grid w-full overflow-hidden sm:[aspect-ratio:var(--wip-aspect)]"
+            className="relative w-full min-w-0 overflow-hidden sm:[aspect-ratio:var(--wip-aspect)]"
             style={frameStyle}
           >
-            {/* Mobile-only aspect floor: same cell as the stage, so the box
-                grows with content when copy needs more height than the ratio. */}
-            <div
-              aria-hidden
-              className="col-start-1 row-start-1 w-full sm:hidden"
-              style={{ aspectRatio: "var(--wip-aspect)" }}
-            />
-
-            <div className="relative col-start-1 row-start-1 flex min-h-full w-full flex-col items-center px-6 pb-10 pt-14 sm:absolute sm:inset-0 sm:px-10 sm:py-14">
+            <div className="relative flex w-full min-w-0 flex-col items-center px-6 pb-10 pt-14 sm:absolute sm:inset-0 sm:px-10 sm:py-14">
               {sheet.kind === "wip" ? (
                 <div className="pointer-events-none absolute inset-0 z-20 origin-center transition duration-500 group-hover:scale-[1.02]">
                   <WipTape />
@@ -339,8 +332,9 @@ export async function SheetPlaceholder({ sheet }: SheetPlaceholderProps) {
                 {badge}
               </span>
 
-              {/* Content column — min-h-full so it can grow past the aspect floor;
-                  w-full keeps text-center relative to the frame, not the text width. */}
+              {/* Content column — w-full so text-center is relative to the frame;
+                  min-h-full + justify-center vertically centres copy inside the
+                  locked aspect box from sm up. */}
               <div className="relative z-10 flex w-full min-h-full flex-col items-center justify-center text-center">
                 <h2
                   className={`w-full break-words bg-clip-text font-display text-2xl font-medium tracking-tight text-transparent sm:text-3xl ${
