@@ -78,62 +78,62 @@ export function MobileNav() {
   // Portal only after a client click (`open`); never runs during SSR.
   const panel = open
     ? createPortal(
-          <div
-            id={panelId}
-            ref={panelRef}
-            role="dialog"
-            aria-modal="true"
-            aria-label="Primary"
-            className="fixed inset-0 z-[60] flex flex-col bg-void pt-[env(safe-area-inset-top)] sm:hidden"
-          >
-            <div className="flex h-14 shrink-0 items-center justify-between gap-4 border-b border-white/[0.07] px-4">
-              <Link
-                href="/"
-                onClick={close}
-                className="shrink-0 font-display text-sm font-medium uppercase tracking-[0.28em] text-glow-500 transition hover:text-glow-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-glow-500"
-              >
-                playwolf.net
-              </Link>
-              <button
-                type="button"
-                aria-label="Close menu"
-                onClick={close}
-                className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-full border border-white/10 bg-void-lift/70 text-parchment transition hover:border-glow-500/40 hover:text-glow-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-glow-500"
-              >
-                <MenuIcon open />
-              </button>
-            </div>
-
-            <nav
-              aria-label="Primary"
-              className="flex flex-1 flex-col overflow-y-auto px-4 pb-[max(1.5rem,env(safe-area-inset-bottom))] pt-6"
+        <div
+          id={panelId}
+          ref={panelRef}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Primary"
+          className="fixed inset-0 z-[60] flex flex-col bg-void pt-[env(safe-area-inset-top)] sm:hidden"
+        >
+          <div className="flex h-14 shrink-0 items-center justify-between gap-4 border-b border-white/[0.07] px-4">
+            <Link
+              href="/"
+              onClick={close}
+              className="shrink-0 font-display text-sm font-medium uppercase tracking-[0.28em] text-glow-500 transition hover:text-glow-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-glow-500"
             >
-              <ul className="flex flex-col gap-1">
-                {NAV_ITEMS.map((item) => {
-                  const active =
-                    pathname === item.href || pathname.startsWith(`${item.href}/`);
-                  return (
-                    <li key={item.href}>
-                      <Link
-                        href={item.href}
-                        aria-current={active ? "page" : undefined}
-                        onClick={close}
-                        className={`flex min-h-14 items-center rounded-2xl px-4 text-base font-medium uppercase tracking-[0.2em] transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-glow-500 ${
-                          active
-                            ? "bg-glow-500/10 text-glow-400"
-                            : "text-parchment-dim hover:bg-white/[0.04] hover:text-parchment"
-                        }`}
-                      >
-                        {item.label}
-                      </Link>
-                    </li>
-                  );
-                })}
-              </ul>
-            </nav>
-          </div>,
-          document.body,
-        )
+              playwolf.net
+            </Link>
+            <button
+              type="button"
+              aria-label="Close menu"
+              onClick={close}
+              className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-full border border-white/10 bg-void-lift/70 text-parchment transition hover:border-glow-500/40 hover:text-glow-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-glow-500"
+            >
+              <MenuIcon open />
+            </button>
+          </div>
+
+          <nav
+            aria-label="Primary"
+            className="flex flex-1 flex-col overflow-y-auto px-4 pb-[max(1.5rem,env(safe-area-inset-bottom))] pt-6"
+          >
+            <ul className="flex flex-col gap-1">
+              {NAV_ITEMS.map((item) => {
+                const active =
+                  pathname === item.href || pathname.startsWith(`${item.href}/`);
+                return (
+                  <li key={item.href}>
+                    <Link
+                      href={item.href}
+                      aria-current={active ? "page" : undefined}
+                      onClick={close}
+                      className={`flex min-h-14 items-center rounded-2xl px-4 text-base font-medium uppercase tracking-[0.2em] transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-glow-500 ${
+                        active
+                          ? "bg-glow-500/10 text-glow-400"
+                          : "text-parchment-dim hover:bg-white/[0.04] hover:text-parchment"
+                      }`}
+                    >
+                      {item.label}
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+          </nav>
+        </div>,
+        document.body,
+      )
     : null;
 
   return (

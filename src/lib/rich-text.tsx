@@ -100,7 +100,10 @@ export function RichTextContent({
 }) {
   // `break-words` + `overflow-wrap` keep long CMS URLs / tokens from pushing
   // the page sideways on narrow viewports; `[&_*]:max-w-full` clamps embeds.
-  const classes = ["break-words [overflow-wrap:anywhere] [&_img]:max-w-full [&_video]:max-w-full [&_iframe]:max-w-full", className]
+  const classes = [
+    "break-words [overflow-wrap:anywhere] [&_img]:max-w-full [&_video]:max-w-full [&_iframe]:max-w-full",
+    className,
+  ]
     .filter(Boolean)
     .join(" ");
   return <RichText className={classes} converters={withTextEffects} data={value} />;

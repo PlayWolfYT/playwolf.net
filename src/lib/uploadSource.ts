@@ -51,7 +51,9 @@ export function pickUploadRenderSource(args: {
       framed,
       args.original,
     ].filter((entry): entry is Candidate => {
-      return Boolean(entry && aspectsMatch(aspectRatio(entry.width, entry.height), target));
+      return Boolean(
+        entry && aspectsMatch(aspectRatio(entry.width, entry.height), target),
+      );
     });
 
     matching.sort((a, b) => b.width - a.width);
@@ -60,12 +62,10 @@ export function pickUploadRenderSource(args: {
 
   if (isFramed) {
     // `frame` key present but empty (`withoutEnlargement`) — main file is the crop.
-    const usable =
-      candidate(sizes?.display) ?? candidate(sizes?.card) ?? args.original;
+    const usable = candidate(sizes?.display) ?? candidate(sizes?.card) ?? args.original;
     return { ...usable, isFramed: true };
   }
 
-  const usable =
-    candidate(sizes?.display) ?? candidate(sizes?.card) ?? args.original;
+  const usable = candidate(sizes?.display) ?? candidate(sizes?.card) ?? args.original;
   return { ...usable, isFramed: false };
 }
