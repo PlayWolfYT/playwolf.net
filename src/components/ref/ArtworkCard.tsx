@@ -17,14 +17,22 @@ type ArtworkCardProps = {
   fit?: "page" | "viewport";
   /** When true, show the diagonal WIP tape over the image. */
   isWip?: boolean;
+  /**
+   * Extra classes on the artwork `<img>` itself — the alt carousel uses this
+   * to blur gated 18+ slides from the very first render (no unblurred flash).
+   */
+  imageClassName?: string;
 };
 
 /**
  * Widest the artwork may grow on large screens. Derived from the aspect ratio
  * so wide reference sheets can use the room a near-full-width page offers
  * while tall pieces don't end up taller than the viewport.
+ *
+ * Exported so the alt carousel can size a wrapper to the same frame and pin
+ * its chevron controls to the card's edges rather than the page's.
  */
-function frameFor(src: ImageRef): { className: string; px: number } {
+export function frameFor(src: ImageRef): { className: string; px: number } {
   const ratio = src.width / src.height;
   if (ratio >= 1.3) return { className: "max-w-6xl", px: 1152 };
   if (ratio >= 0.85) return { className: "max-w-4xl", px: 896 };
@@ -38,6 +46,7 @@ export function ArtworkCard({
   artist,
   fit = "page",
   isWip = false,
+  imageClassName,
 }: ArtworkCardProps) {
   const frame = frameFor(src);
   const bounded = fit === "viewport";
@@ -50,22 +59,25 @@ export function ArtworkCard({
       height={src.height}
       placeholder={placeholderFor(src)}
       sizes={`(max-width: ${frame.px}px) 100vw, ${frame.px}px`}
-      className={
+      className={`${
         bounded ? "mx-auto h-auto max-h-[70vh] w-auto max-w-full" : "h-auto w-full"
-      }
+      }${imageClassName ? ` ${imageClassName}` : ""}`}
     />
   );
 
   return (
     <figure
-      className={`group mx-auto rounded-3xl border border-white/[0.07] bg-gradient-to-br from-void-lift/90 to-void-panel/70 shadow-glow-sm transition hover:border-glow-500/40 ${
+      // Hover feedback lives on the frame (border + glow), never the artwork:
+      // the pointer crosses the image on its way to the controls around it,
+      // and a large picture zooming under the cursor reads as jitter.
+      className={`group mx-auto rounded-3xl border border-white/[0.07] bg-gradient-to-br from-void-lift/90 to-void-panel/70 shadow-glow-sm transition duration-300 hover:border-glow-500/40 hover:shadow-glow-md ${
         bounded ? "w-fit max-w-full" : `w-full ${frame.className}`
       }`}
     >
       <div
         className={`relative overflow-hidden rounded-t-3xl ${artist ? "" : "rounded-b-3xl"}`}
       >
-        <div className="relative origin-center transition duration-500 group-hover:scale-[1.02]">
+        <div className="relative">
           {image}
           {isWip ? <WipTape /> : null}
         </div>

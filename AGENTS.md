@@ -18,8 +18,10 @@ bun run dev      # Next.js + Payload
 ```
 
 That layers [`docker-compose.dev.yml`](docker-compose.dev.yml) to publish `db:5432`
-and `garage:3900`/`3903` on loopback, and imports the pinned local S3 credentials
-from `.env`. Do **not** use `docker-compose.dev.yml` on Coolify.
+and Garage on loopback as `127.0.0.1:7900`→`3900` (S3) / `7903`→`3903` (admin),
+and imports the pinned local S3 credentials from `.env`. Host ports avoid the
+Windows Hyper-V reserved range that often blocks binding `3900`/`3903` directly.
+Do **not** use `docker-compose.dev.yml` on Coolify.
 
 #### Cursor Cloud VM (no Docker)
 
@@ -50,7 +52,7 @@ Verify Postgres with `pg_lsclusters` and Garage with `/tmp/garage -c ~/.garage/g
 
 `bun run dev` reads `.env`. A working `.env` is present on the VM snapshot with
 `DATABASE_URL=postgresql://playwolf:playwolf@localhost:5432/playwolf`, a generated
-`PAYLOAD_SECRET`, and `S3_*` pointing at the local Garage (`S3_ENDPOINT=http://localhost:3900`).
+`PAYLOAD_SECRET`, and `S3_*` pointing at the local Garage (`S3_ENDPOINT=http://localhost:7900` with Docker Desktop; Cloud VM Garage still uses `3900`).
 If it is missing, copy [`.env.example`](.env.example) and fill those values. `S3_*` only
 fails at _upload time_, so the app still boots and renders without Garage running.
 

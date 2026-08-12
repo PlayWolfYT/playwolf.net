@@ -196,6 +196,58 @@ export const Artworks: CollectionConfig = {
         description: "Final artwork. Required once the piece is marked complete.",
       },
     },
+    {
+      name: "altImages",
+      type: "array",
+      label: "Alternate versions (inline images)",
+      labels: { singular: "Alt image", plural: "Alt images" },
+      admin: {
+        description:
+          "Lightweight variants (outfit swap, alternate pose) shown as a carousel on this artwork's page. Same rating as this artwork. Counterparts that deserve their own page belong in “Alternate versions (linked artworks)” instead.",
+        initCollapsed: true,
+      },
+      fields: [
+        {
+          name: "image",
+          type: "upload",
+          relationTo: "media",
+          required: true,
+        },
+        {
+          name: "label",
+          type: "text",
+          admin: { description: "Shown as the slide caption, e.g. “casual outfit”." },
+        },
+      ],
+    },
+    {
+      name: "altArtworks",
+      type: "relationship",
+      relationTo: "artworks",
+      hasMany: true,
+      label: "Alternate versions (linked artworks)",
+      admin: {
+        description:
+          "Independent artworks that are versions of this one (e.g. the After Dark counterpart). Link one side only — the other side lists this artwork automatically.",
+      },
+      filterOptions: ({ id }) => {
+        const self = idOf(id);
+        return self === undefined ? true : { id: { not_equals: self } };
+      },
+    },
+    {
+      // Reverse of `altArtworks`: which artworks name this one as a version.
+      // Editors never touch it; the frontend merges both directions into one
+      // symmetric alt group, so linking a single side is enough.
+      name: "altOf",
+      type: "join",
+      collection: "artworks",
+      on: "altArtworks",
+      label: "Alternate version of",
+      admin: {
+        description: "Artworks that link this one as an alternate version.",
+      },
+    },
     withAdminCondition(
       {
         name: "commission",

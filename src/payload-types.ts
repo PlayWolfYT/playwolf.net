@@ -84,7 +84,11 @@ export interface Config {
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
   };
-  collectionsJoins: {};
+  collectionsJoins: {
+    artworks: {
+      altOf: 'artworks';
+    };
+  };
   collectionsSelect: {
     users: UsersSelect<false> | UsersSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
@@ -859,6 +863,31 @@ export interface Artwork {
    * Final artwork. Required once the piece is marked complete.
    */
   image?: (number | null) | Media;
+  /**
+   * Lightweight variants (outfit swap, alternate pose) shown as a carousel on this artwork's page. Same rating as this artwork. Counterparts that deserve their own page belong in “Alternate versions (linked artworks)” instead.
+   */
+  altImages?:
+    | {
+        image: number | Media;
+        /**
+         * Shown as the slide caption, e.g. “casual outfit”.
+         */
+        label?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Independent artworks that are versions of this one (e.g. the After Dark counterpart). Link one side only — the other side lists this artwork automatically.
+   */
+  altArtworks?: (number | Artwork)[] | null;
+  /**
+   * Artworks that link this one as an alternate version.
+   */
+  altOf?: {
+    docs?: (number | Artwork)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
   commission?: {
     paid?: boolean | null;
     artistStarted?: boolean | null;
@@ -1716,6 +1745,15 @@ export interface ArtworksSelect<T extends boolean = true> {
   profile?: T;
   lifecycle?: T;
   image?: T;
+  altImages?:
+    | T
+    | {
+        image?: T;
+        label?: T;
+        id?: T;
+      };
+  altArtworks?: T;
+  altOf?: T;
   commission?:
     | T
     | {

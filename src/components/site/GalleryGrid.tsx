@@ -3,6 +3,7 @@ import Link from "next/link";
 
 import { exampleThumb, placeholderFor, type GalleryItem } from "@/lib/content";
 import { ShimmerImage } from "@/components/ref/ShimmerImage";
+import { VersionBadge } from "@/components/ref/VersionBadge";
 import { WipTape } from "@/components/ref/WipTape";
 
 const THUMB_SIZES =
@@ -76,6 +77,7 @@ export function GalleryGrid({ items }: { items: GalleryItem[] }) {
                   {thumb}
                   {example.isWip ? <WipTape /> : null}
                 </div>
+                <VersionBadge example={example} />
               </div>
               {caption}
             </Link>

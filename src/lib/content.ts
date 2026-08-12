@@ -245,6 +245,27 @@ export type ExampleCommission = {
   lastArtistUpdateNote?: string;
 };
 
+/**
+ * One extra rendition of an artwork, shown as a slide in the detail-page
+ * carousel. Inline alt images carry just an image and caption; slides that are
+ * independent artworks also point back at their own page.
+ */
+export type AltSlide = {
+  image: ImageRef;
+  /** Slide caption — the alt image's label, or the linked artwork's title. */
+  label?: string;
+  /** Detail page of the slide when it is an independent artwork. */
+  sourceHref?: string;
+  sourceTitle?: string;
+  artist?: Artist;
+  /**
+   * Set only when the slide is a linked artwork from the *other* rating
+   * bucket. `"nsfw"` slides are blurred in the carousel until deliberately
+   * revealed (consent-gated); they also never count towards grid badges.
+   */
+  profile?: ProfileKey;
+};
+
 /** A single piece of art within a character's profile gallery. */
 export type Example = {
   slug: string;
@@ -263,6 +284,12 @@ export type Example = {
   artist?: Artist;
   featuring: Featured[];
   tags: Tag[];
+  /**
+   * Alternate versions shown as carousel slides: inline alt images, then
+   * same-rating linked artworks, then cross-rating counterparts (marked with
+   * `profile`).
+   */
+  alts: AltSlide[];
 };
 
 /**

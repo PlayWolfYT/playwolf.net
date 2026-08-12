@@ -15,6 +15,7 @@ import type {
 } from "@/payload-types";
 import type {
   AccentMap,
+  AltSlide,
   Artist,
   Character,
   ContentLink,
@@ -243,7 +244,7 @@ function toWipImages(entries: StoredArtwork["wipImages"]): Example["wipImages"] 
  * In-progress pieces may omit a final image; overview / first WIP fill the gap
  * for `overviewImage`, while `src` stays undefined until the final lands.
  */
-function toExample(artwork: StoredArtwork): Example | undefined {
+function toExample(artwork: StoredArtwork, alts: AltSlide[] = []): Example | undefined {
   const isWip = artwork.lifecycle === "in_progress";
   const src = toImageRef(artwork.image);
   if (!isWip && !src) return undefined;
@@ -266,7 +267,39 @@ function toExample(artwork: StoredArtwork): Example | undefined {
     artist: toArtist(artwork.artist),
     featuring: toFeatured(artwork),
     tags: (artwork.tags ?? []).flatMap((tag) => toTag(tag) ?? []),
+    alts,
   };
+}
+
+function relationId(value: number | { id: number }): number {
+  return typeof value === "object" ? value.id : value;
+}
+
+/**
+ * Alt links as one symmetric, one-hop union. Editors only link one side
+ * (`altOf` is the automatic reverse in the admin), so here every stored
+ * `altArtworks` edge is registered in both directions — scanning the whole
+ * corpus covers the reverse direction without reading the join field.
+ */
+function buildAltNeighbours(artworks: StoredArtwork[]): Map<number, number[]> {
+  const neighbours = new Map<number, number[]>();
+
+  const link = (a: number, b: number) => {
+    if (a === b) return;
+    const list = neighbours.get(a) ?? [];
+    if (!list.includes(b)) list.push(b);
+    neighbours.set(a, list);
+  };
+
+  for (const artwork of artworks) {
+    for (const entry of artwork.altArtworks ?? []) {
+      const other = relationId(entry);
+      link(artwork.id, other);
+      link(other, artwork.id);
+    }
+  }
+
+  return neighbours;
 }
 
 function toProfile(
@@ -337,11 +370,50 @@ async function loadCharacters(): Promise<Character[]> {
     }),
   ]);
 
+  const artworkById = new Map(artworks.docs.map((doc) => [doc.id, doc]));
+  const characterSlugById = new Map(
+    characters.docs.map((stored) => [stored.id, stored.slug]),
+  );
+  const altNeighbours = buildAltNeighbours(artworks.docs);
+
+  function toAltSlides(artwork: StoredArtwork): AltSlide[] {
+    // Inline variants always lead; linked counterparts follow in link order,
+    // same-rating ones before cross-rating ones.
+    const alts: AltSlide[] = (artwork.altImages ?? []).flatMap((entry) => {
+      const image = toImageRef(entry.image);
+      return image ? [{ image, label: entry.label ?? undefined }] : [];
+    });
+    const crossAlts: AltSlide[] = [];
+
+    for (const id of altNeighbours.get(artwork.id) ?? []) {
+      const other = artworkById.get(id);
+      if (!other) continue;
+      const characterSlug = characterSlugById.get(relationId(other.character));
+      if (!characterSlug) continue;
+      // A slide needs an image; WIP counterparts without one stay invisible.
+      const image = toImageRef(other.image);
+      if (!image) continue;
+
+      const slide: AltSlide = {
+        image,
+        label: other.title,
+        sourceHref: `/ref/${characterSlug}/${other.profile}/${other.slug}`,
+        sourceTitle: other.title,
+        artist: toArtist(other.artist),
+      };
+
+      if (other.profile === artwork.profile) alts.push(slide);
+      else crossAlts.push({ ...slide, profile: other.profile });
+    }
+
+    return [...alts, ...crossAlts];
+  }
+
   const byCharacter = new Map<number, Record<ProfileKey, Example[]>>();
   for (const artwork of artworks.docs) {
     const characterId =
       typeof artwork.character === "object" ? artwork.character.id : artwork.character;
-    const example = toExample(artwork);
+    const example = toExample(artwork, toAltSlides(artwork));
     if (!example) continue;
 
     const buckets =
