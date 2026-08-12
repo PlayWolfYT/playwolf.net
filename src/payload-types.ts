@@ -239,6 +239,18 @@ export interface FriendImage {
    * Generated on upload and used as the `next/image` blur placeholder.
    */
   blurDataURL?: string | null;
+  source?: {
+    key?: string | null;
+    width?: number | null;
+    height?: number | null;
+    mimeType?: string | null;
+  };
+  crop?: {
+    x?: number | null;
+    y?: number | null;
+    width?: number | null;
+    height?: number | null;
+  };
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -301,6 +313,18 @@ export interface CharacterImage {
    * Generated on upload and used as the `next/image` blur placeholder.
    */
   blurDataURL?: string | null;
+  source?: {
+    key?: string | null;
+    width?: number | null;
+    height?: number | null;
+    mimeType?: string | null;
+  };
+  crop?: {
+    x?: number | null;
+    y?: number | null;
+    width?: number | null;
+    height?: number | null;
+  };
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -363,6 +387,18 @@ export interface ProjectImage {
    * Generated on upload and used as the `next/image` blur placeholder.
    */
   blurDataURL?: string | null;
+  source?: {
+    key?: string | null;
+    width?: number | null;
+    height?: number | null;
+    mimeType?: string | null;
+  };
+  crop?: {
+    x?: number | null;
+    y?: number | null;
+    width?: number | null;
+    height?: number | null;
+  };
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -425,6 +461,18 @@ export interface SiteImage {
    * Generated on upload and used as the `next/image` blur placeholder.
    */
   blurDataURL?: string | null;
+  source?: {
+    key?: string | null;
+    width?: number | null;
+    height?: number | null;
+    mimeType?: string | null;
+  };
+  crop?: {
+    x?: number | null;
+    y?: number | null;
+    width?: number | null;
+    height?: number | null;
+  };
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -1191,6 +1239,22 @@ export interface MediaSelect<T extends boolean = true> {
 export interface FriendImagesSelect<T extends boolean = true> {
   alt?: T;
   blurDataURL?: T;
+  source?:
+    | T
+    | {
+        key?: T;
+        width?: T;
+        height?: T;
+        mimeType?: T;
+      };
+  crop?:
+    | T
+    | {
+        x?: T;
+        y?: T;
+        width?: T;
+        height?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -1254,6 +1318,22 @@ export interface FriendImagesSelect<T extends boolean = true> {
 export interface CharacterImagesSelect<T extends boolean = true> {
   alt?: T;
   blurDataURL?: T;
+  source?:
+    | T
+    | {
+        key?: T;
+        width?: T;
+        height?: T;
+        mimeType?: T;
+      };
+  crop?:
+    | T
+    | {
+        x?: T;
+        y?: T;
+        width?: T;
+        height?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -1317,6 +1397,22 @@ export interface CharacterImagesSelect<T extends boolean = true> {
 export interface ProjectImagesSelect<T extends boolean = true> {
   alt?: T;
   blurDataURL?: T;
+  source?:
+    | T
+    | {
+        key?: T;
+        width?: T;
+        height?: T;
+        mimeType?: T;
+      };
+  crop?:
+    | T
+    | {
+        x?: T;
+        y?: T;
+        width?: T;
+        height?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -1380,6 +1476,22 @@ export interface ProjectImagesSelect<T extends boolean = true> {
 export interface SiteImagesSelect<T extends boolean = true> {
   alt?: T;
   blurDataURL?: T;
+  source?:
+    | T
+    | {
+        key?: T;
+        width?: T;
+        height?: T;
+        mimeType?: T;
+      };
+  crop?:
+    | T
+    | {
+        x?: T;
+        y?: T;
+        width?: T;
+        height?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
   url?: T;

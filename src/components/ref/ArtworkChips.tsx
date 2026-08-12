@@ -3,7 +3,7 @@ import Link from "next/link";
 import type { Example } from "@/lib/content";
 
 const CHIP_CLASS =
-  "inline-flex min-h-8 items-center gap-1.5 rounded-full border border-white/10 bg-void/70 px-3 text-xs text-parchment-muted transition hover:border-glow-500/40 hover:text-parchment focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-glow-500";
+  "inline-flex min-h-9 items-center gap-1.5 rounded-full border border-white/10 bg-void/70 px-3 py-1.5 text-xs text-parchment-muted transition hover:border-glow-500/40 hover:text-parchment focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-glow-500";
 
 /**
  * Who is in the picture and what it is about, as links out. Characters go to

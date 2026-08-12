@@ -222,7 +222,7 @@ function NsfwWarning({
   }, [onDecline]);
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center overflow-y-auto overscroll-contain bg-void/90 p-4 backdrop-blur-2xl sm:p-8">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center overflow-y-auto overscroll-contain bg-void/90 p-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-[max(1rem,env(safe-area-inset-top))] backdrop-blur-2xl sm:p-8 sm:pb-[max(2rem,env(safe-area-inset-bottom))] sm:pt-[max(2rem,env(safe-area-inset-top))]">
       <div
         ref={panelRef}
         role="alertdialog"

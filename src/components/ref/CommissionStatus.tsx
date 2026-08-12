@@ -19,7 +19,7 @@ export function CommissionStatus({ commission }: { commission: ExampleCommission
         {commission.lastArtistUpdateAt ? (
           <div className="col-span-2">
             <dt className="text-parchment-dim">Last artist update</dt>
-            <dd className="text-parchment">
+            <dd className="break-words text-parchment [overflow-wrap:anywhere]">
               {new Date(commission.lastArtistUpdateAt).toLocaleString()}
               {commission.lastArtistUpdateNote
                 ? ` — ${commission.lastArtistUpdateNote}`

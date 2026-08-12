@@ -211,144 +211,160 @@ export async function SheetPlaceholder({ sheet }: SheetPlaceholderProps) {
     ? { backgroundImage: `linear-gradient(90deg, ${gradient.join(", ")})` }
     : undefined;
 
+  // Aspect ratio as a CSS custom property so mobile can treat it as a floor
+  // (grid spacer) while `sm+` locks the frame to the exact ratio.
+  const frameStyle = {
+    "--wip-aspect": `${frameWidth} / ${frameHeight}`,
+  } as CSSProperties;
+
   return (
     <figure className="mx-auto w-full max-w-4xl">
       <div className="group rounded-3xl bg-gradient-to-br from-glow-500/45 via-white/[0.07] to-glow-700/30 p-px shadow-glow-md transition hover:from-glow-500/55">
         <div className="overflow-hidden rounded-[calc(1.5rem-1px)] bg-void">
           <div
-            className="relative w-full overflow-hidden px-6 py-10 sm:px-10 sm:py-14"
-            style={{ aspectRatio: aspect }}
+            className="relative grid w-full overflow-hidden sm:[aspect-ratio:var(--wip-aspect)]"
+            style={frameStyle}
           >
-            {sheet.kind === "wip" ? (
-              <div className="pointer-events-none absolute inset-0 z-20 origin-center transition duration-500 group-hover:scale-[1.02]">
-                <WipTape />
-              </div>
-            ) : null}
-            {/* Stage atmosphere */}
+            {/* Mobile-only aspect floor: same cell as the stage, so the box
+                grows with content when copy needs more height than the ratio. */}
             <div
-              className="pointer-events-none absolute inset-0 bg-gradient-to-br from-void-lift via-void-panel to-void"
               aria-hidden
+              className="col-start-1 row-start-1 w-full sm:hidden"
+              style={{ aspectRatio: "var(--wip-aspect)" }}
             />
-            <div
-              className="pointer-events-none absolute inset-0 bg-[size:34px_34px] bg-grid-soft opacity-70 [mask-image:radial-gradient(ellipse_at_center,transparent_12%,black_72%)]"
-              aria-hidden
-            />
-            {washStyle ? (
-              <div
-                className="pointer-events-none absolute inset-0 opacity-[0.12]"
-                style={washStyle}
-                aria-hidden
-              />
-            ) : (
-              <div
-                className="pointer-events-none absolute inset-0 bg-rim-cyan"
-                aria-hidden
-              />
-            )}
 
-            {/* Icon scatter — faded toward the centre so the copy stays legible */}
-            <div
-              className="pointer-events-none absolute inset-0 [mask-image:radial-gradient(ellipse_58%_62%_at_center,transparent_25%,black_82%)]"
-              aria-hidden
-            >
-              {dust.map((dot, position) => (
-                <span
-                  key={`dust-${position}`}
-                  className={`absolute rounded-full ${tinted ? "" : "bg-glow-500"} ${
-                    dot.twinkle ? "animate-twinkle" : ""
-                  }`}
-                  style={dot.style}
+            <div className="relative col-start-1 row-start-1 flex min-h-full w-full flex-col px-6 pb-10 pt-14 sm:absolute sm:inset-0 sm:px-10 sm:py-14">
+              {sheet.kind === "wip" ? (
+                <div className="pointer-events-none absolute inset-0 z-20 origin-center transition duration-500 group-hover:scale-[1.02]">
+                  <WipTape />
+                </div>
+              ) : null}
+              {/* Stage atmosphere */}
+              <div
+                className="pointer-events-none absolute inset-0 bg-gradient-to-br from-void-lift via-void-panel to-void"
+                aria-hidden
+              />
+              <div
+                className="pointer-events-none absolute inset-0 bg-[size:34px_34px] bg-grid-soft opacity-70 [mask-image:radial-gradient(ellipse_at_center,transparent_12%,black_72%)]"
+                aria-hidden
+              />
+              {washStyle ? (
+                <div
+                  className="pointer-events-none absolute inset-0 opacity-[0.12]"
+                  style={washStyle}
+                  aria-hidden
                 />
-              ))}
+              ) : (
+                <div
+                  className="pointer-events-none absolute inset-0 bg-rim-cyan"
+                  aria-hidden
+                />
+              )}
 
-              {specks.map(({ name, style, twinkle }, position) => {
-                const Icon = iconComponents[name];
-                return (
-                  <span
-                    key={`speck-${position}`}
-                    className={`absolute block ${tinted ? "" : "text-glow-500"} ${
-                      twinkle ? "animate-twinkle" : ""
-                    }`}
-                    style={style}
-                  >
-                    <Icon className="h-full w-full" strokeWidth={1.5} />
-                  </span>
-                );
-              })}
-            </div>
-
-            {/* Soft pool behind the copy */}
-            <div
-              className="pointer-events-none absolute left-1/2 top-1/2 h-[70%] w-[80%] -translate-x-1/2 -translate-y-1/2 rounded-full bg-void/70 blur-3xl"
-              aria-hidden
-            />
-
-            {/* Slow sheen sweeping across the frame */}
-            <span
-              className="pointer-events-none absolute inset-0 bg-shimmer animate-shimmer [animation-duration:7s]"
-              aria-hidden
-            />
-
-            {/* Double frame + corner brackets */}
-            <span
-              className="pointer-events-none absolute inset-3 rounded-[1.35rem] border border-glow-500/20"
-              aria-hidden
-            />
-            <span
-              className="pointer-events-none absolute inset-[1.15rem] rounded-2xl border border-dashed border-white/[0.06]"
-              aria-hidden
-            />
-            <span
-              className="pointer-events-none absolute left-3 top-3 h-7 w-7 rounded-tl-[1.35rem] border-l-2 border-t-2 border-glow-400/50"
-              aria-hidden
-            />
-            <span
-              className="pointer-events-none absolute right-3 top-3 h-7 w-7 rounded-tr-[1.35rem] border-r-2 border-t-2 border-glow-400/50"
-              aria-hidden
-            />
-            <span
-              className="pointer-events-none absolute bottom-3 left-3 h-7 w-7 rounded-bl-[1.35rem] border-b-2 border-l-2 border-glow-400/50"
-              aria-hidden
-            />
-            <span
-              className="pointer-events-none absolute bottom-3 right-3 h-7 w-7 rounded-br-[1.35rem] border-b-2 border-r-2 border-glow-400/50"
-              aria-hidden
-            />
-
-            {/* Badge tab hanging from the top edge */}
-            <span className="absolute left-1/2 top-0 z-20 inline-flex -translate-x-1/2 items-center gap-2 rounded-b-2xl border-x border-b border-glow-500/30 bg-void/85 px-4 py-1.5 font-mono text-[0.6rem] font-medium uppercase tracking-[0.28em] text-glow-300 backdrop-blur">
-              <span
-                className="h-1.5 w-1.5 rounded-full bg-glow-400 animate-slow-pulse"
+              {/* Icon scatter — faded toward the centre so the copy stays legible */}
+              <div
+                className="pointer-events-none absolute inset-0 [mask-image:radial-gradient(ellipse_58%_62%_at_center,transparent_25%,black_82%)]"
                 aria-hidden
-              />
-              {badge}
-            </span>
-
-            {/* Content column */}
-            <div className="relative z-10 flex h-full flex-col items-center justify-center text-center">
-              <h2
-                className={`bg-clip-text font-display text-2xl font-medium tracking-tight text-transparent sm:text-3xl ${
-                  tinted
-                    ? ""
-                    : "bg-gradient-to-r from-parchment via-glow-300 to-parchment"
-                }`}
-                style={titleStyle}
               >
-                {sheet.title}
-              </h2>
+                {dust.map((dot, position) => (
+                  <span
+                    key={`dust-${position}`}
+                    className={`absolute rounded-full ${tinted ? "" : "bg-glow-500"} ${
+                      dot.twinkle ? "animate-twinkle" : ""
+                    }`}
+                    style={dot.style}
+                  />
+                ))}
 
-              <div className="mt-4 flex items-center gap-3" aria-hidden>
-                <span className="h-px w-12 bg-gradient-to-r from-transparent to-glow-500/50 sm:w-16" />
-                <SparkStar className="h-3 w-3 animate-twinkle text-glow-400/80" />
-                <span className="h-px w-12 bg-gradient-to-l from-transparent to-glow-500/50 sm:w-16" />
+                {specks.map(({ name, style, twinkle }, position) => {
+                  const Icon = iconComponents[name];
+                  return (
+                    <span
+                      key={`speck-${position}`}
+                      className={`absolute block ${tinted ? "" : "text-glow-500"} ${
+                        twinkle ? "animate-twinkle" : ""
+                      }`}
+                      style={style}
+                    >
+                      <Icon className="h-full w-full" strokeWidth={1.5} />
+                    </span>
+                  );
+                })}
               </div>
 
-              <p className="mt-5 font-mono text-[0.62rem] uppercase tracking-[0.24em] text-parchment-dim">
-                {subtitle}
-              </p>
+              {/* Soft pool behind the copy */}
+              <div
+                className="pointer-events-none absolute left-1/2 top-1/2 h-[70%] w-[80%] -translate-x-1/2 -translate-y-1/2 rounded-full bg-void/70 blur-3xl"
+                aria-hidden
+              />
 
-              <div className="mt-5 flex flex-col items-center">
-                <WipQuoteCycler quotes={quotes} interval={interval} />
+              {/* Slow sheen sweeping across the frame */}
+              <span
+                className="pointer-events-none absolute inset-0 bg-shimmer animate-shimmer [animation-duration:7s]"
+                aria-hidden
+              />
+
+              {/* Double frame + corner brackets */}
+              <span
+                className="pointer-events-none absolute inset-3 rounded-[1.35rem] border border-glow-500/20"
+                aria-hidden
+              />
+              <span
+                className="pointer-events-none absolute inset-[1.15rem] rounded-2xl border border-dashed border-white/[0.06]"
+                aria-hidden
+              />
+              <span
+                className="pointer-events-none absolute left-3 top-3 h-7 w-7 rounded-tl-[1.35rem] border-l-2 border-t-2 border-glow-400/50"
+                aria-hidden
+              />
+              <span
+                className="pointer-events-none absolute right-3 top-3 h-7 w-7 rounded-tr-[1.35rem] border-r-2 border-t-2 border-glow-400/50"
+                aria-hidden
+              />
+              <span
+                className="pointer-events-none absolute bottom-3 left-3 h-7 w-7 rounded-bl-[1.35rem] border-b-2 border-l-2 border-glow-400/50"
+                aria-hidden
+              />
+              <span
+                className="pointer-events-none absolute bottom-3 right-3 h-7 w-7 rounded-br-[1.35rem] border-b-2 border-r-2 border-glow-400/50"
+                aria-hidden
+              />
+
+              {/* Badge tab hanging from the top edge */}
+              <span className="absolute left-1/2 top-0 z-20 inline-flex -translate-x-1/2 items-center gap-2 rounded-b-2xl border-x border-b border-glow-500/30 bg-void/85 px-4 py-1.5 font-mono text-[0.6rem] font-medium uppercase tracking-[0.28em] text-glow-300 backdrop-blur">
+                <span
+                  className="h-1.5 w-1.5 rounded-full bg-glow-400 animate-slow-pulse"
+                  aria-hidden
+                />
+                {badge}
+              </span>
+
+              {/* Content column — min-h-full so it can grow past the aspect floor */}
+              <div className="relative z-10 flex min-h-full flex-col items-center justify-center text-center">
+                <h2
+                  className={`break-words bg-clip-text font-display text-2xl font-medium tracking-tight text-transparent sm:text-3xl ${
+                    tinted
+                      ? ""
+                      : "bg-gradient-to-r from-parchment via-glow-300 to-parchment"
+                  }`}
+                  style={titleStyle}
+                >
+                  {sheet.title}
+                </h2>
+
+                <div className="mt-4 flex items-center gap-3" aria-hidden>
+                  <span className="h-px w-12 bg-gradient-to-r from-transparent to-glow-500/50 sm:w-16" />
+                  <SparkStar className="h-3 w-3 animate-twinkle text-glow-400/80" />
+                  <span className="h-px w-12 bg-gradient-to-l from-transparent to-glow-500/50 sm:w-16" />
+                </div>
+
+                <p className="mt-5 font-mono text-[0.62rem] uppercase tracking-[0.24em] text-parchment-dim">
+                  {subtitle}
+                </p>
+
+                <div className="mt-5 flex flex-col items-center">
+                  <WipQuoteCycler quotes={quotes} interval={interval} />
+                </div>
               </div>
             </div>
           </div>

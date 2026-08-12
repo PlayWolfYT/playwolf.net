@@ -151,7 +151,7 @@ export function Aurora() {
   return (
     <div
       ref={containerRef}
-      className="pointer-events-none absolute inset-x-0 top-0 h-[min(58vh,560px)] opacity-70"
+      className="pointer-events-none absolute inset-x-0 top-0 h-[min(58lvh,560px)] opacity-70"
       aria-hidden
     />
   );

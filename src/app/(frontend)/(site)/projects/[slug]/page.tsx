@@ -55,12 +55,14 @@ export default async function ProjectPage({ params }: PageProps) {
       {project.cover ? (
         <div className="relative mt-12 aspect-[16/9] w-full overflow-hidden rounded-3xl border border-white/[0.07] bg-void-lift/60 shadow-glow-sm">
           <ShimmerImage
-            src={project.cover}
+            src={project.cover.src}
             alt={project.title}
             fill
+            unoptimized={project.cover.unoptimized}
             placeholder={placeholderFor(project.cover)}
+            blurDataURL={project.cover.blurDataURL}
             sizes="(max-width: 768px) 100vw, 768px"
-            className="object-cover"
+            className="object-contain object-center"
           />
         </div>
       ) : null}

@@ -23,13 +23,15 @@ export function ProjectCard({ project }: { project: Project }) {
         <div className="relative aspect-[16/9] w-full overflow-hidden bg-void-lift/60">
           {project.cover ? (
             <ShimmerImage
-              src={project.cover}
+              src={project.cover.src}
               alt=""
               aria-hidden
               fill
+              unoptimized={project.cover.unoptimized}
               placeholder={placeholderFor(project.cover)}
+              blurDataURL={project.cover.blurDataURL}
               sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 420px"
-              className="object-cover transition duration-500 group-hover:scale-105"
+              className="object-contain transition duration-500 group-hover:scale-105"
               style={{ objectPosition: project.cover.objectPosition }}
             />
           ) : (

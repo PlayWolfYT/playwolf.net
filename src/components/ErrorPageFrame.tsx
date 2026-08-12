@@ -20,8 +20,13 @@ export function ErrorPageFrame({
   children,
 }: ErrorPageFrameProps) {
   return (
-    <main className="relative isolate flex min-h-screen flex-col items-center justify-center overflow-hidden bg-void px-6 py-16">
-      <BrandBackdrop density="soft" />
+    <main className="relative isolate flex min-h-dvh flex-col items-center justify-center overflow-hidden bg-void px-6 py-16">
+      <div
+        className="pointer-events-none absolute inset-x-0 top-0 h-[100lvh] overflow-hidden"
+        aria-hidden
+      >
+        <BrandBackdrop density="soft" />
+      </div>
 
       <div className="relative z-10 w-full max-w-lg">
         <div className="mb-8 flex justify-center gap-4 text-glow-500/40">

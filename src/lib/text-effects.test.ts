@@ -63,6 +63,7 @@ describe("gradient helpers", () => {
   test("maps every editor effect to its public class", () => {
     expect(textEffectClass("rainbow")).toBe("fx-rainbow");
     expect(textEffectClass("shake")).toBe("fx-shake");
+    expect(textEffectClass("twitch")).toBe("fx-twitch");
     expect(textEffectClass("glow")).toBe("fx-glow");
     expect(textEffectClass("shimmer")).toBe("fx-shimmer");
     expect(textEffectClass("float")).toBe("fx-float");

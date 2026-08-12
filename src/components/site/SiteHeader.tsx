@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { MobileNav } from "@/components/site/MobileNav";
 import { NavLink } from "@/components/site/NavLink";
 import { NAV_ITEMS } from "@/components/site/nav";
 
@@ -8,13 +9,12 @@ import { NAV_ITEMS } from "@/components/site/nav";
  * through, and transparent about where you are — `/ref` renders this inside its
  * theme shell, so the active-link accent follows the current character.
  *
- * The nav scrolls sideways rather than collapsing behind a menu button: six
- * short labels fit on anything but a phone, and a swipe beats a tap plus an
- * overlay for the phone case.
+ * Below `sm` the five section links collapse behind a menu button; at `sm` and
+ * up they sit inline beside the logo.
  */
 export function SiteHeader() {
   return (
-    <header className="sticky top-0 z-30 border-b border-white/[0.07] bg-void/75 backdrop-blur-xl">
+    <header className="sticky top-0 z-30 border-b border-white/[0.07] bg-void/75 pt-[env(safe-area-inset-top)] backdrop-blur-xl">
       <div className="mx-auto flex h-14 w-full max-w-[120rem] items-center justify-between gap-4 px-4 sm:px-8">
         <Link
           href="/"
@@ -23,8 +23,8 @@ export function SiteHeader() {
           playwolf.net
         </Link>
 
-        <nav aria-label="Primary" className="min-w-0 overflow-x-auto">
-          <ul className="flex items-center gap-1 whitespace-nowrap sm:gap-2">
+        <nav aria-label="Primary" className="hidden sm:block">
+          <ul className="flex items-center gap-2">
             {NAV_ITEMS.map((item) => (
               <li key={item.href}>
                 <NavLink href={item.href}>{item.label}</NavLink>
@@ -32,6 +32,8 @@ export function SiteHeader() {
             ))}
           </ul>
         </nav>
+
+        <MobileNav />
       </div>
     </header>
   );
