@@ -536,11 +536,20 @@ export interface Artist {
   slug: string;
   links?:
     | {
+        /**
+         * Full URL, or a bare address when the kind is Email.
+         */
+        url: string;
+        /**
+         * Chosen from the URL when you paste one; change it if the guess is wrong.
+         */
         kind:
           | 'website'
           | 'twitter'
           | 'bluesky'
           | 'instagram'
+          | 'twitch'
+          | 'youtube'
           | 'furaffinity'
           | 'vgen'
           | 'linktree'
@@ -551,10 +560,6 @@ export interface Artist {
           | 'telegram'
           | 'discord'
           | 'email';
-        /**
-         * Full URL, or a bare address when the kind is Email.
-         */
-        url: string;
         /**
          * Optional tooltip text, e.g. “private” or “Art Channel”.
          */
@@ -597,11 +602,20 @@ export interface Friend {
   } | null;
   links?:
     | {
+        /**
+         * Full URL, or a bare address when the kind is Email.
+         */
+        url: string;
+        /**
+         * Chosen from the URL when you paste one; change it if the guess is wrong.
+         */
         kind:
           | 'website'
           | 'twitter'
           | 'bluesky'
           | 'instagram'
+          | 'twitch'
+          | 'youtube'
           | 'furaffinity'
           | 'vgen'
           | 'linktree'
@@ -612,10 +626,6 @@ export interface Friend {
           | 'telegram'
           | 'discord'
           | 'email';
-        /**
-         * Full URL, or a bare address when the kind is Email.
-         */
-        url: string;
         /**
          * Optional tooltip text, e.g. “private” or “Art Channel”.
          */
@@ -1031,11 +1041,20 @@ export interface Project {
   } | null;
   links?:
     | {
+        /**
+         * Full URL, or a bare address when the kind is Email.
+         */
+        url: string;
+        /**
+         * Chosen from the URL when you paste one; change it if the guess is wrong.
+         */
         kind:
           | 'website'
           | 'twitter'
           | 'bluesky'
           | 'instagram'
+          | 'twitch'
+          | 'youtube'
           | 'furaffinity'
           | 'vgen'
           | 'linktree'
@@ -1046,10 +1065,6 @@ export interface Project {
           | 'telegram'
           | 'discord'
           | 'email';
-        /**
-         * Full URL, or a bare address when the kind is Email.
-         */
-        url: string;
         /**
          * Optional tooltip text, e.g. “private” or “Art Channel”.
          */
@@ -1587,8 +1602,8 @@ export interface ArtistsSelect<T extends boolean = true> {
   links?:
     | T
     | {
-        kind?: T;
         url?: T;
+        kind?: T;
         description?: T;
         id?: T;
       };
@@ -1607,8 +1622,8 @@ export interface FriendsSelect<T extends boolean = true> {
   links?:
     | T
     | {
-        kind?: T;
         url?: T;
+        kind?: T;
         description?: T;
         id?: T;
       };
@@ -1830,8 +1845,8 @@ export interface ProjectsSelect<T extends boolean = true> {
   links?:
     | T
     | {
-        kind?: T;
         url?: T;
+        kind?: T;
         description?: T;
         id?: T;
       };
@@ -1920,11 +1935,20 @@ export interface SiteSetting {
   ogImage?: (number | null) | SiteImage;
   links?:
     | {
+        /**
+         * Full URL, or a bare address when the kind is Email.
+         */
+        url: string;
+        /**
+         * Chosen from the URL when you paste one; change it if the guess is wrong.
+         */
         kind:
           | 'website'
           | 'twitter'
           | 'bluesky'
           | 'instagram'
+          | 'twitch'
+          | 'youtube'
           | 'furaffinity'
           | 'vgen'
           | 'linktree'
@@ -1935,10 +1959,6 @@ export interface SiteSetting {
           | 'telegram'
           | 'discord'
           | 'email';
-        /**
-         * Full URL, or a bare address when the kind is Email.
-         */
-        url: string;
         /**
          * Optional tooltip text, e.g. “private” or “Art Channel”.
          */
@@ -1996,8 +2016,8 @@ export interface SiteSettingsSelect<T extends boolean = true> {
   links?:
     | T
     | {
-        kind?: T;
         url?: T;
+        kind?: T;
         description?: T;
         id?: T;
       };
