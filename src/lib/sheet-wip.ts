@@ -1,5 +1,19 @@
 import type { WipIconName } from "@/lib/content";
 
+/** Shown under the badge when a piece has no final image yet. */
+export const DEFAULT_WIP_SUBTITLE = "Artwork in progress, check back later~";
+
+/** Previous default; treated as unset so existing CMS rows pick up the new copy. */
+const LEGACY_WIP_SUBTITLE = "Reference sheet in progress";
+
+/** Empty or the old ref-sheet default both fall back to `DEFAULT_WIP_SUBTITLE`. */
+export function resolveWipSubtitle(subtitle?: string | null): string {
+  if (!subtitle || subtitle === LEGACY_WIP_SUBTITLE) {
+    return DEFAULT_WIP_SUBTITLE;
+  }
+  return subtitle;
+}
+
 /** Built-in quote pool used when a WIP sheet lists none of its own. */
 export const DEFAULT_WIP_QUOTES = [
   "Something spicy is coming up",

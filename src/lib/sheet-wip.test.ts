@@ -5,7 +5,9 @@ import {
   DEFAULT_WIP_ICONS,
   DEFAULT_WIP_INTERVAL,
   DEFAULT_WIP_QUOTES,
+  DEFAULT_WIP_SUBTITLE,
   NSFW_WIP_QUOTES,
+  resolveWipSubtitle,
 } from "@/lib/sheet-wip";
 
 describe("WIP defaults", () => {
@@ -39,5 +41,15 @@ describe("WIP defaults", () => {
   test("the scatter and the cycle are both usable numbers", () => {
     expect(DEFAULT_WIP_ICON_COUNT).toBeGreaterThan(0);
     expect(DEFAULT_WIP_INTERVAL).toBeGreaterThanOrEqual(1000);
+  });
+
+  test("empty or the old ref-sheet default become the artwork subtitle", () => {
+    expect(resolveWipSubtitle(undefined)).toBe(DEFAULT_WIP_SUBTITLE);
+    expect(resolveWipSubtitle(null)).toBe(DEFAULT_WIP_SUBTITLE);
+    expect(resolveWipSubtitle("")).toBe(DEFAULT_WIP_SUBTITLE);
+    expect(resolveWipSubtitle("Reference sheet in progress")).toBe(
+      DEFAULT_WIP_SUBTITLE,
+    );
+    expect(resolveWipSubtitle("Custom line")).toBe("Custom line");
   });
 });
