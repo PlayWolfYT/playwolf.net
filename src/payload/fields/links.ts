@@ -10,6 +10,8 @@ export const LINK_KINDS = [
   "twitter",
   "bluesky",
   "instagram",
+  "twitch",
+  "youtube",
   "furaffinity",
   "vgen",
   "linktree",
@@ -29,6 +31,8 @@ const LINK_KIND_LABELS: Record<LinkKind, string> = {
   twitter: "Twitter / X",
   bluesky: "Bluesky",
   instagram: "Instagram",
+  twitch: "Twitch",
+  youtube: "YouTube",
   furaffinity: "FurAffinity",
   vgen: "VGen",
   linktree: "Linktree",
@@ -41,9 +45,13 @@ const LINK_KIND_LABELS: Record<LinkKind, string> = {
   email: "Email",
 };
 
+const LINK_URL_FIELD = "@/payload/components/LinkUrlField#LinkUrlField";
+
 /**
  * Ordered social/contact links. `description` fills the tooltip for entries
  * that need one ("private", "Art Channel"); newlines are allowed.
+ *
+ * URL comes first so pasting one can auto-select `kind` (see LinkUrlField).
  */
 export function linksField(label?: string): Field {
   return {
@@ -59,6 +67,17 @@ export function linksField(label?: string): Field {
     },
     fields: [
       {
+        name: "url",
+        type: "text",
+        required: true,
+        admin: {
+          description: "Full URL, or a bare address when the kind is Email.",
+          components: {
+            Field: LINK_URL_FIELD,
+          },
+        },
+      },
+      {
         name: "kind",
         type: "select",
         required: true,
@@ -67,13 +86,9 @@ export function linksField(label?: string): Field {
           label: LINK_KIND_LABELS[kind],
           value: kind,
         })),
-      },
-      {
-        name: "url",
-        type: "text",
-        required: true,
         admin: {
-          description: "Full URL, or a bare address when the kind is Email.",
+          description:
+            "Chosen from the URL when you paste one; change it if the guess is wrong.",
         },
       },
       {

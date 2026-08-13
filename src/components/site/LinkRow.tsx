@@ -13,8 +13,10 @@ import {
   TelegramIcon,
   GlobeIcon,
   TrelloIcon,
+  TwitchIcon,
   VGenIcon,
   XIcon,
+  YoutubeIcon,
 } from "@/components/site/SocialIcons";
 
 const ICON_CLASS = "h-[18px] w-[18px]";
@@ -55,6 +57,18 @@ const PRESENTATION: Record<LinkKind, Presentation> = {
     label: "Instagram",
     icon: <InstagramIcon className={ICON_CLASS} />,
     hoverClass: "hover:text-[#E1306C]",
+    atPrefixed: true,
+  },
+  twitch: {
+    label: "Twitch",
+    icon: <TwitchIcon className={ICON_CLASS} />,
+    hoverClass: "hover:text-[#9146FF]",
+    atPrefixed: true,
+  },
+  youtube: {
+    label: "YouTube",
+    icon: <YoutubeIcon className={ICON_CLASS} />,
+    hoverClass: "hover:text-[#FF0000]",
     atPrefixed: true,
   },
   furaffinity: {
@@ -123,7 +137,8 @@ function inferHandle(kind: LinkKind, url: string): string | undefined {
   }
 
   if (!segment) return undefined;
-  return PRESENTATION[kind].atPrefixed ? `@${segment}` : segment;
+  if (!PRESENTATION[kind].atPrefixed) return segment;
+  return segment.startsWith("@") ? segment : `@${segment}`;
 }
 
 type RenderedLink = {
