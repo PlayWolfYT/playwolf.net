@@ -42,6 +42,7 @@ import {
   DEFAULT_WIP_INTERVAL,
   DEFAULT_WIP_QUOTES,
   NSFW_WIP_QUOTES,
+  resolveWipSubtitle,
 } from "@/lib/sheet-wip";
 
 /**
@@ -159,7 +160,7 @@ function toWipOptions(
 
   return {
     badge: wip?.badge || "WIP",
-    subtitle: wip?.subtitle || "Reference sheet in progress",
+    subtitle: resolveWipSubtitle(wip?.subtitle),
     quotes: quotes.length > 0 ? quotes : [...fallbackQuotes],
     icons: icons.length > 0 ? icons : [...DEFAULT_WIP_ICONS],
     iconCount: wip?.iconCount ?? DEFAULT_WIP_ICON_COUNT,

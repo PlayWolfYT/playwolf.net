@@ -1,5 +1,6 @@
 import type { Field } from "payload";
 
+import { DEFAULT_WIP_SUBTITLE } from "@/lib/sheet-wip";
 import { richTextEditor } from "../editor";
 import { withAdminCondition } from "./adminCondition";
 
@@ -46,7 +47,7 @@ export const wipFields: Field[] = [
   {
     name: "subtitle",
     type: "text",
-    defaultValue: "Reference sheet in progress",
+    defaultValue: DEFAULT_WIP_SUBTITLE,
   },
   {
     name: "quotes",
