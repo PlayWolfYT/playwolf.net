@@ -47,7 +47,9 @@ describe("WIP defaults", () => {
     expect(resolveWipSubtitle(undefined)).toBe(DEFAULT_WIP_SUBTITLE);
     expect(resolveWipSubtitle(null)).toBe(DEFAULT_WIP_SUBTITLE);
     expect(resolveWipSubtitle("")).toBe(DEFAULT_WIP_SUBTITLE);
-    expect(resolveWipSubtitle("Reference sheet in progress")).toBe(DEFAULT_WIP_SUBTITLE);
+    expect(resolveWipSubtitle("Reference sheet in progress")).toBe(
+      DEFAULT_WIP_SUBTITLE,
+    );
     expect(resolveWipSubtitle("Custom line")).toBe("Custom line");
   });
 });
