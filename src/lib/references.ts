@@ -155,7 +155,7 @@ function toWipOptions(
   const gradient = (wip?.gradient ?? []).map((entry) => entry.color).filter(Boolean);
 
   // An After Dark sheet that names no quotes of its own gets the racier pool,
-  // which is what the hand-written character files used to do explicitly.
+  // which is what the hand-written characters used to do explicitly.
   const fallbackQuotes = key === "nsfw" ? NSFW_WIP_QUOTES : DEFAULT_WIP_QUOTES;
 
   return {

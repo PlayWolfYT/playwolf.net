@@ -26,7 +26,7 @@ const syne = Syne({
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://playwolf.net";
 
 const siteDescription =
-  "Character reference sheets, art examples, and portfolio for playwolf.";
+  "PlayWolf's personal site for characters, artwork, and side projects.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),

@@ -4,8 +4,6 @@ import { MobileNav } from "@/components/site/MobileNav";
 import { NavLink } from "@/components/site/NavLink";
 import { NAV_ITEMS } from "@/components/site/nav";
 import { Wordmark } from "@/components/site/Wordmark";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
 
 /**
  * Site-wide masthead. Sticky and translucent so the backdrop keeps showing
@@ -26,24 +24,15 @@ export function SiteHeader() {
           <Wordmark compact />
         </Link>
 
-        <div className="hidden items-center gap-3 sm:flex">
-          <Badge
-            variant="outline"
-            className="hidden border-signal/25 text-signal lg:inline-flex"
-          >
-            2026 edition
-          </Badge>
-          <Separator orientation="vertical" className="mx-1 h-5" />
-          <nav aria-label="Primary">
-            <ul className="flex items-center gap-1">
-              {NAV_ITEMS.map((item) => (
-                <li key={item.href}>
-                  <NavLink href={item.href}>{item.label}</NavLink>
-                </li>
-              ))}
-            </ul>
-          </nav>
-        </div>
+        <nav aria-label="Primary" className="hidden sm:block">
+          <ul className="flex items-center gap-1">
+            {NAV_ITEMS.map((item) => (
+              <li key={item.href}>
+                <NavLink href={item.href}>{item.label}</NavLink>
+              </li>
+            ))}
+          </ul>
+        </nav>
 
         <MobileNav />
       </div>

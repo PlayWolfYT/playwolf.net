@@ -98,6 +98,7 @@ uniform float uShine;
 uniform float uRim;
 uniform float uIridescence;
 uniform float uIntensity;
+uniform float uPresence;
 uniform vec3 uTint;
 uniform float uTintStrength;
 uniform vec3 uColorA;
@@ -206,7 +207,7 @@ void main () {
   float spec = pow(max(dot(reflect(-L, n), vec3(0.0, 0.0, 1.0)), 0.0), 60.0);
 
   vec3 color;
-  float alpha = cov;
+  float alpha = cov * clamp(uPresence, 0.0, 1.0);
   if (uHasContent > 0.5) {
     float depth = uRefraction * uDpr;
     float ca = uDispersion * 0.03;
@@ -230,7 +231,8 @@ void main () {
   } else {
     float edge = pow(1.0 - clamp(n.z, 0.0, 1.0), 1.5);
     vec3 filmTint = mix(vec3(0.9), uTint, clamp(uTintStrength, 0.0, 1.0));
-    float fade = cov * clamp(uFallbackAlpha, 0.0, 1.0);
+    float fade = cov * clamp(uFallbackAlpha, 0.0, 1.0) *
+      clamp(uPresence, 0.0, 1.0);
     vec3 light = glints * uIridescence * 0.65 + vec3(spec * uShine * 1.5) +
       filmTint * (0.55 * max(uRim, 0.4) * edge + 0.03);
     float a = fade * clamp(0.08 + 0.4 * edge, 0.0, 1.0);
@@ -407,7 +409,7 @@ export function createBubble(
 
     const count = activeCount();
     const minRes = Math.min(output.width, output.height);
-    const headRadius = Math.max(config.size, 4) * dpr * presence;
+    const headRadius = Math.max(config.size, 4) * dpr;
     const baseRadius = (headRadius * 2) / (minRes * count);
     const blend = Math.max(config.blend, 0.5);
 
@@ -433,13 +435,12 @@ export function createBubble(
       32 * dpr;
     const sx = Math.max(0, Math.floor(minX - pad));
     const sy = Math.max(0, Math.floor(minY - pad));
+    const ex = Math.min(output.width, Math.ceil(maxX + pad));
+    const ey = Math.min(output.height, Math.ceil(maxY + pad));
+    if (ex <= sx || ey <= sy) return;
+
     gl!.enable(gl!.SCISSOR_TEST);
-    gl!.scissor(
-      sx,
-      sy,
-      Math.min(output.width - sx, Math.ceil(maxX - minX + pad * 2)),
-      Math.min(output.height - sy, Math.ceil(maxY - minY + pad * 2)),
-    );
+    gl!.scissor(sx, sy, ex - sx, ey - sy);
 
     gl!.useProgram(program);
     gl!.activeTexture(gl!.TEXTURE0);
@@ -461,6 +462,7 @@ export function createBubble(
     gl!.uniform1f(uniforms.uRim, Math.min(Math.max(config.rim, 0), 2));
     gl!.uniform1f(uniforms.uIridescence, Math.max(config.iridescence, 0));
     gl!.uniform1f(uniforms.uIntensity, Math.max(config.intensity, 0));
+    gl!.uniform1f(uniforms.uPresence, presence);
     gl!.uniform3f(uniforms.uTint, config.tint[0], config.tint[1], config.tint[2]);
     gl!.uniform1f(
       uniforms.uTintStrength,
@@ -554,25 +556,34 @@ export function createBubble(
     const rect = output.getBoundingClientRect();
     targetX = event.clientX - rect.left;
     targetY = event.clientY - rect.top;
-    if (!hasPointer) {
+    const inside =
+      event.clientX >= rect.left &&
+      event.clientX <= rect.right &&
+      event.clientY >= rect.top &&
+      event.clientY <= rect.bottom;
+
+    if (inside && !hasPointer) {
       headX = targetX;
       headY = targetY;
       trailX.fill(targetX);
       trailY.fill(targetY);
       hasPointer = true;
     }
-    presenceTarget = 1;
+    if (!hasPointer) return;
+
+    presenceTarget = inside ? 1 : 0;
     start();
   }
 
-  function onPointerLeave() {
+  function onPointerExit(event: PointerEvent) {
+    if (event.relatedTarget) return;
     presenceTarget = 0;
     hasPointer = false;
     start();
   }
 
-  content.addEventListener("pointermove", onPointerMove, { passive: true });
-  content.addEventListener("pointerleave", onPointerLeave, { passive: true });
+  window.addEventListener("pointermove", onPointerMove, { passive: true });
+  window.addEventListener("pointerout", onPointerExit, { passive: true });
 
   function onScroll() {
     start();
@@ -616,8 +627,8 @@ export function createBubble(
     destroy() {
       destroyed = true;
       cancelAnimationFrame(raf);
-      content.removeEventListener("pointermove", onPointerMove);
-      content.removeEventListener("pointerleave", onPointerLeave);
+      window.removeEventListener("pointermove", onPointerMove);
+      window.removeEventListener("pointerout", onPointerExit);
       content.removeEventListener("scroll", onScroll);
       observer.disconnect();
       intersection.disconnect();

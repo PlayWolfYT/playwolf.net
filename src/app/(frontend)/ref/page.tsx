@@ -22,7 +22,7 @@ export default async function RefHome() {
   return (
     <div className="w-full">
       <PageHeader
-        eyebrow="Character files"
+        eyebrow="Characters"
         title="References"
         lede="Reference sheets, palettes, details, and artwork for every character in the archive."
       />
@@ -41,7 +41,7 @@ export default async function RefHome() {
             <EmptyMedia variant="icon">
               <PawPrintIcon />
             </EmptyMedia>
-            <EmptyTitle>No character files yet</EmptyTitle>
+            <EmptyTitle>No characters yet</EmptyTitle>
             <EmptyDescription>
               The first profile will appear here once it is ready.
             </EmptyDescription>

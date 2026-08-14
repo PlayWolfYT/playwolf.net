@@ -7,11 +7,7 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme {
-  /*
-   * Night Press — a warm, ink-heavy editorial palette. The legacy token
-   * names remain aliases so CMS-rich surfaces transition with the rest of the
-   * rebrand instead of retaining the old blue/black treatment.
-   */
+  /* Warm, ink-heavy surfaces with the site's original electric-blue accent. */
   --color-ink: #0d0c0b;
   --color-ink-soft: #13110f;
   --color-ink-lift: #191613;
@@ -39,9 +35,9 @@
 
   --color-coral-soft: #ff7954;
   --color-coral-glow: #ff9d7f;
-  --color-signal: #d8ff62;
-  --color-signal-muted: #a9ca43;
-  --color-signal-ink: #111606;
+  --color-signal: #a6e4ff;
+  --color-signal-muted: #5cccff;
+  --color-signal-ink: #06141b;
 
   --font-sans: var(--font-manrope), system-ui, sans-serif;
   --font-display: var(--font-syne), system-ui, sans-serif;
@@ -160,21 +156,21 @@
   }
   ::selection {
     background: rgb(var(--accent-500) / 0.86);
-    color: #110806;
+    color: #06141b;
   }
 }
 
 :root {
   color-scheme: dark;
 
-  /* Default signal-orange accent. Overridden per
+  /* Default electric-blue accent. Overridden per
      character profile by RefThemeShell (values are "R G B" triplets,
      consumed as `rgb(var(--accent-N) / alpha)`). */
-  --accent-300: 255 176 146;
-  --accent-400: 255 132 94;
-  --accent-500: 255 91 54;
-  --accent-600: 228 64 31;
-  --accent-700: 169 42 22;
+  --accent-300: 138 217 255;
+  --accent-400: 92 204 255;
+  --accent-500: 58 190 249;
+  --accent-600: 26 166 235;
+  --accent-700: 11 125 189;
 
   --background: #0d0c0b;
   --foreground: #f3ecdf;
@@ -183,9 +179,9 @@
   --popover: #211d19;
   --popover-foreground: #f3ecdf;
   --primary: rgb(var(--accent-500));
-  --primary-foreground: #160a06;
-  --secondary: #d8ff62;
-  --secondary-foreground: #111606;
+  --primary-foreground: #06141b;
+  --secondary: #a6e4ff;
+  --secondary-foreground: #06141b;
   --muted: #28231e;
   --muted-foreground: #a99e8f;
   --accent: #302820;
@@ -195,7 +191,7 @@
   --input: rgb(243 236 223 / 0.16);
   --ring: rgb(var(--accent-400));
   --chart-1: rgb(var(--accent-500));
-  --chart-2: #d8ff62;
+  --chart-2: #a6e4ff;
   --chart-3: #f3ecdf;
   --chart-4: #9c82ff;
   --chart-5: #72d8c8;
@@ -203,7 +199,7 @@
   --sidebar: #13110f;
   --sidebar-foreground: #f3ecdf;
   --sidebar-primary: rgb(var(--accent-500));
-  --sidebar-primary-foreground: #160a06;
+  --sidebar-primary-foreground: #06141b;
   --sidebar-accent: #28231e;
   --sidebar-accent-foreground: #f3ecdf;
   --sidebar-border: rgb(243 236 223 / 0.12);
@@ -218,7 +214,7 @@ body {
   @apply min-h-dvh bg-void antialiased text-parchment;
   background-image:
     radial-gradient(circle at 8% 8%, rgb(var(--accent-500) / 0.1), transparent 25rem),
-    radial-gradient(circle at 88% 42%, rgb(216 255 98 / 0.055), transparent 30rem);
+    radial-gradient(circle at 88% 42%, rgb(138 217 255 / 0.055), transparent 30rem);
   background-attachment: fixed;
   text-rendering: optimizeLegibility;
 }

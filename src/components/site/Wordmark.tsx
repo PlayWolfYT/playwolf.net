@@ -13,13 +13,13 @@ export function Wordmark({
         <span className="absolute -right-2 -top-3 size-5 rotate-45 bg-signal/90" />
         <span className="relative">PW</span>
       </span>
-      <span className={cn("flex flex-col", compact && "sr-only sm:not-sr-only")}>
-        <span className="font-display text-sm font-bold leading-none tracking-[-0.04em] text-foreground">
-          playwolf.net
-        </span>
-        <span className="mt-1 font-mono text-[0.5rem] uppercase leading-none tracking-[0.24em] text-muted-foreground">
-          visual archive
-        </span>
+      <span
+        className={cn(
+          "font-display text-sm font-bold leading-none tracking-[-0.04em] text-foreground",
+          compact && "sr-only sm:not-sr-only",
+        )}
+      >
+        playwolf.net
       </span>
     </span>
   );

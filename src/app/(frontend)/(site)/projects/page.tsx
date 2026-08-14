@@ -23,9 +23,9 @@ export default async function ProjectsPage() {
   return (
     <div className="mx-auto w-full max-w-7xl px-4 pb-24 pt-12 sm:px-6 sm:pt-20 lg:px-8 lg:pb-32">
       <PageHeader
-        eyebrow="Build log"
+        eyebrow="Things I make"
         title="Projects"
-        lede="Web experiments, useful tools, and ideas moving from sketchbook to release."
+        lede="Web experiments, useful tools, and ideas I wanted to try for myself."
       />
 
       {projects.length === 0 ? (
@@ -34,9 +34,9 @@ export default async function ProjectsPage() {
             <EmptyMedia variant="icon">
               <FolderKanbanIcon />
             </EmptyMedia>
-            <EmptyTitle>Nothing has shipped yet</EmptyTitle>
+            <EmptyTitle>No projects here yet</EmptyTitle>
             <EmptyDescription>
-              Projects will appear here when they are ready to leave the studio.
+              I&rsquo;ll add them whenever there is something worth sharing.
             </EmptyDescription>
           </EmptyHeader>
         </Empty>

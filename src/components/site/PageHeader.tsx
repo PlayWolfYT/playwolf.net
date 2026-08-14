@@ -34,7 +34,7 @@ export function PageHeader({
 
         <SplitTextReveal
           text={title}
-          className="mt-5 max-w-5xl wrap-break-word font-display text-[clamp(3.5rem,11vw,8.5rem)] font-bold leading-[0.82] tracking-[-0.075em] text-foreground"
+          className="mt-5 max-w-5xl wrap-break-word font-display text-[clamp(3.5rem,11vw,8rem)] font-bold leading-[0.82] tracking-[-0.075em] text-foreground"
         />
       </div>
 

@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { ArrowUpRightIcon } from "lucide-react";
+import { ArrowUpRightIcon, GlobeIcon as WebsiteIcon } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import type { ContentLink, LinkKind } from "@/lib/content";
@@ -15,7 +15,6 @@ import {
   LinktreeIcon,
   PatreonIcon,
   TelegramIcon,
-  GlobeIcon,
   TrelloIcon,
   TwitchIcon,
   VGenIcon,
@@ -42,7 +41,7 @@ type Presentation = {
 const PRESENTATION: Record<LinkKind, Presentation> = {
   website: {
     label: "Website",
-    icon: <GlobeIcon className={ICON_CLASS} />,
+    icon: <WebsiteIcon />,
     hoverClass: "hover:text-glow-400",
   },
   twitter: {

@@ -43,14 +43,6 @@ export function ProfileView({ profile, profileKey, basePath }: ProfileViewProps)
       {profile.description ? (
         <Reveal>
           <Card className="mx-auto mt-10 max-w-3xl [--card-spacing:--spacing(6)] sm:[--card-spacing:--spacing(8)]">
-            <CardHeader>
-              <Badge variant="outline" className="w-fit">
-                Character notes
-              </Badge>
-              <CardTitle className="mt-3 text-2xl font-bold tracking-[-0.045em]">
-                About this profile
-              </CardTitle>
-            </CardHeader>
             <CardContent>
               <RichTextContent
                 className="text-base leading-relaxed text-muted-foreground"

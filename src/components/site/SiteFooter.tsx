@@ -18,8 +18,8 @@ export async function SiteFooter() {
           <div className="flex flex-col items-start gap-5">
             <Wordmark />
             <p className="max-w-md text-sm leading-relaxed text-muted-foreground">
-              Character references, commissioned artwork, and small digital
-              experiments—kept in one independent archive.
+              My characters, favorite artwork, and small digital experiments, all in one
+              place.
             </p>
             <LinkRow links={links} align="start" />
           </div>
@@ -47,7 +47,7 @@ export async function SiteFooter() {
 
         <div className="flex flex-col gap-2 font-mono text-[0.58rem] uppercase tracking-[0.2em] text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
           <p>© {new Date().getFullYear()} playwolf.net</p>
-          <p>Made for curious eyes</p>
+          <p>Made for fun</p>
         </div>
       </div>
     </footer>

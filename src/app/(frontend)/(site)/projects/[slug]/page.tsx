@@ -105,7 +105,7 @@ export default async function ProjectPage({ params }: PageProps) {
         <Card className="h-fit lg:sticky lg:top-24">
           <CardHeader>
             <CardTitle>Project links</CardTitle>
-            <CardDescription>Continue outside the archive.</CardDescription>
+            <CardDescription>Open this project somewhere else.</CardDescription>
           </CardHeader>
           <CardContent>
             {project.links.length > 0 ? (

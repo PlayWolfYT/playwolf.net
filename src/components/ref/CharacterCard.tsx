@@ -47,31 +47,22 @@ export function CharacterCard({ character }: { character: Character }) {
                 </span>
               </div>
             )}
-            <span className="absolute bottom-4 left-4 rounded-md bg-background/78 px-2 py-1 font-mono text-[0.55rem] uppercase tracking-[0.18em] text-muted-foreground backdrop-blur-md">
-              Character file
-            </span>
           </div>
 
-          <CardHeader className="border-t border-border pt-(--card-spacing)">
+          <CardHeader className="border-t border-border py-(--card-spacing)">
             <CardTitle>
               <h2 className="font-display text-2xl font-bold tracking-[-0.055em]">
                 {character.name}
               </h2>
             </CardTitle>
-            {character.species ? (
-              <CardAction>
-                <Badge variant="outline">{character.species}</Badge>
-              </CardAction>
-            ) : null}
           </CardHeader>
 
           <CardFooter className="mt-auto justify-between gap-3">
             <span className="font-mono text-[0.58rem] uppercase tracking-[0.18em] text-muted-foreground">
-              SFW
-              {character.profiles.nsfw ? " + 18+" : ""}
+              {character.species}
             </span>
             <span className="inline-flex items-center gap-1 text-xs font-medium text-glow-400">
-              Open file
+              View character
               <ArrowUpRightIcon aria-hidden />
             </span>
           </CardFooter>

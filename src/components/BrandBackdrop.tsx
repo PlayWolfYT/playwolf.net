@@ -65,13 +65,6 @@ export function BrandBackdrop({ density = "full" }: BrandBackdropProps) {
         className="pointer-events-none absolute inset-x-0 bottom-0 h-[52%] bg-linear-to-t from-void via-void/85 to-transparent"
         aria-hidden
       />
-      <div
-        className="pointer-events-none absolute bottom-8 left-8 hidden items-center gap-3 font-mono text-[0.55rem] uppercase tracking-[0.35em] text-parchment/20 lg:flex"
-        aria-hidden
-      >
-        <span className="block h-px w-14 bg-current" />
-        independent image archive
-      </div>
     </div>
   );
 }
