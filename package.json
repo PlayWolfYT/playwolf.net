@@ -10,6 +10,8 @@
     "dev:up": "docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d db garage && bun run garage:bootstrap",
     "dev:down": "docker compose -f docker-compose.yml -f docker-compose.dev.yml down",
     "garage:bootstrap": "bun scripts/garage-bootstrap.ts",
+    "seed": "bun scripts/seed.ts",
+    "seed:fresh": "bun scripts/seed.ts --fresh",
     "build": "next build",
     "start": "next start",
     "lint": "eslint .",

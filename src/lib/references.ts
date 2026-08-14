@@ -443,18 +443,21 @@ async function loadCharacters(): Promise<Character[]> {
 }
 
 /**
- * Reads are cached rather than the pages themselves, because the production
- * image is built without a database. The Payload hooks in
- * `src/payload/hooks/revalidate.ts` purge `CONTENT_TAG` on every write, so an
- * edit in the admin is live on the next request.
+ * Production reads are cached rather than the pages themselves, because the
+ * production image is built without a database. Development reads stay
+ * uncached: standalone scripts cannot call next/cache, and a persisted dev
+ * cache otherwise survives database resets with content that no longer exists.
+ * Payload hooks purge `CONTENT_TAG` for normal in-app writes.
  */
+const cacheContent = process.env.NODE_ENV === "production";
+
 const cachedCharacters = unstable_cache(loadCharacters, ["ref:characters"], {
   tags: [CONTENT_TAG],
 });
 
 /** All characters, in admin sort order. */
 export function getCharacters(): Promise<Character[]> {
-  return cachedCharacters();
+  return cacheContent ? cachedCharacters() : loadCharacters();
 }
 
 /** Single character by URL slug. */
@@ -617,7 +620,7 @@ const cachedSiteSettings = unstable_cache(loadSiteSettings, ["site:settings"], {
  */
 export async function getSiteSettings(): Promise<SiteSettings> {
   try {
-    return await cachedSiteSettings();
+    return await (cacheContent ? cachedSiteSettings() : loadSiteSettings());
   } catch {
     return DEFAULT_SITE_SETTINGS;
   }
@@ -654,7 +657,7 @@ const cachedProjects = unstable_cache(loadProjects, ["site:projects"], {
 });
 
 export function getProjects(): Promise<Project[]> {
-  return cachedProjects();
+  return cacheContent ? cachedProjects() : loadProjects();
 }
 
 export async function getProject(slug: string): Promise<Project | undefined> {
