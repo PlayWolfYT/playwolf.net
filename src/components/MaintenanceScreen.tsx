@@ -16,10 +16,15 @@ import {
 
 export function MaintenanceScreen({ message }: { message?: string }) {
   return (
-    <main className="relative isolate min-h-dvh overflow-hidden bg-background">
+    <main className="relative isolate min-h-svh bg-background">
+      {/* `fixed` + `100lvh` keeps the blaze/backdrop stable when mobile browser
+          chrome shows/hides. An `absolute` `h-lvh` child inside `h-dvh` (Blaze
+          also uses `overflow: auto` on its capture box) makes that layer
+          scrollable by the chrome delta. The shell uses `svh` so the page
+          never grows past the visible area while the toolbar is showing. */}
       <Blaze
-        className="pointer-events-none absolute inset-0 h-dvh w-full overflow-hidden"
-        style={{ position: "absolute" }}
+        className="pointer-events-none fixed inset-x-0 top-0 h-lvh w-full overflow-hidden"
+        style={{ position: "fixed" }}
         height={0.86}
         distortion={0.72}
         distortionScale={0.65}
@@ -35,7 +40,7 @@ export function MaintenanceScreen({ message }: { message?: string }) {
       >
         <div className="relative h-full overflow-hidden">
           <div
-            className="pointer-events-none absolute inset-x-0 top-0 h-lvh overflow-hidden"
+            className="pointer-events-none absolute inset-0 overflow-hidden"
             aria-hidden
           >
             <BrandBackdrop density="full" />
@@ -50,7 +55,7 @@ export function MaintenanceScreen({ message }: { message?: string }) {
         </div>
       </Blaze>
 
-      <div className="relative z-10 flex min-h-dvh items-center justify-center px-4 py-32 sm:px-8 sm:py-40">
+      <div className="relative z-10 flex min-h-svh items-center justify-center px-4 py-16 sm:px-8 sm:py-40">
         <FlameWrap
           className="relative z-10 w-full max-w-2xl"
           color={[0.18, 0.7, 1]}
@@ -91,7 +96,7 @@ export function MaintenanceScreen({ message }: { message?: string }) {
                   Site maintenance
                 </Badge>
               </div>
-              <CardTitle className="mt-10 text-5xl font-bold leading-[0.88] tracking-[-0.07em] sm:text-7xl">
+              <CardTitle className="mt-8 text-4xl font-bold leading-[0.92] tracking-[-0.06em] sm:mt-10 sm:text-6xl sm:leading-[0.88] sm:tracking-[-0.07em] lg:text-7xl">
                 In maintenance
               </CardTitle>
             </CardHeader>
