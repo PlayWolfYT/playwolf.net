@@ -86,11 +86,12 @@ export default async function RootLayout({
   const nsfwConsent = cookieStore.get(NSFW_CONSENT_COOKIE)?.value === "1";
 
   return (
-    <html lang="en" className="scroll-smooth" suppressHydrationWarning>
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} ${outfit.variable} font-sans`}
-        suppressHydrationWarning
-      >
+    <html
+      lang="en"
+      className={`${geistSans.variable} ${geistMono.variable} ${outfit.variable} scroll-smooth`}
+      suppressHydrationWarning
+    >
+      <body className="font-sans" suppressHydrationWarning>
         <NsfwConsentProvider initialConsent={nsfwConsent}>
           {children}
         </NsfwConsentProvider>
