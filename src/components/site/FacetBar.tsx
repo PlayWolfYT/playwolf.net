@@ -45,8 +45,9 @@ export function parseFilter(
   return filter;
 }
 
+// `min-h-11` is the 44px touch target the rest of the site's controls use.
 const CHIP_BASE =
-  "inline-flex min-h-9 items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-glow-500";
+  "inline-flex min-h-11 items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-glow-500";
 const CHIP_OFF = `${CHIP_BASE} border-white/10 bg-void/70 text-parchment-muted hover:border-glow-500/40 hover:text-parchment`;
 const CHIP_ON = `${CHIP_BASE} border-glow-500/45 bg-glow-500/10 text-glow-400 hover:bg-glow-500/20`;
 
@@ -64,9 +65,21 @@ function FacetRow({
   const options = facetOptions(items, facetKey, filter);
   if (options.length === 0) return null;
 
+  // Server component, so no `useId` — the facet key is unique per bar anyway.
+  const labelId = `facet-${facetKey}-label`;
+
   return (
-    <div className="flex flex-col gap-2 border-b border-white/[0.05] pb-3 last:border-b-0 last:pb-0 sm:flex-row sm:flex-wrap sm:items-baseline sm:border-0 sm:pb-0">
-      <span className="shrink-0 font-mono text-[0.6rem] uppercase tracking-[0.2em] text-parchment-dim sm:w-20">
+    // A labelled group, so the row's category is announced with its chips
+    // instead of the chips reading as a flat list of unrelated links.
+    <div
+      role="group"
+      aria-labelledby={labelId}
+      className="flex flex-col gap-2 border-b border-white/[0.05] pb-3 last:border-b-0 last:pb-0 sm:flex-row sm:flex-wrap sm:items-baseline sm:border-0 sm:pb-0"
+    >
+      <span
+        id={labelId}
+        className="shrink-0 font-mono text-[0.6rem] uppercase tracking-[0.2em] text-parchment-dim sm:w-20"
+      >
         {FACET_LABELS[facetKey]}
       </span>
       <div className="flex flex-wrap gap-2">
@@ -79,7 +92,10 @@ function FacetRow({
                 ...filter,
                 [facetKey]: selected ? undefined : option.slug,
               })}
-              aria-pressed={selected}
+              // These are links, not buttons: `aria-pressed` is only defined for
+              // `role="button"`, so the applied facet is marked with
+              // `aria-current` instead.
+              aria-current={selected ? "true" : undefined}
               className={selected ? CHIP_ON : CHIP_OFF}
             >
               {option.label}
@@ -107,11 +123,15 @@ export function FacetBar({
 
   return (
     <div className="rounded-3xl border border-white/[0.07] bg-void-lift/40 backdrop-blur-xl">
-      {/* Checkbox disclosure: collapsed by default on mobile, always open from sm. */}
+      {/* Checkbox disclosure: collapsed by default on mobile, always open from
+          sm. `sm:hidden` because from sm up the panel is open regardless, so an
+          `sr-only` checkbox there is a focus stop that toggles nothing —
+          display:none drops it from the tab order and the a11y tree while the
+          `peer-checked:` sibling rules keep working below sm. */}
       <input
         type="checkbox"
         id="gallery-filters"
-        className="peer sr-only"
+        className="peer sr-only sm:hidden"
         defaultChecked={activeCount > 0}
       />
       <label
@@ -141,9 +161,11 @@ export function FacetBar({
         ))}
 
         <div className="mt-1 flex flex-wrap items-center gap-2 border-t border-white/[0.07] pt-4">
+          {/* The visible label already flips to "Showing …", so `aria-current`
+              only has to mark which of these links is the applied state. */}
           <Link
             href={galleryHref({ ...filter, includeNsfw: !filter.includeNsfw })}
-            aria-pressed={filter.includeNsfw}
+            aria-current={filter.includeNsfw ? "true" : undefined}
             className={filter.includeNsfw ? CHIP_ON : CHIP_OFF}
           >
             {filter.includeNsfw ? "Showing 18+" : "Show 18+"}
@@ -151,7 +173,7 @@ export function FacetBar({
 
           <Link
             href={galleryHref({ ...filter, includeWip: !filter.includeWip })}
-            aria-pressed={filter.includeWip}
+            aria-current={filter.includeWip ? "true" : undefined}
             className={filter.includeWip ? CHIP_ON : CHIP_OFF}
           >
             {filter.includeWip ? "Showing WIP" : "Show WIP"}

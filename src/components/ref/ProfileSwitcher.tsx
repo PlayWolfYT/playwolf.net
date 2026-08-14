@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useRef } from "react";
+import { useRef } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useNsfwConsent } from "@/components/site/NsfwConsent";
@@ -33,6 +33,13 @@ function keyFromPathname(pathname: string): ProfileKey {
  * navigation (`<Link scroll={false}>`). Each route renders only its own
  * profile markup — the inactive panel is never in the HTML.
  *
+ * Because these are two URLs rather than two panels, the switch is a `nav`
+ * landmark with `aria-current="page"` — not a `tablist`. The ARIA tabs pattern
+ * expects a roving `tabIndex`, which took After Dark out of the tab order
+ * entirely even though it is an ordinary link to an ordinary page. The
+ * `aria-label` keeps this landmark apart from `SiteHeader`'s "Primary" nav,
+ * which the `/ref` layout renders above it.
+ *
  * Active state is derived from `usePathname()` so the sliding indicator
  * and accent theme stay in sync with the URL on click and back/forward.
  */
@@ -44,7 +51,6 @@ export function ProfileSwitcher({
   const pathname = usePathname();
   const router = useRouter();
   const { confirmNsfw } = useNsfwConsent();
-  const baseId = useId();
   const tabRefs = useRef<Partial<Record<ProfileKey, HTMLAnchorElement | null>>>({});
 
   if (tabs.length === 0) return null;
@@ -52,8 +58,9 @@ export function ProfileSwitcher({
   const pathKey = keyFromPathname(pathname);
   const active = tabs.some((tab) => tab.key === pathKey) ? pathKey : tabs[0].key;
 
-  // Arrow keys move between tabs without a click, so the 18+ warning has to be
-  // asked for here as well — the provider's click gate never sees these.
+  // Arrow keys still move between the two profiles without a click, so the 18+
+  // warning has to be asked for here as well — the provider's click gate never
+  // sees these.
   const switchTo = async (tab: ProfileTab) => {
     if (tab.key === active) return;
     if (tab.key === "nsfw" && !(await confirmNsfw())) return;
@@ -89,8 +96,7 @@ export function ProfileSwitcher({
         </div>
 
         {tabs.length > 1 ? (
-          <div
-            role="tablist"
+          <nav
             aria-label="Character profiles"
             className="relative grid min-h-11 flex-none select-none grid-cols-2 items-stretch rounded-full border border-white/15 bg-void/80 p-1"
           >
@@ -110,10 +116,7 @@ export function ProfileSwitcher({
                   }}
                   href={tab.href}
                   scroll={false}
-                  role="tab"
-                  id={`${baseId}-tab-${tab.key}`}
-                  aria-selected={selected}
-                  tabIndex={selected ? 0 : -1}
+                  aria-current={selected ? "page" : undefined}
                   onKeyDown={(event) => onKeyDown(event, index)}
                   className={`relative z-10 flex items-center justify-center gap-1.5 rounded-full px-4 font-display text-xs font-semibold uppercase tracking-[0.14em] transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-glow-500 sm:px-5 sm:text-sm ${
                     selected
@@ -136,7 +139,7 @@ export function ProfileSwitcher({
                 </Link>
               );
             })}
-          </div>
+          </nav>
         ) : null}
       </div>
     </div>

@@ -11,8 +11,19 @@ const BADGE_CLASS: Partial<Record<Project["status"], string>> = {
   archived: "border-white/10 bg-white/[0.02] text-parchment-dim/70",
 };
 
-export function ProjectCard({ project }: { project: Project }) {
+type ProjectCardProps = {
+  project: Project;
+  /**
+   * Heading rank for the project title. Defaults to 2, which is right on
+   * `/projects` where the cards sit directly under the page `h1`; the landing
+   * page nests them under a section `h2` and passes 3.
+   */
+  headingLevel?: 2 | 3 | 4;
+};
+
+export function ProjectCard({ project, headingLevel = 2 }: ProjectCardProps) {
   const badgeClass = BADGE_CLASS[project.status];
+  const Heading = `h${headingLevel}` as const;
 
   return (
     <SpotlightCard>
@@ -41,9 +52,9 @@ export function ProjectCard({ project }: { project: Project }) {
 
         <div className="flex flex-1 flex-col p-5">
           <div className="flex items-start justify-between gap-3">
-            <h2 className="font-display text-lg font-medium tracking-tight text-parchment">
+            <Heading className="font-display text-lg font-medium tracking-tight text-parchment">
               {project.title}
-            </h2>
+            </Heading>
             {badgeClass ? (
               <span
                 className={`shrink-0 rounded-full border px-2.5 py-0.5 text-[0.65rem] font-medium ${badgeClass}`}

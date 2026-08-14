@@ -147,7 +147,14 @@ export function AltCarousel({ alt, main, alts }: AltCarouselProps) {
         )}
 
         <p className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-sm text-parchment-muted">
-          <span className="font-mono text-[0.65rem] uppercase tracking-[0.2em] text-glow-400">
+          {/* Swapping slides changes nothing focusable, so the counter announces
+              the move. Scoped to the counter itself: the sibling link must not
+              be inside a live region. */}
+          <span
+            role="status"
+            className="font-mono text-[0.65rem] uppercase tracking-[0.2em] text-glow-400"
+          >
+            <span className="sr-only">Version </span>
             {index + 1} / {count}
           </span>
           {current.label ? <span>{current.label}</span> : null}

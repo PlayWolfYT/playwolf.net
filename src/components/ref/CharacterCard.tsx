@@ -7,10 +7,17 @@ import { getMainArt, placeholderFor } from "@/lib/content";
 
 type CharacterCardProps = {
   character: Character;
+  /**
+   * Heading rank for the character's name. Defaults to 2, which is right on
+   * `/ref` where the cards sit directly under the page `h1`; the landing page
+   * nests them under a section `h2` and passes 3.
+   */
+  headingLevel?: 2 | 3 | 4;
 };
 
-export function CharacterCard({ character }: CharacterCardProps) {
+export function CharacterCard({ character, headingLevel = 2 }: CharacterCardProps) {
   const mainArt = getMainArt(character);
+  const Heading = `h${headingLevel}` as const;
   const href = `/ref/${character.slug}`;
   // Tint the card with the character's accent (SFW preferred) so the
   // overview hints at each character's colour before their page is opened.
@@ -48,9 +55,9 @@ export function CharacterCard({ character }: CharacterCardProps) {
             )}
           </div>
           <div className="p-5">
-            <h2 className="font-display text-lg font-medium tracking-tight text-parchment">
+            <Heading className="font-display text-lg font-medium tracking-tight text-parchment">
               {character.name}
-            </h2>
+            </Heading>
             {character.species ? (
               <p className="mt-1 font-mono text-[0.65rem] uppercase tracking-[0.2em] text-parchment-dim">
                 {character.species}
