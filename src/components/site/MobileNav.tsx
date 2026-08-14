@@ -11,7 +11,7 @@ const FOCUSABLE = 'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1
 
 /**
  * Hamburger + full-screen menu for viewports below `sm`. The panel is portaled
- * to `document.body` so the header's `backdrop-blur` cannot create a containing
+ * to `document.body` so the header's `backdrop-blur-sm` cannot create a containing
  * block that clips `position: fixed` (a common sticky-header trap).
  *
  * Open state is keyed to the current pathname so a navigation (link tap or
@@ -84,13 +84,13 @@ export function MobileNav() {
           role="dialog"
           aria-modal="true"
           aria-label="Primary"
-          className="fixed inset-0 z-[60] flex flex-col bg-void pt-[env(safe-area-inset-top)] sm:hidden"
+          className="fixed inset-0 z-60 flex flex-col bg-void pt-[env(safe-area-inset-top)] sm:hidden"
         >
           <div className="flex h-14 shrink-0 items-center justify-between gap-4 border-b border-white/[0.07] px-4">
             <Link
               href="/"
               onClick={close}
-              className="shrink-0 font-display text-sm font-medium uppercase tracking-[0.28em] text-glow-500 transition hover:text-glow-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-glow-500"
+              className="shrink-0 font-display text-sm font-medium uppercase tracking-[0.28em] text-glow-500 transition hover:text-glow-400 focus-visible:outline-solid focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-glow-500"
             >
               playwolf.net
             </Link>
@@ -98,7 +98,7 @@ export function MobileNav() {
               type="button"
               aria-label="Close menu"
               onClick={close}
-              className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-full border border-white/10 bg-void-lift/70 text-parchment transition hover:border-glow-500/40 hover:text-glow-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-glow-500"
+              className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-full border border-white/10 bg-void-lift/70 text-parchment transition hover:border-glow-500/40 hover:text-glow-400 focus-visible:outline-solid focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-glow-500"
             >
               <MenuIcon open />
             </button>
@@ -118,10 +118,10 @@ export function MobileNav() {
                       href={item.href}
                       aria-current={active ? "page" : undefined}
                       onClick={close}
-                      className={`flex min-h-14 items-center rounded-2xl px-4 text-base font-medium uppercase tracking-[0.2em] transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-glow-500 ${
+                      className={`flex min-h-14 items-center rounded-2xl px-4 text-base font-medium uppercase tracking-[0.2em] transition focus-visible:outline-solid focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-glow-500 ${
                         active
                           ? "bg-glow-500/10 text-glow-400"
-                          : "text-parchment-dim hover:bg-white/[0.04] hover:text-parchment"
+                          : "text-parchment-dim hover:bg-white/4 hover:text-parchment"
                       }`}
                     >
                       {item.label}
@@ -145,7 +145,7 @@ export function MobileNav() {
         aria-controls={panelId}
         aria-label={open ? "Close menu" : "Menu"}
         onClick={() => setOpenForPath(open ? null : pathname)}
-        className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-full border border-white/10 bg-void/70 text-parchment transition hover:border-glow-500/40 hover:text-glow-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-glow-500"
+        className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-full border border-white/10 bg-void/70 text-parchment transition hover:border-glow-500/40 hover:text-glow-400 focus-visible:outline-solid focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-glow-500"
       >
         <MenuIcon open={open} />
       </button>

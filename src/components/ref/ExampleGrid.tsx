@@ -48,7 +48,7 @@ export function ExampleGrid({
       ) : null}
 
       {examples.length === 0 ? (
-        <div className="rounded-3xl border border-dashed border-white/[0.1] bg-void-lift/40 px-8 py-16 text-center">
+        <div className="rounded-3xl border border-dashed border-white/10 bg-void-lift/40 px-8 py-16 text-center">
           <p className="font-display text-lg font-medium text-parchment">
             Nothing here yet
           </p>
@@ -109,7 +109,7 @@ export function ExampleGrid({
                     same destination is noise for anyone using a screen reader. */}
                 <Link
                   href={detailHref}
-                  className={`group block ${card} focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-glow-500`}
+                  className={`group block ${card} focus-visible:outline-solid focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-glow-500`}
                 >
                   <div className="relative aspect-square w-full overflow-hidden">
                     <div className="absolute inset-0 origin-center transition duration-500 group-hover:scale-105">

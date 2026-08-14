@@ -115,7 +115,7 @@ export function ProfileSwitcher({
                   aria-selected={selected}
                   tabIndex={selected ? 0 : -1}
                   onKeyDown={(event) => onKeyDown(event, index)}
-                  className={`relative z-10 flex items-center justify-center gap-1.5 rounded-full px-4 font-display text-xs font-semibold uppercase tracking-[0.14em] transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-glow-500 sm:px-5 sm:text-sm ${
+                  className={`relative z-10 flex items-center justify-center gap-1.5 rounded-full px-4 font-display text-xs font-semibold uppercase tracking-[0.14em] transition-colors focus-visible:outline-solid focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-glow-500 sm:px-5 sm:text-sm ${
                     selected
                       ? "text-glow-300"
                       : "text-parchment-dim hover:text-parchment"
@@ -124,7 +124,7 @@ export function ProfileSwitcher({
                   {tab.label}
                   {tab.badge ? (
                     <span
-                      className={`rounded-full border px-1.5 py-px font-mono text-[0.6rem] font-normal tracking-[0.1em] ${
+                      className={`rounded-full border px-1.5 py-px font-mono text-[0.6rem] font-normal tracking-widest ${
                         selected
                           ? "border-glow-500/50 text-glow-400"
                           : "border-white/15 text-parchment-dim"

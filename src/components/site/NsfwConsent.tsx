@@ -22,10 +22,10 @@ import {
 const FOCUSABLE = 'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
 const PRIMARY_BUTTON =
-  "inline-flex min-h-11 flex-1 items-center justify-center rounded-full border border-glow-500/45 bg-glow-500/15 px-6 text-sm font-medium text-glow-300 shadow-glow-sm transition hover:border-glow-500/70 hover:bg-glow-500/25 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-glow-500";
+  "inline-flex min-h-11 flex-1 items-center justify-center rounded-full border border-glow-500/45 bg-glow-500/15 px-6 text-sm font-medium text-glow-300 shadow-glow-sm transition hover:border-glow-500/70 hover:bg-glow-500/25 focus-visible:outline-solid focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-glow-500";
 
 const SECONDARY_BUTTON =
-  "inline-flex min-h-11 flex-1 items-center justify-center rounded-full border border-white/10 bg-void-lift/70 px-6 text-sm font-medium text-parchment-muted transition hover:border-white/25 hover:text-parchment focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-glow-500";
+  "inline-flex min-h-11 flex-1 items-center justify-center rounded-full border border-white/10 bg-void-lift/70 px-6 text-sm font-medium text-parchment-muted transition hover:border-white/25 hover:text-parchment focus-visible:outline-solid focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-glow-500";
 
 type NsfwConsentValue = {
   consented: boolean;
@@ -222,7 +222,7 @@ function NsfwWarning({
   }, [onDecline]);
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center overflow-y-auto overscroll-contain bg-void/90 p-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-[max(1rem,env(safe-area-inset-top))] backdrop-blur-2xl sm:p-8 sm:pb-[max(2rem,env(safe-area-inset-bottom))] sm:pt-[max(2rem,env(safe-area-inset-top))]">
+    <div className="fixed inset-0 z-100 flex items-center justify-center overflow-y-auto overscroll-contain bg-void/90 p-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-[max(1rem,env(safe-area-inset-top))] backdrop-blur-2xl sm:p-8 sm:pb-[max(2rem,env(safe-area-inset-bottom))] sm:pt-[max(2rem,env(safe-area-inset-top))]">
       <div
         ref={panelRef}
         role="alertdialog"
@@ -230,7 +230,7 @@ function NsfwWarning({
         aria-labelledby={titleId}
         aria-describedby={bodyId}
         tabIndex={-1}
-        className="relative my-auto w-full max-w-md rounded-3xl border border-white/[0.08] bg-gradient-to-br from-void-lift/95 to-void-panel/90 p-px shadow-glow-md outline-none"
+        className="relative my-auto w-full max-w-md rounded-3xl border border-white/8 bg-linear-to-br from-void-lift/95 to-void-panel/90 p-px shadow-glow-md outline-hidden"
       >
         <div className="rounded-[calc(1.5rem-1px)] px-7 py-9 text-center shadow-inner-glow sm:px-9">
           <span className="inline-flex items-center rounded-full border border-glow-500/40 bg-glow-500/10 px-3 py-1 font-mono text-[0.65rem] uppercase tracking-[0.25em] text-glow-400">

@@ -7,8 +7,8 @@ import { placeholderFor, PROJECT_STATUS_LABELS, type Project } from "@/lib/conte
 /** Only states worth calling out get a badge; "live" is the unremarkable case. */
 const BADGE_CLASS: Partial<Record<Project["status"], string>> = {
   wip: "border-glow-500/35 bg-glow-500/10 text-glow-400",
-  planned: "border-white/15 bg-white/[0.04] text-parchment-dim",
-  archived: "border-white/10 bg-white/[0.02] text-parchment-dim/70",
+  planned: "border-white/15 bg-white/4 text-parchment-dim",
+  archived: "border-white/10 bg-white/2 text-parchment-dim/70",
 };
 
 export function ProjectCard({ project }: { project: Project }) {
@@ -18,9 +18,9 @@ export function ProjectCard({ project }: { project: Project }) {
     <SpotlightCard>
       <Link
         href={`/projects/${project.slug}`}
-        className="group flex h-full flex-col overflow-hidden rounded-3xl border border-white/[0.07] bg-gradient-to-br from-void-lift/90 to-void-panel/70 shadow-glow-sm backdrop-blur-xl transition hover:border-glow-500/40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-glow-500"
+        className="group flex h-full flex-col overflow-hidden rounded-3xl border border-white/[0.07] bg-linear-to-br from-void-lift/90 to-void-panel/70 shadow-glow-sm backdrop-blur-xl transition hover:border-glow-500/40 focus-visible:outline-solid focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-glow-500"
       >
-        <div className="relative aspect-[16/9] w-full overflow-hidden bg-void-lift/60">
+        <div className="relative aspect-video w-full overflow-hidden bg-void-lift/60">
           {project.cover ? (
             <ShimmerImage
               src={project.cover.src}
@@ -35,7 +35,7 @@ export function ProjectCard({ project }: { project: Project }) {
               style={{ objectPosition: project.cover.objectPosition }}
             />
           ) : (
-            <div className="flex h-full w-full items-center justify-center bg-grid-soft bg-[size:34px_34px] opacity-70" />
+            <div className="flex h-full w-full items-center justify-center bg-grid-soft bg-size-[34px_34px] opacity-70" />
           )}
         </div>
 

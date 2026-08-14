@@ -46,7 +46,7 @@ export function parseFilter(
 }
 
 const CHIP_BASE =
-  "inline-flex min-h-9 items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-glow-500";
+  "inline-flex min-h-9 items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs transition focus-visible:outline-solid focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-glow-500";
 const CHIP_OFF = `${CHIP_BASE} border-white/10 bg-void/70 text-parchment-muted hover:border-glow-500/40 hover:text-parchment`;
 const CHIP_ON = `${CHIP_BASE} border-glow-500/45 bg-glow-500/10 text-glow-400 hover:bg-glow-500/20`;
 
@@ -65,7 +65,7 @@ function FacetRow({
   if (options.length === 0) return null;
 
   return (
-    <div className="flex flex-col gap-2 border-b border-white/[0.05] pb-3 last:border-b-0 last:pb-0 sm:flex-row sm:flex-wrap sm:items-baseline sm:border-0 sm:pb-0">
+    <div className="flex flex-col gap-2 border-b border-white/5 pb-3 last:border-b-0 last:pb-0 sm:flex-row sm:flex-wrap sm:items-baseline sm:border-0 sm:pb-0">
       <span className="shrink-0 font-mono text-[0.6rem] uppercase tracking-[0.2em] text-parchment-dim sm:w-20">
         {FACET_LABELS[facetKey]}
       </span>
@@ -116,7 +116,7 @@ export function FacetBar({
       />
       <label
         htmlFor="gallery-filters"
-        className="flex min-h-11 cursor-pointer items-center justify-between gap-3 px-4 py-3 font-mono text-xs uppercase tracking-[0.2em] text-parchment transition hover:text-glow-400 peer-checked:[&>span:last-child]:rotate-180 sm:hidden"
+        className="flex min-h-11 cursor-pointer items-center justify-between gap-3 px-4 py-3 font-mono text-xs uppercase tracking-[0.2em] text-parchment transition hover:text-glow-400 [&>span:last-child]:peer-checked:rotate-180 sm:hidden"
       >
         <span>
           Filters

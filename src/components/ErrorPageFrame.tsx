@@ -2,7 +2,7 @@ import { BrandBackdrop, SparkStar } from "@/components/BrandBackdrop";
 
 /** Shared primary control style for error / not-found actions */
 export const errorActionClassName =
-  "inline-flex min-h-11 min-w-[8.5rem] items-center justify-center rounded-full border border-glow-500/40 bg-glow-500/10 px-6 text-sm font-medium text-glow-400 shadow-glow-sm transition hover:border-glow-500/60 hover:bg-glow-500/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-glow-500";
+  "inline-flex min-h-11 min-w-34 items-center justify-center rounded-full border border-glow-500/40 bg-glow-500/10 px-6 text-sm font-medium text-glow-400 shadow-glow-sm transition hover:border-glow-500/60 hover:bg-glow-500/20 focus-visible:outline-solid focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-glow-500";
 
 type ErrorPageFrameProps = {
   /** Small label above the title (e.g. code or category) */
@@ -22,7 +22,7 @@ export function ErrorPageFrame({
   return (
     <main className="relative isolate flex min-h-dvh flex-col items-center justify-center overflow-hidden bg-void px-6 py-16">
       <div
-        className="pointer-events-none absolute inset-x-0 top-0 h-[100lvh] overflow-hidden"
+        className="pointer-events-none absolute inset-x-0 top-0 h-lvh overflow-hidden"
         aria-hidden
       >
         <BrandBackdrop density="soft" />
@@ -35,7 +35,7 @@ export function ErrorPageFrame({
           <SparkStar className="h-4 w-4 animate-twinkle [animation-delay:600ms]" />
         </div>
 
-        <div className="relative rounded-3xl border border-white/[0.07] bg-gradient-to-br from-void-lift/90 to-void-panel/70 p-px shadow-glow-sm backdrop-blur-xl">
+        <div className="relative rounded-3xl border border-white/[0.07] bg-linear-to-br from-void-lift/90 to-void-panel/70 p-px shadow-glow-sm backdrop-blur-xl">
           <div className="rounded-[calc(1.5rem-1px)] px-8 py-12 text-center shadow-inner-glow sm:px-10 sm:py-14">
             <p className="font-mono text-xs uppercase tracking-[0.35em] text-parchment-dim">
               {eyebrow}
@@ -55,7 +55,7 @@ export function ErrorPageFrame({
               </div>
             ) : null}
             <div className="mx-auto mt-10 flex h-1 w-24 overflow-hidden rounded-full bg-void-line">
-              <div className="h-full w-1/2 rounded-full bg-gradient-to-r from-glow-600 via-glow-500 to-glow-400 shadow-glow-sm" />
+              <div className="h-full w-1/2 rounded-full bg-linear-to-r from-glow-600 via-glow-500 to-glow-400 shadow-glow-sm" />
             </div>
           </div>
         </div>

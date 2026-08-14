@@ -16,7 +16,7 @@ export async function SiteFooter() {
               <li key={section.href}>
                 <Link
                   href={section.href}
-                  className="inline-flex min-h-11 items-center text-xs font-medium uppercase tracking-[0.2em] text-parchment-dim transition hover:text-parchment focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-glow-500"
+                  className="inline-flex min-h-11 items-center text-xs font-medium uppercase tracking-[0.2em] text-parchment-dim transition hover:text-parchment focus-visible:outline-solid focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-glow-500"
                 >
                   {section.label}
                 </Link>

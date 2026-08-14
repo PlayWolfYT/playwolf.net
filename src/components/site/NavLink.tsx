@@ -17,7 +17,7 @@ export function NavLink({ children, href }: { children: ReactNode; href: string 
     <Link
       href={href}
       aria-current={active ? "page" : undefined}
-      className={`inline-flex min-h-11 items-center rounded-full px-3 text-xs font-medium uppercase tracking-[0.2em] transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-glow-500 ${
+      className={`inline-flex min-h-11 items-center rounded-full px-3 text-xs font-medium uppercase tracking-[0.2em] transition focus-visible:outline-solid focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-glow-500 ${
         active ? "text-glow-400" : "text-parchment-dim hover:text-parchment"
       }`}
     >

@@ -12,7 +12,7 @@ export function BrandBackdrop({ density = "full" }: BrandBackdropProps) {
     <>
       <Aurora />
       <div
-        className="pointer-events-none absolute inset-0 bg-[size:56px_56px] bg-grid-soft opacity-90"
+        className="pointer-events-none absolute inset-0 bg-size-[56px_56px] bg-grid-soft opacity-90"
         aria-hidden
       />
       <div className="pointer-events-none absolute inset-0 bg-rim-cyan" aria-hidden />
@@ -33,7 +33,7 @@ export function BrandBackdrop({ density = "full" }: BrandBackdropProps) {
         aria-hidden
       />
       <div
-        className="pointer-events-none absolute inset-x-0 bottom-0 h-[45%] bg-gradient-to-t from-void via-void-soft/90 to-transparent"
+        className="pointer-events-none absolute inset-x-0 bottom-0 h-[45%] bg-linear-to-t from-void via-void-soft/90 to-transparent"
         aria-hidden
       />
       {/* Soft accent wash — very subtle, follows the active profile theme */}

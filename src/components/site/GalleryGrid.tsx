@@ -70,7 +70,7 @@ export function GalleryGrid({ items }: { items: GalleryItem[] }) {
           >
             <Link
               href={href}
-              className={`group block ${CARD_CLASS} focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-glow-500`}
+              className={`group block ${CARD_CLASS} focus-visible:outline-solid focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-glow-500`}
             >
               <div className="relative aspect-square w-full overflow-hidden">
                 <div className="absolute inset-0 origin-center transition duration-500 group-hover:scale-105">

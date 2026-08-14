@@ -53,7 +53,7 @@ export default async function ProjectPage({ params }: PageProps) {
       </header>
 
       {project.cover ? (
-        <div className="relative mt-12 aspect-[16/9] w-full overflow-hidden rounded-3xl border border-white/[0.07] bg-void-lift/60 shadow-glow-sm">
+        <div className="relative mt-12 aspect-video w-full overflow-hidden rounded-3xl border border-white/[0.07] bg-void-lift/60 shadow-glow-sm">
           <ShimmerImage
             src={project.cover.src}
             alt={project.title}
@@ -79,7 +79,7 @@ export default async function ProjectPage({ params }: PageProps) {
       <div className="mt-14 flex justify-center">
         <Link
           href="/projects"
-          className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full border border-white/10 bg-void-lift/60 px-6 text-sm font-medium text-parchment-muted transition hover:border-white/20 hover:text-parchment focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-glow-500"
+          className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full border border-white/10 bg-void-lift/60 px-6 text-sm font-medium text-parchment-muted transition hover:border-white/20 hover:text-parchment focus-visible:outline-solid focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-glow-500"
         >
           <BackArrow />
           All projects

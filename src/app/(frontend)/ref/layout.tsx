@@ -24,7 +24,7 @@ export default async function RefLayout({
       {/* `100lvh` keeps orb/decor positions stable when mobile browser chrome
           shows/hides mid-scroll (plain `inset-0` would resize with the toolbar). */}
       <div
-        className="pointer-events-none fixed inset-x-0 top-0 h-[100lvh] overflow-hidden"
+        className="pointer-events-none fixed inset-x-0 top-0 h-lvh overflow-hidden"
         aria-hidden
       >
         <BrandBackdrop density="soft" />

@@ -20,7 +20,7 @@ export default async function LinksPage() {
         lede="Everywhere else I can be found."
       />
 
-      <div className="mt-12 rounded-3xl border border-white/[0.07] bg-gradient-to-br from-void-lift/90 to-void-panel/70 px-6 py-10 shadow-glow-sm backdrop-blur-xl">
+      <div className="mt-12 rounded-3xl border border-white/[0.07] bg-linear-to-br from-void-lift/90 to-void-panel/70 px-6 py-10 shadow-glow-sm backdrop-blur-xl">
         {links.length > 0 ? (
           <LinkRow links={links} />
         ) : (

@@ -37,7 +37,7 @@ type AltCarouselProps = {
 };
 
 const CHEVRON_CLASS =
-  "absolute top-1/2 z-20 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-white/15 bg-void/75 text-parchment-muted backdrop-blur transition hover:border-glow-500/50 hover:text-glow-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-glow-500";
+  "absolute top-1/2 z-20 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-white/15 bg-void/75 text-parchment-muted backdrop-blur-sm transition hover:border-glow-500/50 hover:text-glow-300 focus-visible:outline-solid focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-glow-500";
 
 /**
  * The artwork plus its alternate versions as one swappable image. The main
@@ -101,7 +101,7 @@ export function AltCarousel({ alt, main, alts }: AltCarouselProps) {
           <button
             type="button"
             onClick={() => void reveal(index)}
-            className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-4 rounded-3xl bg-void/40 px-6 text-center backdrop-blur-sm focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-coral-soft"
+            className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-4 rounded-3xl bg-void/40 px-6 text-center backdrop-blur-xs focus-visible:outline-solid focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-coral-soft"
           >
             <span className="inline-flex items-center rounded-full border border-coral-soft/50 bg-void/80 px-3 py-1 font-mono text-[0.65rem] uppercase tracking-[0.25em] text-coral-soft">
               18+
@@ -154,7 +154,7 @@ export function AltCarousel({ alt, main, alts }: AltCarouselProps) {
           {current.sourceHref ? (
             <Link
               href={current.sourceHref}
-              className="text-xs text-glow-400 underline-offset-4 transition hover:text-glow-300 hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-glow-500"
+              className="text-xs text-glow-400 underline-offset-4 transition hover:text-glow-300 hover:underline focus-visible:outline-solid focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-glow-500"
             >
               View this version&rsquo;s page
               {current.gated ? <span className="sr-only"> (18+ content)</span> : null}
@@ -176,7 +176,7 @@ export function AltCarousel({ alt, main, alts }: AltCarouselProps) {
                     slide.label ? ` — ${slide.label}` : ""
                   }${slide.gated ? " (18+)" : ""}`}
                   aria-current={active}
-                  className={`relative h-20 w-20 overflow-hidden rounded-xl border transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-glow-500 ${
+                  className={`relative h-20 w-20 overflow-hidden rounded-xl border transition focus-visible:outline-solid focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-glow-500 ${
                     active
                       ? "border-glow-500/70 shadow-glow-sm"
                       : "border-white/10 opacity-70 hover:border-white/25 hover:opacity-100"
@@ -196,7 +196,7 @@ export function AltCarousel({ alt, main, alts }: AltCarouselProps) {
                       aria-hidden
                       className="absolute inset-0 z-10 flex items-center justify-center bg-void/30"
                     >
-                      <span className="rounded-full border border-coral-soft/50 bg-void/80 px-1.5 py-0.5 font-mono text-[0.6rem] tracking-[0.1em] text-coral-soft">
+                      <span className="rounded-full border border-coral-soft/50 bg-void/80 px-1.5 py-0.5 font-mono text-[0.6rem] tracking-widest text-coral-soft">
                         18+
                       </span>
                     </span>

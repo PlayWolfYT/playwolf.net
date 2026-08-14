@@ -21,7 +21,7 @@ export default async function ProjectsPage() {
       />
 
       {projects.length === 0 ? (
-        <div className="mt-12 rounded-3xl border border-dashed border-white/[0.1] bg-void-lift/40 px-8 py-16 text-center">
+        <div className="mt-12 rounded-3xl border border-dashed border-white/10 bg-void-lift/40 px-8 py-16 text-center">
           <p className="font-display text-lg font-medium text-parchment">
             Nothing here yet
           </p>

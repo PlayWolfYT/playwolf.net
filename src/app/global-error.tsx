@@ -42,7 +42,7 @@ export default function GlobalError({
             Try again
           </button>
           {process.env.NODE_ENV === "development" && error.message ? (
-            <p className="basis-full break-words text-center font-mono text-[11px] leading-relaxed text-coral-soft/85">
+            <p className="basis-full wrap-break-word text-center font-mono text-[11px] leading-relaxed text-coral-soft/85">
               {error.message}
             </p>
           ) : null}

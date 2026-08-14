@@ -31,7 +31,7 @@ function ChevronIcon({ className = "" }: { className?: string }) {
 }
 
 const LINK_CLASS =
-  "inline-flex min-h-11 min-w-0 flex-1 items-center gap-2 rounded-full border border-white/10 bg-void/70 px-3 text-sm text-parchment-muted transition hover:border-glow-500/40 hover:text-parchment focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-glow-500 sm:max-w-[45%] sm:flex-none sm:px-4";
+  "inline-flex min-h-11 min-w-0 flex-1 items-center gap-2 rounded-full border border-white/10 bg-void/70 px-3 text-sm text-parchment-muted transition hover:border-glow-500/40 hover:text-parchment focus-visible:outline-solid focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-glow-500 sm:max-w-[45%] sm:flex-none sm:px-4";
 
 /**
  * Step between the images of one profile without going back to the grid. The

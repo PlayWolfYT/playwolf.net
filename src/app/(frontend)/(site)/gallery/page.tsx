@@ -49,7 +49,7 @@ export default async function GalleryPage({ searchParams }: PageProps) {
                 includeNsfw: filter.includeNsfw,
                 includeWip: filter.includeWip,
               })}
-              className="inline-flex min-h-11 items-center justify-center rounded-full border border-glow-500/40 bg-glow-500/10 px-6 text-sm font-medium text-glow-400 transition hover:bg-glow-500/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-glow-500"
+              className="inline-flex min-h-11 items-center justify-center rounded-full border border-glow-500/40 bg-glow-500/10 px-6 text-sm font-medium text-glow-400 transition hover:bg-glow-500/20 focus-visible:outline-solid focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-glow-500"
             >
               Clear filters
             </Link>

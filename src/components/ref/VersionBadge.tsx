@@ -12,7 +12,7 @@ export function VersionBadge({ example }: { example: Example }) {
   const count = sameRating.length + 1;
 
   return (
-    <span className="absolute right-2 top-2 z-20 inline-flex items-center gap-1 rounded-full border border-white/10 bg-void/75 px-2 py-1 font-mono text-[0.6rem] text-parchment-muted backdrop-blur">
+    <span className="absolute right-2 top-2 z-20 inline-flex items-center gap-1 rounded-full border border-white/10 bg-void/75 px-2 py-1 font-mono text-[0.6rem] text-parchment-muted backdrop-blur-sm">
       <svg
         viewBox="0 0 24 24"
         fill="none"

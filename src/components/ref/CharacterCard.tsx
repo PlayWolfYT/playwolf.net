@@ -21,7 +21,7 @@ export function CharacterCard({ character }: CharacterCardProps) {
       <Link
         href={href}
         style={accent ? (accentVars(accent) as React.CSSProperties) : undefined}
-        className="group block h-full overflow-hidden rounded-3xl border border-white/[0.07] bg-gradient-to-br from-void-lift/90 to-void-panel/70 p-px shadow-glow-sm backdrop-blur-xl transition hover:border-glow-500/40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-glow-500"
+        className="group block h-full overflow-hidden rounded-3xl border border-white/[0.07] bg-linear-to-br from-void-lift/90 to-void-panel/70 p-px shadow-glow-sm backdrop-blur-xl transition hover:border-glow-500/40 focus-visible:outline-solid focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-glow-500"
       >
         <div className="h-full overflow-hidden rounded-[calc(1.5rem-1px)] shadow-inner-glow">
           {/* Pre-cropped 1:1 frame; objectPosition is centered in toImageRef. */}

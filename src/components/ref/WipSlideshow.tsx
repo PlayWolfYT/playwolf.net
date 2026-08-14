@@ -33,9 +33,9 @@ export function WipSlideshow({
         </p>
       </header>
 
-      <div className="relative overflow-hidden rounded-3xl border border-white/[0.08] bg-void-lift/50">
+      <div className="relative overflow-hidden rounded-3xl border border-white/8 bg-void-lift/50">
         <WipTape />
-        <div className="relative aspect-[4/3] w-full">
+        <div className="relative aspect-4/3 w-full">
           <Image
             src={current.src}
             alt={current.caption || `WIP sketch ${index + 1}`}
@@ -46,7 +46,7 @@ export function WipSlideshow({
           />
         </div>
         {current.caption ? (
-          <p className="border-t border-white/[0.06] px-4 py-3 text-center text-sm text-parchment-muted">
+          <p className="border-t border-white/6 px-4 py-3 text-center text-sm text-parchment-muted">
             {current.caption}
           </p>
         ) : null}
@@ -59,14 +59,14 @@ export function WipSlideshow({
             onClick={() =>
               setIndex((value) => (value - 1 + slides.length) % slides.length)
             }
-            className="inline-flex min-h-11 items-center rounded-full border border-white/10 px-5 text-xs text-parchment-muted transition hover:border-glow-500/40 hover:text-glow-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-glow-500"
+            className="inline-flex min-h-11 items-center rounded-full border border-white/10 px-5 text-xs text-parchment-muted transition hover:border-glow-500/40 hover:text-glow-300 focus-visible:outline-solid focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-glow-500"
           >
             Previous
           </button>
           <button
             type="button"
             onClick={() => setIndex((value) => (value + 1) % slides.length)}
-            className="inline-flex min-h-11 items-center rounded-full border border-white/10 px-5 text-xs text-parchment-muted transition hover:border-glow-500/40 hover:text-glow-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-glow-500"
+            className="inline-flex min-h-11 items-center rounded-full border border-white/10 px-5 text-xs text-parchment-muted transition hover:border-glow-500/40 hover:text-glow-300 focus-visible:outline-solid focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-glow-500"
           >
             Next
           </button>
