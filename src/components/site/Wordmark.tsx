@@ -1,3 +1,5 @@
+import Image from "next/image";
+
 import { cn } from "@/lib/utils";
 
 export function Wordmark({
@@ -9,10 +11,14 @@ export function Wordmark({
 }) {
   return (
     <span className={cn("inline-flex items-center gap-3", className)}>
-      <span className="relative flex size-9 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-primary font-mono text-[0.65rem] font-semibold tracking-[-0.08em] text-primary-foreground shadow-glow-sm">
-        <span className="absolute -right-2 -top-3 size-5 rotate-45 bg-signal/90" />
-        <span className="relative">PW</span>
-      </span>
+      <Image
+        src="/favicon.ico"
+        width={36}
+        height={36}
+        alt=""
+        unoptimized
+        className="size-9 shrink-0 rounded-lg shadow-glow-sm"
+      />
       <span
         className={cn(
           "font-display text-sm font-bold leading-none tracking-[-0.04em] text-foreground",
