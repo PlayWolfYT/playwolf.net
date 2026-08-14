@@ -1,10 +1,11 @@
-import type { CollectionConfig } from "payload";
+import type { CollectionConfig, FieldAccess } from "payload";
 
 import { anyone, authenticated } from "../access";
 import { generateBlurPlaceholder } from "../hooks/blurPlaceholder";
 import {
   cleanupFramedOriginalAfterDelete,
   framedCropBeforeOperation,
+  reclaimFramedOriginalAfterChange,
 } from "../hooks/framedCrop";
 import { revalidateHooks } from "../hooks/revalidate";
 import {
@@ -12,6 +13,23 @@ import {
   type FramedCollectionSlug,
   UPLOAD_FRAMES,
 } from "../uploadFrames";
+
+/**
+ * Field-level counterpart to `authenticated`. Collection access may return a
+ * `Where`; field access has nothing to filter, so it must be a plain boolean.
+ *
+ * This — not the top-level `hidden` flag — is what keeps `source` and `crop`
+ * out of anonymous REST and GraphQL responses. `hidden` would be the stronger
+ * control (it survives `overrideAccess`), but it strips the field from *every*
+ * read that does not opt in with `showHiddenFields`, and Payload's own admin
+ * document view does not: `@payloadcms/next`'s `getDocumentData` calls
+ * `findByID` without it. The crop drawer reads `data.source.key` to decide
+ * whether to edit the pristine sidecar, so losing it would silently send the
+ * drawer back to the already-cropped file and make every re-crop compound —
+ * the exact data loss the sidecar exists to prevent. Adding `hidden` therefore
+ * has to land together with a change to `FramedCollectionUpload.client.tsx`.
+ */
+const authenticatedField: FieldAccess = ({ req }) => Boolean(req.user);
 
 type CroppedUploadOptions = {
   slug: FramedCollectionSlug;
@@ -59,7 +77,7 @@ export function createCroppedUploadCollection({
       },
     },
     hooks: {
-      afterChange,
+      afterChange: [...afterChange, reclaimFramedOriginalAfterChange],
       afterDelete: [...afterDelete, cleanupFramedOriginalAfterDelete],
       beforeChange: [generateBlurPlaceholder],
       beforeOperation: [framedCropBeforeOperation],
@@ -127,9 +145,19 @@ export function createCroppedUploadCollection({
          * decoded anything. Null on documents that predate non-destructive
          * cropping; the hook adopts their current file as the original on the
          * next save.
+         *
+         * `admin.hidden` only keeps the group out of the edit view; REST and
+         * GraphQL happily served the storage key of a private object to anyone.
+         * Field access is what actually withholds it — see the note above
+         * `authenticatedField` for why the top-level `hidden` flag is not also
+         * set here.
          */
         name: "source",
         type: "group",
+        access: {
+          read: authenticatedField,
+          update: authenticatedField,
+        },
         admin: {
           hidden: true,
           readOnly: true,
@@ -149,9 +177,17 @@ export function createCroppedUploadCollection({
          * selection instead of starting over — and they are free to go negative
          * or past 100, which is what lets a crop extend into padding beyond the
          * original's edges.
+         *
+         * Authenticated-only for the same reason as `source`: it is editing
+         * state for the admin drawer, and the public site renders the baked
+         * file rather than re-deriving anything from these numbers.
          */
         name: "crop",
         type: "group",
+        access: {
+          read: authenticatedField,
+          update: authenticatedField,
+        },
         admin: {
           hidden: true,
           readOnly: true,

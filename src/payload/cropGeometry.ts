@@ -110,6 +110,44 @@ export function rectsAlmostEqual(
 }
 
 /**
+ * Confines a rect to the same bounds the drawer's stage imposes: at most
+ * `maxOutset` of each axis past every edge of the original.
+ *
+ * The drawer can only ever produce a rect inside those bounds, so for a save
+ * from the admin this is the identity. It exists for the other caller — the
+ * crop hook, whose rect arrives on `uploadEdits[crop]` straight off the
+ * request, where nothing stops `width: 8_000_000` and a padded canvas measured
+ * in gigapixels. Clamping here rather than rejecting keeps a hand-written API
+ * call working; the pixel ceiling in `cropToWebp` is the hard stop.
+ *
+ * Each axis is clamped on its own, so an out-of-bounds rect can come back with
+ * a different aspect than it went in with. That only happens for input the
+ * drawer could not have produced, and a slightly reframed crop is a better
+ * outcome than a refused save.
+ */
+export function clampRectToOutset(
+  rect: Rect | null | undefined,
+  maxOutset: number,
+): Rect {
+  const safe = normalizeRect(rect);
+  const outset = Math.max(0, maxOutset) * 100;
+  // `0 - outset` rather than `-outset`, so a zero outset yields 0 and not -0.
+  const min = 0 - outset;
+  const max = 100 + outset;
+  const span = max - min;
+
+  const width = Math.min(safe.width, span);
+  const height = Math.min(safe.height, span);
+
+  return {
+    x: Math.min(Math.max(safe.x, min), max - width),
+    y: Math.min(Math.max(safe.y, min), max - height),
+    width,
+    height,
+  };
+}
+
+/**
  * Turns an original-percent rect into the `extend` + `extract` arguments that
  * reproduce it from the original bytes.
  *

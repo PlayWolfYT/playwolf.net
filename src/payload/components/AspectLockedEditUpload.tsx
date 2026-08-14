@@ -28,6 +28,7 @@ import ReactCrop, { type PercentCrop } from "react-image-crop";
 import "react-image-crop/dist/ReactCrop.css";
 
 import {
+  clampRectToOutset,
   focalPointInCrop,
   maxAspectRect,
   normalizeRect,
@@ -37,11 +38,7 @@ import {
   type Rect,
   type Size,
 } from "@/payload/cropGeometry";
-import {
-  frameForCollection,
-  getActiveUploadFrame,
-  type UploadFrame,
-} from "@/payload/uploadFrames";
+import { frameForCollection, type UploadFrame } from "@/payload/uploadFrames";
 
 const baseClass = "edit-upload";
 
@@ -176,8 +173,7 @@ export const EditUpload: React.FC<EditUploadProps> = ({
   const { closeModal } = useModal();
   const { t } = useTranslation();
   const { collectionSlug } = useDocumentInfo();
-  const frame =
-    frameProp ?? getActiveUploadFrame() ?? frameForCollection(collectionSlug);
+  const frame = frameProp ?? frameForCollection(collectionSlug);
   const maxOutset = frame?.maxOutset ?? 0;
 
   const [crop, setCrop] = useState<PercentCrop>(() =>
@@ -315,7 +311,13 @@ export const EditUpload: React.FC<EditUploadProps> = ({
       width: crop.width,
       height: crop.height,
     };
-    const originalCrop = stageRectToOriginal(stageCropRect, maxOutset);
+    // The stage cannot express a rect outside the outset bounds, so this is
+    // the identity — it is here so the drawer and the server agree on the
+    // stored rect rather than the hook silently clamping to something else.
+    const originalCrop = clampRectToOutset(
+      stageRectToOriginal(stageCropRect, maxOutset),
+      maxOutset,
+    );
     // Focal handle is stage-percent; Payload wants cropped-result percent.
     const croppedFocal = focalPointInCrop(focalPosition, stageCropRect);
 
