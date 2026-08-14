@@ -18,14 +18,18 @@ import {
   NSFW_CONSENT_COOKIE,
   NSFW_CONSENT_MAX_AGE,
 } from "@/lib/nsfw";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 
 const FOCUSABLE = 'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])';
-
-const PRIMARY_BUTTON =
-  "inline-flex min-h-11 flex-1 items-center justify-center rounded-full border border-glow-500/45 bg-glow-500/15 px-6 text-sm font-medium text-glow-300 shadow-glow-sm transition hover:border-glow-500/70 hover:bg-glow-500/25 focus-visible:outline-solid focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-glow-500";
-
-const SECONDARY_BUTTON =
-  "inline-flex min-h-11 flex-1 items-center justify-center rounded-full border border-white/10 bg-void-lift/70 px-6 text-sm font-medium text-parchment-muted transition hover:border-white/25 hover:text-parchment focus-visible:outline-solid focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-glow-500";
 
 type NsfwConsentValue = {
   consented: boolean;
@@ -222,50 +226,54 @@ function NsfwWarning({
   }, [onDecline]);
 
   return (
-    <div className="fixed inset-0 z-100 flex items-center justify-center overflow-y-auto overscroll-contain bg-void/90 p-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-[max(1rem,env(safe-area-inset-top))] backdrop-blur-2xl sm:p-8 sm:pb-[max(2rem,env(safe-area-inset-bottom))] sm:pt-[max(2rem,env(safe-area-inset-top))]">
-      <div
+    <div className="fixed inset-0 z-100 flex items-center justify-center overflow-y-auto overscroll-contain bg-background/90 p-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-[max(1rem,env(safe-area-inset-top))] backdrop-blur-2xl sm:p-8 sm:pb-[max(2rem,env(safe-area-inset-bottom))] sm:pt-[max(2rem,env(safe-area-inset-top))]">
+      <Card
         ref={panelRef}
         role="alertdialog"
         aria-modal="true"
         aria-labelledby={titleId}
         aria-describedby={bodyId}
         tabIndex={-1}
-        className="relative my-auto w-full max-w-md rounded-3xl border border-white/8 bg-linear-to-br from-void-lift/95 to-void-panel/90 p-px shadow-glow-md outline-hidden"
+        className="relative my-auto w-full max-w-md [--card-spacing:--spacing(6)] outline-hidden sm:[--card-spacing:--spacing(8)]"
       >
-        <div className="rounded-[calc(1.5rem-1px)] px-7 py-9 text-center shadow-inner-glow sm:px-9">
-          <span className="inline-flex items-center rounded-full border border-glow-500/40 bg-glow-500/10 px-3 py-1 font-mono text-[0.65rem] uppercase tracking-[0.25em] text-glow-400">
-            18+
-          </span>
-
-          <h2
+        <CardHeader className="items-center text-center">
+          <Badge variant="destructive">18+ / adult content</Badge>
+          <CardTitle
             id={titleId}
-            className="mt-5 font-display text-2xl font-semibold tracking-tight text-parchment"
+            className="mt-4 text-3xl font-bold tracking-[-0.055em]"
           >
             Adult content ahead
-          </h2>
-
-          <p
+          </CardTitle>
+          <CardDescription
             id={bodyId}
-            className="mx-auto mt-4 max-w-sm text-sm leading-relaxed text-parchment-muted"
+            className="mx-auto mt-2 max-w-sm leading-relaxed"
           >
             This part of the site holds artwork meant for adults. Continue only if you
             are 18 or older and happy to see it.
-          </p>
-
-          <div className="mt-8 flex flex-col-reverse gap-3 sm:flex-row">
-            <button type="button" onClick={onDecline} className={SECONDARY_BUTTON}>
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-col-reverse gap-3 sm:flex-row">
+            <Button
+              type="button"
+              variant="outline"
+              size="lg"
+              onClick={onDecline}
+              className="flex-1"
+            >
               Take me back
-            </button>
-            <button type="button" onClick={onAccept} className={PRIMARY_BUTTON}>
+            </Button>
+            <Button type="button" size="lg" onClick={onAccept} className="flex-1">
               Yes, I am 18 or older
-            </button>
+            </Button>
           </div>
-
-          <p className="mt-6 text-xs text-parchment-dim">
+        </CardContent>
+        <CardFooter className="justify-center">
+          <p className="text-center text-xs text-muted-foreground">
             Remembered on this device so you are only asked once.
           </p>
-        </div>
-      </div>
+        </CardFooter>
+      </Card>
     </div>
   );
 }

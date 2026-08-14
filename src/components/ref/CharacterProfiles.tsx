@@ -1,8 +1,10 @@
 import { ProfileSwitcher, type ProfileTab } from "@/components/ref/ProfileSwitcher";
 import { ProfileView } from "@/components/ref/ProfileView";
+import { buttonVariants } from "@/components/ui/button";
 import { PROFILE_KEYS, type Character, type ProfileKey } from "@/lib/content";
+import { cn } from "@/lib/utils";
+import { ArrowLeftIcon } from "lucide-react";
 import Link from "next/link";
-import { BackArrow } from "./BackArrow";
 
 type CharacterProfilesProps = {
   character: Character;
@@ -55,10 +57,13 @@ export function CharacterProfiles({
       <div className="mt-14 flex justify-center">
         <Link
           href="/ref"
-          className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full border border-white/10 bg-void-lift/60 px-6 text-sm font-medium text-parchment-muted transition hover:border-white/20 hover:text-parchment focus-visible:outline-solid focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-glow-500"
+          className={cn(
+            buttonVariants({ variant: "outline", size: "lg" }),
+            "rounded-xl",
+          )}
         >
-          <BackArrow />
-          Back to Characters
+          <ArrowLeftIcon data-icon="inline-start" />
+          Character index
         </Link>
       </div>
     </div>

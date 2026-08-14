@@ -2,14 +2,17 @@
 
 import Link from "next/link";
 
-import { errorActionClassName } from "@/components/ErrorPageFrame";
+import { buttonVariants } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 
-/**
- * Sits inside the reference chrome rather than replacing the page, so a failed
- * character or gallery still leaves the header, footer and navigation usable.
- * Errors thrown by the `/ref` layout itself escape this boundary and land on
- * the frontend-wide one instead.
- */
 export default function RefError({
   error,
   reset,
@@ -18,34 +21,46 @@ export default function RefError({
   reset: () => void;
 }) {
   return (
-    <div className="mx-auto max-w-lg rounded-3xl border border-white/[0.07] bg-linear-to-br from-void-lift/90 to-void-panel/70 px-8 py-12 text-center shadow-glow-sm backdrop-blur-xl">
-      <p className="font-mono text-xs uppercase tracking-[0.35em] text-parchment-dim">
-        Something went wrong
-      </p>
-      <h1 className="mt-4 font-display text-2xl font-semibold tracking-tight text-parchment sm:text-3xl">
-        Could not load this reference
-      </h1>
-      <p className="mx-auto mt-4 max-w-md text-sm leading-relaxed text-parchment-muted">
-        The gallery is temporarily unreachable. Trying again usually does it.
-      </p>
-
-      <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-        <button type="button" onClick={reset} className={errorActionClassName}>
+    <Card className="mx-auto max-w-xl text-center [--card-spacing:--spacing(7)]">
+      <CardHeader>
+        <p className="font-mono text-[0.6rem] uppercase tracking-[0.22em] text-primary">
+          Something went wrong
+        </p>
+        <CardTitle className="mt-3 text-3xl font-bold tracking-[-0.055em]">
+          Could not load this reference
+        </CardTitle>
+        <CardDescription className="mx-auto mt-2 max-w-md leading-relaxed">
+          The gallery is temporarily unreachable. Trying again usually does it.
+        </CardDescription>
+      </CardHeader>
+      {process.env.NODE_ENV === "development" && error.message ? (
+        <CardContent>
+          <p className="wrap-break-word font-mono text-[11px] leading-relaxed text-destructive">
+            {error.message}
+          </p>
+        </CardContent>
+      ) : null}
+      <CardFooter className="justify-center gap-3">
+        <button
+          type="button"
+          onClick={reset}
+          className={cn(
+            buttonVariants({ variant: "default", size: "lg" }),
+            "rounded-xl",
+          )}
+        >
           Try again
         </button>
         <Link
           href="/ref"
-          className="inline-flex min-h-11 items-center justify-center rounded-full border border-white/10 bg-void/70 px-6 text-sm text-parchment-muted transition hover:border-white/25 hover:text-parchment focus-visible:outline-solid focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-glow-500"
+          className={cn(
+            buttonVariants({ variant: "outline", size: "lg" }),
+            "rounded-xl",
+          )}
         >
           All characters
         </Link>
-      </div>
-
-      {process.env.NODE_ENV === "development" && error.message ? (
-        <p className="mt-6 wrap-break-word text-center font-mono text-[11px] leading-relaxed text-coral-soft/85">
-          {error.message}
-        </p>
-      ) : null}
-    </div>
+      </CardFooter>
+    </Card>
   );
 }

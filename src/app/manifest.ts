@@ -8,8 +8,8 @@ export default function manifest(): MetadataRoute.Manifest {
       "Character reference sheets, art examples, and portfolio for playwolf.",
     start_url: "/",
     display: "standalone",
-    background_color: "#050506",
-    theme_color: "#050506",
+    background_color: "#0d0c0b",
+    theme_color: "#0d0c0b",
     icons: [
       {
         src: "/favicon.ico",

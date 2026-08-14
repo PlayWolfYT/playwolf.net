@@ -1,9 +1,7 @@
 import Link from "next/link";
 
+import { Badge } from "@/components/ui/badge";
 import type { Example } from "@/lib/content";
-
-const CHIP_CLASS =
-  "inline-flex min-h-9 items-center gap-1.5 rounded-full border border-white/10 bg-void/70 px-3 py-1.5 text-xs text-parchment-muted transition hover:border-glow-500/40 hover:text-parchment focus-visible:outline-solid focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-glow-500";
 
 /**
  * Who is in the picture and what it is about, as links out. Characters go to
@@ -18,33 +16,34 @@ export function ArtworkChips({ example }: { example: Example }) {
   return (
     <div className="flex flex-wrap items-center justify-center gap-2">
       {people.map((person) => (
-        <Link
+        <Badge
           key={`${person.kind}-${person.slug}`}
-          href={
-            person.kind === "character"
-              ? `/ref/${person.slug}`
-              : `#friend-${person.slug}`
+          variant="outline"
+          render={
+            <Link
+              href={
+                person.kind === "character"
+                  ? `/ref/${person.slug}`
+                  : `#friend-${person.slug}`
+              }
+            />
           }
-          className={CHIP_CLASS}
         >
-          <span className="font-mono text-[0.6rem] uppercase tracking-[0.2em] text-glow-500">
+          <span className="font-mono text-[0.55rem] uppercase tracking-[0.16em] text-primary">
             {person.kind === "character" ? "OC" : "Friend"}
           </span>
           {person.name}
-        </Link>
+        </Badge>
       ))}
 
       {tags.map((tag) => (
-        <Link
+        <Badge
           key={tag.slug}
-          href={`/gallery?tag=${encodeURIComponent(tag.slug)}`}
-          className={CHIP_CLASS}
+          variant="secondary"
+          render={<Link href={`/gallery?tag=${encodeURIComponent(tag.slug)}`} />}
         >
-          <span aria-hidden className="text-parchment-dim">
-            #
-          </span>
-          {tag.label}
-        </Link>
+          #{tag.label}
+        </Badge>
       ))}
     </div>
   );

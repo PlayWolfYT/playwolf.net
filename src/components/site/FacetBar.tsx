@@ -1,6 +1,15 @@
 import Link from "next/link";
 
 import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+import { Badge } from "@/components/ui/badge";
+import { buttonVariants } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
+import {
   FACET_KEYS,
   FACET_LABELS,
   facetOptions,
@@ -8,12 +17,8 @@ import {
   type GalleryFilter,
   type GalleryItem,
 } from "@/lib/content";
+import { cn } from "@/lib/utils";
 
-/**
- * Filters live entirely in the query string: every control below is a plain
- * link to another URL, so the state survives a reload, can be shared, and
- * works before any JavaScript arrives.
- */
 export function galleryHref(filter: GalleryFilter): string {
   const params = new URLSearchParams();
   for (const key of FACET_KEYS) {
@@ -27,7 +32,6 @@ export function galleryHref(filter: GalleryFilter): string {
   return query ? `/gallery?${query}` : "/gallery";
 }
 
-/** Reading a filter back off the URL, ignoring anything unrecognised. */
 export function parseFilter(
   params: Record<string, string | string[] | undefined>,
 ): GalleryFilter {
@@ -45,10 +49,15 @@ export function parseFilter(
   return filter;
 }
 
-const CHIP_BASE =
-  "inline-flex min-h-9 items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs transition focus-visible:outline-solid focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-glow-500";
-const CHIP_OFF = `${CHIP_BASE} border-white/10 bg-void/70 text-parchment-muted hover:border-glow-500/40 hover:text-parchment`;
-const CHIP_ON = `${CHIP_BASE} border-glow-500/45 bg-glow-500/10 text-glow-400 hover:bg-glow-500/20`;
+function chipClass(selected: boolean) {
+  return cn(
+    buttonVariants({
+      variant: selected ? "default" : "outline",
+      size: "sm",
+    }),
+    "rounded-full",
+  );
+}
 
 function FacetRow({
   active,
@@ -65,8 +74,8 @@ function FacetRow({
   if (options.length === 0) return null;
 
   return (
-    <div className="flex flex-col gap-2 border-b border-white/5 pb-3 last:border-b-0 last:pb-0 sm:flex-row sm:flex-wrap sm:items-baseline sm:border-0 sm:pb-0">
-      <span className="shrink-0 font-mono text-[0.6rem] uppercase tracking-[0.2em] text-parchment-dim sm:w-20">
+    <div className="grid gap-3 py-4 sm:grid-cols-[7rem_1fr] sm:items-start">
+      <span className="pt-2 font-mono text-[0.58rem] uppercase tracking-[0.2em] text-muted-foreground">
         {FACET_LABELS[facetKey]}
       </span>
       <div className="flex flex-wrap gap-2">
@@ -80,10 +89,10 @@ function FacetRow({
                 [facetKey]: selected ? undefined : option.slug,
               })}
               aria-pressed={selected}
-              className={selected ? CHIP_ON : CHIP_OFF}
+              className={chipClass(selected)}
             >
               {option.label}
-              <span className="text-parchment-dim">{option.count}</span>
+              <Badge variant={selected ? "secondary" : "ghost"}>{option.count}</Badge>
             </Link>
           );
         })}
@@ -106,70 +115,75 @@ export function FacetBar({
     (filter.includeWip ? 1 : 0);
 
   return (
-    <div className="rounded-3xl border border-white/[0.07] bg-void-lift/40 backdrop-blur-xl">
-      {/* Checkbox disclosure: collapsed by default on mobile, always open from sm. */}
-      <input
-        type="checkbox"
-        id="gallery-filters"
-        className="peer sr-only"
-        defaultChecked={activeCount > 0}
-      />
-      <label
-        htmlFor="gallery-filters"
-        className="flex min-h-11 cursor-pointer items-center justify-between gap-3 px-4 py-3 font-mono text-xs uppercase tracking-[0.2em] text-parchment transition hover:text-glow-400 [&>span:last-child]:peer-checked:rotate-180 sm:hidden"
-      >
-        <span>
-          Filters
-          {activeCount > 0 ? (
-            <span className="ml-2 text-glow-400">· {activeCount} active</span>
-          ) : null}
-        </span>
-        <span aria-hidden className="text-parchment-dim transition">
-          ▾
-        </span>
-      </label>
+    <Accordion
+      defaultValue={activeCount > 0 ? ["gallery-filters"] : []}
+      className="rounded-2xl border border-border bg-card/85 px-5 shadow-glow-sm backdrop-blur-sm"
+    >
+      <AccordionItem value="gallery-filters" className="border-0">
+        <AccordionTrigger className="py-4 hover:no-underline">
+          <span className="flex items-center gap-3">
+            <span className="font-display text-base font-semibold tracking-[-0.025em]">
+              Filter the archive
+            </span>
+            {activeCount > 0 ? (
+              <Badge variant="secondary">{activeCount} active</Badge>
+            ) : (
+              <Badge variant="outline">All work</Badge>
+            )}
+          </span>
+        </AccordionTrigger>
+        <AccordionContent className="pb-5">
+          <Separator />
+          <div className="flex flex-col">
+            {FACET_KEYS.map((key, index) => (
+              <div key={key}>
+                {index > 0 ? <Separator /> : null}
+                <FacetRow
+                  active={filter[key]}
+                  facetKey={key}
+                  filter={filter}
+                  items={items}
+                />
+              </div>
+            ))}
+          </div>
 
-      <div className="hidden flex-col gap-3 border-t border-white/[0.07] p-4 peer-checked:flex sm:flex sm:border-0 sm:p-5">
-        {FACET_KEYS.map((key) => (
-          <FacetRow
-            key={key}
-            active={filter[key]}
-            facetKey={key}
-            filter={filter}
-            items={items}
-          />
-        ))}
-
-        <div className="mt-1 flex flex-wrap items-center gap-2 border-t border-white/[0.07] pt-4">
-          <Link
-            href={galleryHref({ ...filter, includeNsfw: !filter.includeNsfw })}
-            aria-pressed={filter.includeNsfw}
-            className={filter.includeNsfw ? CHIP_ON : CHIP_OFF}
-          >
-            {filter.includeNsfw ? "Showing 18+" : "Show 18+"}
-          </Link>
-
-          <Link
-            href={galleryHref({ ...filter, includeWip: !filter.includeWip })}
-            aria-pressed={filter.includeWip}
-            className={filter.includeWip ? CHIP_ON : CHIP_OFF}
-          >
-            {filter.includeWip ? "Showing WIP" : "Show WIP"}
-          </Link>
-
-          {narrowed ? (
+          <Separator className="mb-4" />
+          <div className="flex flex-wrap items-center gap-2">
             <Link
               href={galleryHref({
-                includeNsfw: filter.includeNsfw,
-                includeWip: filter.includeWip,
+                ...filter,
+                includeNsfw: !filter.includeNsfw,
               })}
-              className={CHIP_OFF}
+              aria-pressed={filter.includeNsfw}
+              className={chipClass(Boolean(filter.includeNsfw))}
             >
-              Clear filters
+              {filter.includeNsfw ? "Showing 18+" : "Show 18+"}
             </Link>
-          ) : null}
-        </div>
-      </div>
-    </div>
+            <Link
+              href={galleryHref({
+                ...filter,
+                includeWip: !filter.includeWip,
+              })}
+              aria-pressed={filter.includeWip}
+              className={chipClass(Boolean(filter.includeWip))}
+            >
+              {filter.includeWip ? "Showing WIP" : "Show WIP"}
+            </Link>
+            {narrowed ? (
+              <Link
+                href={galleryHref({
+                  includeNsfw: filter.includeNsfw,
+                  includeWip: filter.includeWip,
+                })}
+                className={buttonVariants({ variant: "ghost", size: "sm" })}
+              >
+                Clear filters
+              </Link>
+            ) : null}
+          </div>
+        </AccordionContent>
+      </AccordionItem>
+    </Accordion>
   );
 }

@@ -1,14 +1,25 @@
 import type { Metadata } from "next";
+import { ArrowLeftIcon } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
-import { BackArrow } from "@/components/ref/BackArrow";
 import { ShimmerImage } from "@/components/ref/ShimmerImage";
 import { LinkRow } from "@/components/site/LinkRow";
+import { PageHeader } from "@/components/site/PageHeader";
+import { Badge } from "@/components/ui/badge";
+import { buttonVariants } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { PROJECT_STATUS_LABELS, placeholderFor } from "@/lib/content";
 import { buildImageMetadata } from "@/lib/embed";
-import { placeholderFor, PROJECT_STATUS_LABELS } from "@/lib/content";
 import { getProject } from "@/lib/references";
 import { RichTextContent, richTextToPlainText } from "@/lib/rich-text";
+import { cn } from "@/lib/utils";
 
 type PageProps = { params: Promise<{ slug: string }> };
 
@@ -18,7 +29,6 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   if (!project) return {};
 
   const description = project.summary ?? richTextToPlainText(project.body);
-
   if (!project.cover) return { title: project.title, description };
 
   return buildImageMetadata({
@@ -36,52 +46,88 @@ export default async function ProjectPage({ params }: PageProps) {
   if (!project) notFound();
 
   return (
-    <article className="mx-auto w-full max-w-3xl px-4 pb-24 pt-16 sm:px-8 sm:pt-24">
-      <header className="text-center">
-        <p className="font-mono text-[0.65rem] uppercase tracking-[0.28em] text-glow-500">
-          {PROJECT_STATUS_LABELS[project.status]}
-          {project.year ? ` · ${project.year}` : ""}
-        </p>
-        <h1 className="mt-4 font-display text-3xl font-light tracking-tight text-parchment sm:text-4xl">
-          {project.title}
-        </h1>
-        {project.summary ? (
-          <p className="mx-auto mt-4 max-w-xl text-sm leading-relaxed text-parchment-muted">
-            {project.summary}
-          </p>
-        ) : null}
-      </header>
+    <article className="mx-auto w-full max-w-7xl px-4 pb-24 pt-12 sm:px-6 sm:pt-20 lg:px-8 lg:pb-32">
+      <PageHeader
+        eyebrow={PROJECT_STATUS_LABELS[project.status]}
+        title={project.title}
+        lede={project.summary}
+      >
+        <div className="flex flex-wrap gap-2">
+          <Badge variant="outline">{project.year ?? "Ongoing"}</Badge>
+          {project.featured ? <Badge variant="secondary">Featured</Badge> : null}
+        </div>
+      </PageHeader>
 
       {project.cover ? (
-        <div className="relative mt-12 aspect-video w-full overflow-hidden rounded-3xl border border-white/[0.07] bg-void-lift/60 shadow-glow-sm">
-          <ShimmerImage
-            src={project.cover.src}
-            alt={project.title}
-            fill
-            unoptimized={project.cover.unoptimized}
-            placeholder={placeholderFor(project.cover)}
-            blurDataURL={project.cover.blurDataURL}
-            sizes="(max-width: 768px) 100vw, 768px"
-            className="object-contain object-center"
-          />
-        </div>
+        <Card className="mt-10 gap-0 py-0">
+          <div className="relative aspect-video w-full overflow-hidden bg-muted">
+            <ShimmerImage
+              src={project.cover.src}
+              alt={project.title}
+              fill
+              unoptimized={project.cover.unoptimized}
+              placeholder={placeholderFor(project.cover)}
+              blurDataURL={project.cover.blurDataURL}
+              sizes="(max-width: 1280px) 100vw, 1280px"
+              className="object-contain object-center"
+            />
+          </div>
+        </Card>
       ) : null}
 
-      {project.body ? (
-        <RichTextContent
-          className="mt-12 text-sm leading-relaxed text-parchment-muted"
-          value={project.body}
-        />
-      ) : null}
+      <div className="mt-8 grid gap-5 lg:grid-cols-[minmax(0,1fr)_18rem]">
+        {project.body ? (
+          <Card className="[--card-spacing:--spacing(7)] sm:[--card-spacing:--spacing(10)]">
+            <CardHeader>
+              <CardTitle className="text-2xl font-bold tracking-[-0.045em]">
+                Project notes
+              </CardTitle>
+              <CardDescription>Process, context, and release details.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <RichTextContent
+                className="max-w-3xl text-base leading-8 text-muted-foreground"
+                value={project.body}
+              />
+            </CardContent>
+          </Card>
+        ) : (
+          <Card className="min-h-56 justify-center">
+            <CardHeader>
+              <CardTitle>Notes incoming</CardTitle>
+              <CardDescription>
+                This project does not have a write-up yet.
+              </CardDescription>
+            </CardHeader>
+          </Card>
+        )}
 
-      <LinkRow className="mt-12" links={project.links} />
+        <Card className="h-fit lg:sticky lg:top-24">
+          <CardHeader>
+            <CardTitle>Project links</CardTitle>
+            <CardDescription>Continue outside the archive.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {project.links.length > 0 ? (
+              <LinkRow links={project.links} align="start" />
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                No external links are attached.
+              </p>
+            )}
+          </CardContent>
+        </Card>
+      </div>
 
-      <div className="mt-14 flex justify-center">
+      <div className="mt-10">
         <Link
           href="/projects"
-          className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full border border-white/10 bg-void-lift/60 px-6 text-sm font-medium text-parchment-muted transition hover:border-white/20 hover:text-parchment focus-visible:outline-solid focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-glow-500"
+          className={cn(
+            buttonVariants({ variant: "outline", size: "lg" }),
+            "rounded-xl",
+          )}
         >
-          <BackArrow />
+          <ArrowLeftIcon data-icon="inline-start" />
           All projects
         </Link>
       </div>

@@ -35,7 +35,7 @@ export default async function RefLayout({
 
       <main
         id={MAIN_CONTENT_ID}
-        className="relative z-10 mx-auto w-full max-w-[120rem] flex-1 px-4 pb-16 pt-10 sm:px-8 sm:pb-24 sm:pt-14"
+        className="relative z-10 mx-auto w-full max-w-7xl flex-1 px-4 pb-20 pt-8 sm:px-6 sm:pb-28 sm:pt-12 lg:px-8"
       >
         {children}
       </main>

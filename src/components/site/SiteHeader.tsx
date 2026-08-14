@@ -3,6 +3,9 @@ import Link from "next/link";
 import { MobileNav } from "@/components/site/MobileNav";
 import { NavLink } from "@/components/site/NavLink";
 import { NAV_ITEMS } from "@/components/site/nav";
+import { Wordmark } from "@/components/site/Wordmark";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
 
 /**
  * Site-wide masthead. Sticky and translucent so the backdrop keeps showing
@@ -14,24 +17,33 @@ import { NAV_ITEMS } from "@/components/site/nav";
  */
 export function SiteHeader() {
   return (
-    <header className="sticky top-0 z-30 border-b border-white/[0.07] bg-void/75 pt-[env(safe-area-inset-top)] backdrop-blur-xl">
-      <div className="mx-auto flex h-14 w-full max-w-[120rem] items-center justify-between gap-4 px-4 sm:px-8">
+    <header className="sticky top-0 z-30 border-b border-border/80 bg-background/82 pt-[env(safe-area-inset-top)] backdrop-blur-2xl">
+      <div className="mx-auto flex h-18 w-full max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
         <Link
           href="/"
-          className="shrink-0 font-display text-sm font-medium uppercase tracking-[0.28em] text-glow-500 transition hover:text-glow-400 focus-visible:outline-solid focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-glow-500"
+          className="shrink-0 rounded-lg transition hover:opacity-80 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring"
         >
-          playwolf.net
+          <Wordmark compact />
         </Link>
 
-        <nav aria-label="Primary" className="hidden sm:block">
-          <ul className="flex items-center gap-2">
-            {NAV_ITEMS.map((item) => (
-              <li key={item.href}>
-                <NavLink href={item.href}>{item.label}</NavLink>
-              </li>
-            ))}
-          </ul>
-        </nav>
+        <div className="hidden items-center gap-3 sm:flex">
+          <Badge
+            variant="outline"
+            className="hidden border-signal/25 text-signal lg:inline-flex"
+          >
+            2026 edition
+          </Badge>
+          <Separator orientation="vertical" className="mx-1 h-5" />
+          <nav aria-label="Primary">
+            <ul className="flex items-center gap-1">
+              {NAV_ITEMS.map((item) => (
+                <li key={item.href}>
+                  <NavLink href={item.href}>{item.label}</NavLink>
+                </li>
+              ))}
+            </ul>
+          </nav>
+        </div>
 
         <MobileNav />
       </div>

@@ -3,6 +3,8 @@ import { AltCarousel } from "@/components/ref/AltCarousel";
 import { ArtworkCard } from "@/components/ref/ArtworkCard";
 import { BackButton } from "@/components/ref/BackButton";
 import { OpenImageLink } from "@/components/ref/OpenImageLink";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
 
 type RefImageProps = {
   src: ImageRef;
@@ -43,17 +45,21 @@ export function RefImage({
   return (
     <section className="w-full">
       {hasHeader ? (
-        <header className="mb-6 text-center">
+        <header className="mb-8">
+          <Badge variant={description ? "destructive" : "outline"}>
+            {description ? "18+ artwork" : "Artwork file"}
+          </Badge>
           {title ? (
-            <h1 className="font-display text-2xl font-semibold tracking-tight text-parchment sm:text-3xl">
+            <h1 className="mt-4 max-w-5xl wrap-break-word font-display text-4xl font-bold leading-[0.9] tracking-[-0.06em] sm:text-6xl">
               {title}
             </h1>
           ) : null}
           {description ? (
-            <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-parchment-muted">
+            <p className="mt-3 max-w-md text-sm leading-relaxed text-muted-foreground">
               {description}
             </p>
           ) : null}
+          <Separator className="mt-6" />
         </header>
       ) : null}
 

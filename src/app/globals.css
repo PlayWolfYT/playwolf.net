@@ -1,4 +1,4 @@
-@import 'tailwindcss';
+@import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 /*
@@ -7,11 +7,22 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme {
-  --color-void: #050506;
-  --color-void-soft: #0a0a0c;
-  --color-void-lift: #101014;
-  --color-void-panel: #15151a;
-  --color-void-line: #1f1f26;
+  /*
+   * Night Press — a warm, ink-heavy editorial palette. The legacy token
+   * names remain aliases so CMS-rich surfaces transition with the rest of the
+   * rebrand instead of retaining the old blue/black treatment.
+   */
+  --color-ink: #0d0c0b;
+  --color-ink-soft: #13110f;
+  --color-ink-lift: #191613;
+  --color-ink-panel: #201c18;
+  --color-ink-line: #302a24;
+
+  --color-void: #0d0c0b;
+  --color-void-soft: #13110f;
+  --color-void-lift: #191613;
+  --color-void-panel: #201c18;
+  --color-void-line: #302a24;
 
   --color-glow-300: rgb(var(--accent-300));
   --color-glow-400: rgb(var(--accent-400));
@@ -19,24 +30,33 @@
   --color-glow-600: rgb(var(--accent-600));
   --color-glow-700: rgb(var(--accent-700));
 
-  --color-parchment: #f7f4ec;
-  --color-parchment-muted: #c9c3b8;
-  --color-parchment-dim: #8a847a;
+  --color-paper: #f3ecdf;
+  --color-paper-muted: #c8bdad;
+  --color-paper-dim: #8e8273;
+  --color-parchment: #f3ecdf;
+  --color-parchment-muted: #c8bdad;
+  --color-parchment-dim: #8e8273;
 
-  --color-coral-soft: #f88379;
-  --color-coral-glow: #ff9a93;
+  --color-coral-soft: #ff7954;
+  --color-coral-glow: #ff9d7f;
+  --color-signal: #d8ff62;
+  --color-signal-muted: #a9ca43;
+  --color-signal-ink: #111606;
 
-  --font-sans: var(--font-geist-sans), system-ui, sans-serif;
-  --font-display: var(--font-outfit), system-ui, sans-serif;
-  --font-heading: var(--font-outfit), system-ui, sans-serif;
-  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+  --font-sans: var(--font-manrope), system-ui, sans-serif;
+  --font-display: var(--font-syne), system-ui, sans-serif;
+  --font-heading: var(--font-syne), system-ui, sans-serif;
+  --font-mono: var(--font-ibm-plex-mono), ui-monospace, monospace;
 
-  --shadow-glow-sm: 0 0 24px -4px rgb(var(--accent-500) / 0.45);
-  --shadow-glow-md: 0 0 48px -8px rgb(var(--accent-500) / 0.5);
-  --shadow-glow-lg: 0 0 80px -12px rgb(var(--accent-500) / 0.55);
+  --shadow-glow-sm: 0 1px 0 rgb(255 255 255 / 0.06), 0 14px 34px rgb(0 0 0 / 0.24);
+  --shadow-glow-md:
+    0 1px 0 rgb(255 255 255 / 0.07), 0 24px 70px rgb(0 0 0 / 0.38),
+    0 0 0 1px rgb(var(--accent-500) / 0.08);
+  --shadow-glow-lg:
+    0 1px 0 rgb(255 255 255 / 0.08), 0 36px 110px rgb(0 0 0 / 0.5),
+    0 0 60px -20px rgb(var(--accent-500) / 0.26);
   --shadow-inner-glow:
-    inset 0 1px 0 0 rgba(255, 255, 255, 0.06),
-    inset 0 0 40px -20px rgb(var(--accent-500) / 0.12);
+    inset 0 1px 0 rgb(255 255 255 / 0.07), inset 0 0 0 1px rgb(var(--accent-500) / 0.05);
 
   --animate-slow-pulse: slow-pulse 5s ease-in-out infinite;
   --animate-drift: drift 20s ease-in-out infinite;
@@ -45,25 +65,17 @@
   --animate-tick: tick 5s linear infinite;
 
   --background-image-grid-soft:
-    linear-gradient(
-      to right,
-      rgb(var(--accent-500) / 0.07) 1px,
-      transparent 1px
-    ),
-    linear-gradient(
-      to bottom,
-      rgb(var(--accent-500) / 0.07) 1px,
-      transparent 1px
-    );
+    linear-gradient(to right, rgb(243 236 223 / 0.055) 1px, transparent 1px),
+    linear-gradient(to bottom, rgb(243 236 223 / 0.055) 1px, transparent 1px);
   --background-image-rim-cyan: radial-gradient(
-    ellipse 80% 50% at 50% -20%,
-    rgb(var(--accent-500) / 0.22),
-    transparent 55%
+    ellipse 70% 48% at 50% -16%,
+    rgb(var(--accent-500) / 0.2),
+    transparent 62%
   );
   --background-image-shimmer: linear-gradient(
     105deg,
     transparent 40%,
-    rgb(var(--accent-500) / 0.08) 50%,
+    rgb(var(--accent-400) / 0.14) 50%,
     transparent 60%
   );
 
@@ -82,10 +94,10 @@
       transform: translate(0, 0) scale(1);
     }
     40% {
-      transform: translate(3%, -2%) scale(1.04);
+      transform: translate(2%, -1.5%) rotate(1deg) scale(1.035);
     }
     70% {
-      transform: translate(-2%, 3%) scale(0.98);
+      transform: translate(-1.5%, 2%) rotate(-1deg) scale(0.985);
     }
   }
   @keyframes twinkle {
@@ -142,60 +154,95 @@
   html {
     @apply font-sans;
   }
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+  ::selection {
+    background: rgb(var(--accent-500) / 0.86);
+    color: #110806;
+  }
 }
 
 :root {
   color-scheme: dark;
 
-  /* Default accent ramp — the original electric cyan. Overridden per
+  /* Default signal-orange accent. Overridden per
      character profile by RefThemeShell (values are "R G B" triplets,
-     consumed as `rgb(var(--accent-N) / alpha)` in tailwind.config.ts). */
-  --accent-300: 138 217 255;
-  --accent-400: 92 204 255;
-  --accent-500: 58 190 249;
-  --accent-600: 26 166 235;
-  --accent-700: 11 125 189;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+     consumed as `rgb(var(--accent-N) / alpha)`). */
+  --accent-300: 255 176 146;
+  --accent-400: 255 132 94;
+  --accent-500: 255 91 54;
+  --accent-600: 228 64 31;
+  --accent-700: 169 42 22;
+
+  --background: #0d0c0b;
+  --foreground: #f3ecdf;
+  --card: #191613;
+  --card-foreground: #f3ecdf;
+  --popover: #211d19;
+  --popover-foreground: #f3ecdf;
+  --primary: rgb(var(--accent-500));
+  --primary-foreground: #160a06;
+  --secondary: #d8ff62;
+  --secondary-foreground: #111606;
+  --muted: #28231e;
+  --muted-foreground: #a99e8f;
+  --accent: #302820;
+  --accent-foreground: #f3ecdf;
+  --destructive: #ff4d6d;
+  --border: rgb(243 236 223 / 0.12);
+  --input: rgb(243 236 223 / 0.16);
+  --ring: rgb(var(--accent-400));
+  --chart-1: rgb(var(--accent-500));
+  --chart-2: #d8ff62;
+  --chart-3: #f3ecdf;
+  --chart-4: #9c82ff;
+  --chart-5: #72d8c8;
+  --radius: 0.875rem;
+  --sidebar: #13110f;
+  --sidebar-foreground: #f3ecdf;
+  --sidebar-primary: rgb(var(--accent-500));
+  --sidebar-primary-foreground: #160a06;
+  --sidebar-accent: #28231e;
+  --sidebar-accent-foreground: #f3ecdf;
+  --sidebar-border: rgb(243 236 223 / 0.12);
+  --sidebar-ring: rgb(var(--accent-400));
 }
 
 html {
-  /* Offset hash navigation past the sticky header (h-14 = 3.5rem). */
-  scroll-padding-top: calc(3.5rem + env(safe-area-inset-top, 0px));
+  scroll-padding-top: calc(4.5rem + env(safe-area-inset-top, 0px));
 }
 
 body {
   @apply min-h-dvh bg-void antialiased text-parchment;
+  background-image:
+    radial-gradient(circle at 8% 8%, rgb(var(--accent-500) / 0.1), transparent 25rem),
+    radial-gradient(circle at 88% 42%, rgb(216 255 98 / 0.055), transparent 30rem);
+  background-attachment: fixed;
+  text-rendering: optimizeLegibility;
+}
+
+.brand-noise {
+  background-image: repeating-radial-gradient(
+    circle at 20% 30%,
+    rgb(243 236 223 / 0.045) 0 0.7px,
+    transparent 0.8px 3px
+  );
+  background-size: 8px 8px;
+}
+
+.brand-outline {
+  color: transparent;
+  -webkit-text-stroke: 1px rgb(243 236 223 / 0.34);
+}
+
+.brand-rule {
+  background-image: repeating-linear-gradient(
+    90deg,
+    rgb(var(--accent-500) / 0.75) 0 34px,
+    transparent 34px 42px
+  );
 }
 
 /* The decoration on this site is almost entirely motion — drifting nebulae,

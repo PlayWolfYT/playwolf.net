@@ -12,7 +12,7 @@ export default function SiteLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <div className="relative isolate flex min-h-dvh flex-col bg-void">
+    <div className="relative isolate flex min-h-dvh flex-col bg-background">
       {/* `100lvh` keeps the layer stable when mobile browser chrome shows/hides. */}
       <div
         className="pointer-events-none fixed inset-x-0 top-0 h-lvh overflow-hidden"

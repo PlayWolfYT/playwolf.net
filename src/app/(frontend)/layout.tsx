@@ -1,25 +1,26 @@
 import type { Metadata, Viewport } from "next";
-import { Geist, Geist_Mono, Outfit } from "next/font/google";
+import { IBM_Plex_Mono, Manrope, Syne } from "next/font/google";
 import { cookies } from "next/headers";
 import { NsfwConsentProvider } from "@/components/site/NsfwConsent";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import { NSFW_CONSENT_COOKIE } from "@/lib/nsfw";
 import "../globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const manrope = Manrope({
+  variable: "--font-manrope",
   subsets: ["latin"],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const ibmPlexMono = IBM_Plex_Mono({
+  variable: "--font-ibm-plex-mono",
   subsets: ["latin"],
+  weight: ["400", "500", "600"],
 });
 
-/** Only the weights the display styles actually ask for; 700 is never used. */
-const outfit = Outfit({
-  variable: "--font-outfit",
+const syne = Syne({
+  variable: "--font-syne",
   subsets: ["latin"],
-  weight: ["300", "400", "500", "600"],
+  weight: ["400", "500", "600", "700", "800"],
 });
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://playwolf.net";
@@ -56,7 +57,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#050506",
+  themeColor: "#0d0c0b",
   viewportFit: "cover",
 };
 
@@ -88,13 +89,15 @@ export default async function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} ${outfit.variable} scroll-smooth`}
+      className={`${manrope.variable} ${ibmPlexMono.variable} ${syne.variable} scroll-smooth`}
       suppressHydrationWarning
     >
       <body className="font-sans" suppressHydrationWarning>
-        <NsfwConsentProvider initialConsent={nsfwConsent}>
-          {children}
-        </NsfwConsentProvider>
+        <TooltipProvider>
+          <NsfwConsentProvider initialConsent={nsfwConsent}>
+            {children}
+          </NsfwConsentProvider>
+        </TooltipProvider>
       </body>
     </html>
   );

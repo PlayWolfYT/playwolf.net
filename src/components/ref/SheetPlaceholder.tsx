@@ -4,6 +4,7 @@ import { SparkStar } from "@/components/BrandBackdrop";
 import { ArtistBar } from "@/components/ref/ArtistBar";
 import { WipQuoteCycler } from "@/components/ref/WipQuoteCycler";
 import { WipTape } from "@/components/ref/WipTape";
+import { Progress, ProgressLabel, ProgressValue } from "@/components/ui/progress";
 import { hexToRgb, type Rgb } from "@/lib/accent";
 import type { RefSheetWip, WipIconName } from "@/lib/content";
 
@@ -141,8 +142,17 @@ function scatterSlots(count: number, ratio: number, random: () => number) {
  * the active profile accent.
  */
 export async function SheetPlaceholder({ sheet }: SheetPlaceholderProps) {
-  const { badge, subtitle, quotes, icons, iconCount, gradient, interval, aspect } =
-    sheet.wip;
+  const {
+    badge,
+    subtitle,
+    quotes,
+    icons,
+    iconCount,
+    gradient,
+    interval,
+    aspect,
+    progress,
+  } = sheet.wip;
 
   const iconComponents = await loadIcons(icons);
   const usable = icons.filter((name) => name in iconComponents);
@@ -362,6 +372,12 @@ export async function SheetPlaceholder({ sheet }: SheetPlaceholderProps) {
 
                 <div className="mt-5 flex w-full flex-col items-center">
                   <WipQuoteCycler quotes={quotes} interval={interval} />
+                  {typeof progress === "number" ? (
+                    <Progress value={progress} className="mt-6 w-full max-w-sm">
+                      <ProgressLabel>Progress</ProgressLabel>
+                      <ProgressValue />
+                    </Progress>
+                  ) : null}
                 </div>
               </div>
             </div>

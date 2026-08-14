@@ -4,6 +4,9 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
 
+import { buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+
 /**
  * Navigation entry that knows whether it is the current section. Matches on
  * prefix so `/ref/playwuff/nsfw` still highlights "References", and marks the
@@ -17,9 +20,13 @@ export function NavLink({ children, href }: { children: ReactNode; href: string 
     <Link
       href={href}
       aria-current={active ? "page" : undefined}
-      className={`inline-flex min-h-11 items-center rounded-full px-3 text-xs font-medium uppercase tracking-[0.2em] transition focus-visible:outline-solid focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-glow-500 ${
-        active ? "text-glow-400" : "text-parchment-dim hover:text-parchment"
-      }`}
+      className={cn(
+        buttonVariants({
+          variant: active ? "secondary" : "ghost",
+          size: "sm",
+        }),
+        "rounded-lg px-3 font-mono text-[0.62rem] uppercase tracking-[0.16em]",
+      )}
     >
       {children}
     </Link>

@@ -2,6 +2,8 @@ import type { ReactNode } from "react";
 import { SparkStar } from "@/components/BrandBackdrop";
 import { Reveal } from "@/components/motion/Reveal";
 import { SplitTextReveal } from "@/components/motion/SplitTextReveal";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
 
 /**
  * The heading treatment every non-landing page opens with — the same sparkle
@@ -19,35 +21,35 @@ export function PageHeader({
   title: string;
 }) {
   return (
-    <header className="text-center">
-      <div className="mb-10 flex justify-center gap-4 text-glow-500/40" aria-hidden>
-        <SparkStar className="h-4 w-4 animate-twinkle" />
-        <SparkStar className="h-3 w-3 translate-y-1 text-glow-500/25" />
-        <SparkStar className="h-4 w-4 animate-twinkle [animation-delay:600ms]" />
+    <header className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(16rem,28rem)] lg:items-end">
+      <div>
+        {eyebrow ? (
+          <Reveal distance={10}>
+            <Badge variant="outline" className="border-primary/35 text-primary">
+              <SparkStar className="animate-twinkle" />
+              {eyebrow}
+            </Badge>
+          </Reveal>
+        ) : null}
+
+        <SplitTextReveal
+          text={title}
+          className="mt-5 max-w-5xl wrap-break-word font-display text-[clamp(3.5rem,11vw,8.5rem)] font-bold leading-[0.82] tracking-[-0.075em] text-foreground"
+        />
       </div>
 
-      {eyebrow ? (
-        <Reveal distance={10}>
-          <p className="font-mono text-[0.65rem] uppercase tracking-[0.28em] text-glow-500">
-            {eyebrow}
-          </p>
-        </Reveal>
-      ) : null}
+      <div className="flex flex-col items-start gap-5 lg:pb-2">
+        {lede ? (
+          <Reveal delay={0.16} distance={14}>
+            <p className="max-w-md text-base leading-relaxed text-muted-foreground">
+              {lede}
+            </p>
+          </Reveal>
+        ) : null}
+        {children}
+      </div>
 
-      <SplitTextReveal
-        text={title}
-        className="mt-4 font-display text-3xl font-light tracking-tight text-parchment sm:text-4xl"
-      />
-
-      {lede ? (
-        <Reveal delay={0.16} distance={14}>
-          <p className="mx-auto mt-4 max-w-md text-sm leading-relaxed text-parchment-muted">
-            {lede}
-          </p>
-        </Reveal>
-      ) : null}
-
-      {children}
+      <Separator className="lg:col-span-2" />
     </header>
   );
 }
