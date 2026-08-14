@@ -33,5 +33,9 @@
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts"
   ],
-  "exclude": ["node_modules", "**/*.test.ts", "scripts"]
+  /* Tests run under `bun test`, which supplies its own globals and the
+     `bun:test` module; `tsc` has neither, so both test extensions are excluded
+     rather than only `.ts` — a `.test.tsx` would otherwise fail typecheck on
+     the import alone. */
+  "exclude": ["node_modules", "**/*.test.ts", "**/*.test.tsx", "scripts"]
 }

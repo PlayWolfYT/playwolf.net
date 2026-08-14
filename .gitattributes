@@ -1,0 +1,28 @@
+# Line endings are a property of the repository, not of the machine that cloned
+# it. Without this file Git normalises on checkout, so a Windows working tree
+# gets CRLF and `prettier --check` (whose `endOfLine` defaults to "lf") fails on
+# a couple of dozen files nobody has touched. `eol=lf` pins the working tree as
+# well as the index, which makes `bun run format:check` give the same answer on
+# every platform and in CI.
+#
+# Landing this file only changes what Git does from here on. The existing
+# working tree still holds whatever line endings it was checked out with, so it
+# needs a one-off `git add --renormalize .` to catch up.
+* text=auto eol=lf
+
+# Binary assets: never converted, never diffed as text. Git's own detection
+# would catch these, but only after reading them; saying so is cheaper and
+# survives a future asset it guesses wrong about.
+*.ico binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.avif binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.otf binary
+*.mp4 binary
+*.webm binary
