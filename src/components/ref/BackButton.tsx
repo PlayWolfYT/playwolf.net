@@ -13,7 +13,10 @@ export function BackButton({ label = "Back", fallbackHref = "/" }: BackButtonPro
   return (
     <Link
       href={fallbackHref}
-      className={cn(buttonVariants({ variant: "outline", size: "lg" }), "rounded-xl")}
+      className={cn(
+        buttonVariants({ variant: "outline", size: "lg" }),
+        "rounded-xl border-glow-500/30 bg-glow-500/[0.06] text-glow-300 shadow-[0_14px_35px_-25px_rgb(var(--accent-500)/0.9)] hover:border-glow-400/60 hover:bg-glow-500/15 hover:text-glow-300",
+      )}
     >
       <ArrowLeftIcon data-icon="inline-start" />
       {label}

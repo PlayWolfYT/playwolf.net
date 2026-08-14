@@ -1,7 +1,7 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { accentVars } from "@/lib/accent";
+import { profileThemeVars } from "@/lib/accent";
 import { isProfileKey, type AccentMap, type ProfileKey } from "@/lib/content";
 
 /**
@@ -51,7 +51,7 @@ export function RefThemeShell({
   return (
     <div
       className="relative isolate flex min-h-dvh flex-col bg-background"
-      style={accent ? (accentVars(accent) as React.CSSProperties) : undefined}
+      style={accent ? (profileThemeVars(accent) as React.CSSProperties) : undefined}
     >
       {children}
     </div>

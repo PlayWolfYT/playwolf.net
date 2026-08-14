@@ -46,7 +46,7 @@ export function ExampleGrid({
               {description}
             </p>
           ) : null}
-          <Separator className="mt-6" />
+          <Separator className="mt-6 bg-linear-to-r from-glow-500/60 via-glow-300/25 to-transparent" />
         </header>
       ) : null}
 
@@ -54,6 +54,7 @@ export function ExampleGrid({
         <EmptyState
           title="Nothing here yet"
           description="Examples will appear here as soon as they are ready."
+          className="border-glow-500/25 bg-glow-500/[0.055] shadow-[0_20px_60px_-42px_rgb(var(--accent-500)/0.85)]"
         />
       ) : (
         <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4 xl:grid-cols-5">
@@ -69,8 +70,12 @@ export function ExampleGrid({
                   href={detailHref}
                   className="group block h-full rounded-2xl focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring"
                 >
-                  <Card className="h-full gap-0 py-0 transition duration-300 group-hover:-translate-y-1 group-hover:border-glow-500/55">
+                  <Card className="h-full gap-0 border-glow-500/25 bg-glow-500/[0.045] py-0 shadow-[0_18px_55px_-40px_rgb(var(--accent-500)/0.85)] transition duration-300 group-hover:-translate-y-1 group-hover:border-glow-400/65 group-hover:bg-glow-500/[0.075] group-hover:shadow-[0_24px_65px_-36px_rgb(var(--accent-500)/0.95)]">
                     <div className="relative aspect-square w-full overflow-hidden bg-muted">
+                      <div
+                        className="pointer-events-none absolute inset-0 z-10 bg-rim-cyan opacity-45"
+                        aria-hidden
+                      />
                       {thumbSrc ? (
                         <>
                           <Image
@@ -104,8 +109,10 @@ export function ExampleGrid({
                       ) : null}
                       <VersionBadge example={example} />
                     </div>
-                    <CardHeader className="border-t border-border pt-(--card-spacing)">
-                      <CardTitle className="truncate">{example.title}</CardTitle>
+                    <CardHeader className="border-t border-glow-500/20 pt-(--card-spacing)">
+                      <CardTitle className="truncate transition-colors group-hover:text-glow-300">
+                        {example.title}
+                      </CardTitle>
                     </CardHeader>
                   </Card>
                 </Link>

@@ -46,7 +46,14 @@ export function RefImage({
     <section className="w-full">
       {hasHeader ? (
         <header className="mb-8">
-          <Badge variant={description ? "destructive" : "outline"}>
+          <Badge
+            variant={description ? "destructive" : "outline"}
+            className={
+              description
+                ? undefined
+                : "border-glow-500/35 bg-glow-500/10 text-glow-300"
+            }
+          >
             {description ? "18+ artwork" : "Artwork file"}
           </Badge>
           {title ? (
@@ -59,7 +66,7 @@ export function RefImage({
               {description}
             </p>
           ) : null}
-          <Separator className="mt-6" />
+          <Separator className="mt-6 bg-linear-to-r from-glow-500/60 via-glow-300/25 to-transparent" />
         </header>
       ) : null}
 
