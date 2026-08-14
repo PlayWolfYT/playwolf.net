@@ -1,5 +1,7 @@
 import nodemailer from "nodemailer";
 
+import { isSecureUrl } from "@/lib/safe-url";
+
 export type NotifyInput = {
   title: string;
   message: string;
@@ -103,6 +105,16 @@ async function sendNtfy(
 ): Promise<void> {
   const url = buildNtfyUrl(ntfy.serverUrl, ntfy.topic);
   if (!url) throw new Error("ntfy is not configured (serverUrl/topic)");
+
+  // The matching `validate` on `siteSettings.notifications.ntfy.serverUrl` only
+  // runs on save, so a URL stored before that check existed is still live and
+  // would put the access token on the wire as a plaintext bearer header. Same
+  // rule, enforced where the request is actually made.
+  if (!isSecureUrl(url)) {
+    throw new Error(
+      "serverUrl must be an https URL — the access token is sent as a bearer header (http is only allowed on localhost)",
+    );
+  }
 
   const response = await fetchImpl(url, {
     method: "POST",
