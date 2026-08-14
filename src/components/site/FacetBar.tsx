@@ -123,7 +123,7 @@ export function FacetBar({
         <AccordionTrigger className="py-4 hover:no-underline">
           <span className="flex items-center gap-3">
             <span className="font-display text-base font-semibold tracking-[-0.025em]">
-              Filter the archive
+              Filter artwork
             </span>
             {activeCount > 0 ? (
               <Badge variant="secondary">{activeCount} active</Badge>

@@ -236,7 +236,7 @@ export async function SheetPlaceholder({ sheet }: SheetPlaceholderProps) {
             className="relative w-full min-w-0 overflow-hidden sm:aspect-(--wip-aspect)"
             style={frameStyle}
           >
-            <div className="relative flex w-full min-w-0 flex-col items-center px-6 pb-10 pt-14 sm:absolute sm:inset-0 sm:px-10 sm:py-14">
+            <div className="relative flex min-h-full w-full min-w-0 flex-col items-center px-6 pb-10 pt-14 sm:px-10 sm:py-14">
               {sheet.kind === "wip" ? (
                 <div className="pointer-events-none absolute inset-0 z-20 origin-center transition duration-500 group-hover:scale-[1.02]">
                   <WipTape />
@@ -303,7 +303,7 @@ export async function SheetPlaceholder({ sheet }: SheetPlaceholderProps) {
 
               {/* Slow sheen sweeping across the frame */}
               <span
-                className="pointer-events-none absolute inset-0 bg-shimmer animate-shimmer [animation-duration:7s]"
+                className="pointer-events-none absolute inset-0 bg-shimmer animate-shimmer animation-duration-[7s]"
                 aria-hidden
               />
 
@@ -342,10 +342,9 @@ export async function SheetPlaceholder({ sheet }: SheetPlaceholderProps) {
                 {badge}
               </span>
 
-              {/* Content column — w-full so text-center is relative to the frame;
-                  min-h-full + justify-center vertically centres copy inside the
-                  locked aspect box from sm up. */}
-              <div className="relative z-10 flex w-full min-h-full flex-col items-center justify-center text-center">
+              {/* The content remains in flow so long quotes and progress details
+                  can grow a wide aspect frame instead of being clipped. */}
+              <div className="relative z-10 flex min-h-full w-full flex-col items-center justify-center text-center">
                 <h2
                   className={`w-full wrap-break-word bg-clip-text font-display text-2xl font-medium tracking-tight text-transparent sm:text-3xl ${
                     tinted

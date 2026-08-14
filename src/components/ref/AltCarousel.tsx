@@ -120,7 +120,7 @@ export function AltCarousel({ alt, main, alts }: AltCarouselProps) {
               size="icon"
               onClick={() => setIndex((value) => (value - 1 + count) % count)}
               aria-label="Previous version"
-              className="absolute left-3 top-1/2 z-20 -translate-y-1/2 rounded-full"
+              className="absolute left-3 top-1/2 z-20 -translate-y-1/2 rounded-full border-glow-500/40 bg-background/80 text-glow-300 shadow-[0_0_24px_-10px_rgb(var(--accent-500)/0.9)] hover:border-glow-400/70 hover:bg-glow-500/15 hover:text-glow-300"
             >
               <ChevronLeft aria-hidden />
             </Button>
@@ -130,7 +130,7 @@ export function AltCarousel({ alt, main, alts }: AltCarouselProps) {
               size="icon"
               onClick={() => setIndex((value) => (value + 1) % count)}
               aria-label="Next version"
-              className="absolute right-3 top-1/2 z-20 -translate-y-1/2 rounded-full"
+              className="absolute right-3 top-1/2 z-20 -translate-y-1/2 rounded-full border-glow-500/40 bg-background/80 text-glow-300 shadow-[0_0_24px_-10px_rgb(var(--accent-500)/0.9)] hover:border-glow-400/70 hover:bg-glow-500/15 hover:text-glow-300"
             >
               <ChevronRight aria-hidden />
             </Button>
@@ -180,7 +180,7 @@ export function AltCarousel({ alt, main, alts }: AltCarouselProps) {
                   className={`relative h-20 w-20 overflow-hidden rounded-xl border transition focus-visible:outline-solid focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-glow-500 ${
                     active
                       ? "border-glow-500/70 shadow-glow-sm"
-                      : "border-white/10 opacity-70 hover:border-white/25 hover:opacity-100"
+                      : "border-glow-500/20 opacity-70 hover:border-glow-400/55 hover:opacity-100"
                   }`}
                 >
                   <Image

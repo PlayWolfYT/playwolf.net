@@ -19,6 +19,7 @@ export function ArtworkChips({ example }: { example: Example }) {
         <Badge
           key={`${person.kind}-${person.slug}`}
           variant="outline"
+          className="border-glow-500/30 bg-glow-500/[0.06] [a]:hover:border-glow-400/60 [a]:hover:bg-glow-500/15"
           render={
             <Link
               href={
@@ -39,7 +40,8 @@ export function ArtworkChips({ example }: { example: Example }) {
       {tags.map((tag) => (
         <Badge
           key={tag.slug}
-          variant="secondary"
+          variant="outline"
+          className="border-glow-500/30 bg-glow-500/10 text-glow-300 [a]:hover:border-glow-400/60 [a]:hover:bg-glow-500/18"
           render={<Link href={`/gallery?tag=${encodeURIComponent(tag.slug)}`} />}
         >
           #{tag.label}

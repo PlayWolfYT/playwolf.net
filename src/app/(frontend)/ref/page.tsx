@@ -24,7 +24,7 @@ export default async function RefHome() {
       <PageHeader
         eyebrow="Characters"
         title="References"
-        lede="Reference sheets, palettes, details, and artwork for every character in the archive."
+        lede="Reference sheets, palettes, details, and artwork for every character."
       />
 
       {characters.length > 0 ? (

@@ -32,10 +32,10 @@ export function MaintenanceBackButton() {
       variant="outline"
       size="lg"
       onClick={() => window.history.back()}
-      className="mt-8 rounded-xl"
+      className="rounded-xl w-full"
     >
       <ArrowLeftIcon data-icon="inline-start" />
-      Back
+      Go back
     </Button>
   );
 }

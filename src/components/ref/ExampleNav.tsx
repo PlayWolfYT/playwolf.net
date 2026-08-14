@@ -31,7 +31,7 @@ function ChevronIcon({ className = "" }: { className?: string }) {
 }
 
 const LINK_CLASS =
-  "inline-flex min-h-11 min-w-0 flex-1 items-center gap-2 rounded-full border border-white/10 bg-void/70 px-3 text-sm text-parchment-muted transition hover:border-glow-500/40 hover:text-parchment focus-visible:outline-solid focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-glow-500 sm:max-w-[45%] sm:flex-none sm:px-4";
+  "inline-flex min-h-11 min-w-0 flex-1 items-center gap-2 rounded-full border border-glow-500/30 bg-glow-500/[0.06] px-3 text-sm text-glow-300 shadow-[0_12px_35px_-26px_rgb(var(--accent-500)/0.9)] transition hover:border-glow-400/65 hover:bg-glow-500/15 hover:text-glow-300 focus-visible:outline-solid focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-glow-500 sm:max-w-[45%] sm:flex-none sm:px-4";
 
 /**
  * Step between the images of one profile without going back to the grid. The
@@ -68,7 +68,7 @@ export function ExampleNav({
         <span className="min-w-0 flex-1 sm:max-w-[45%] sm:flex-none" aria-hidden />
       )}
 
-      <span className="shrink-0 font-mono text-[0.65rem] uppercase tracking-[0.2em] text-parchment-dim">
+      <span className="shrink-0 font-mono text-[0.65rem] uppercase tracking-[0.2em] text-glow-400">
         {position} / {total}
       </span>
 

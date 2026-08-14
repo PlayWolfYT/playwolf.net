@@ -47,7 +47,7 @@ export function ProfileSwitcher({
   const switchTo = async (tab: ProfileTab) => {
     if (tab.key === active) return;
     if (tab.key === "nsfw" && !(await confirmNsfw())) return;
-    router.push(tab.href, { scroll: false });
+    router.push(tab.href, { scroll: true });
   };
 
   const onKeyDown = (event: React.KeyboardEvent, index: number) => {
@@ -60,7 +60,11 @@ export function ProfileSwitcher({
   };
 
   return (
-    <div className="sticky top-[calc(4.5rem+env(safe-area-inset-top,0px))] z-20 mb-10 rounded-2xl border border-border bg-card/88 p-3 shadow-glow-md backdrop-blur-2xl">
+    <div className="sticky top-[calc(4.5rem+env(safe-area-inset-top,0px))] z-20 mb-10 overflow-hidden rounded-2xl border border-glow-500/35 bg-[linear-gradient(120deg,rgb(var(--accent-500)/0.12),rgb(var(--accent-700)/0.04)_45%,rgb(var(--accent-500)/0.08))] p-3 shadow-[0_20px_70px_-42px_rgb(var(--accent-500)/0.95)] backdrop-blur-2xl">
+      <span
+        className="pointer-events-none absolute inset-x-8 top-0 h-px bg-linear-to-r from-transparent via-glow-300/90 to-transparent shadow-[0_0_18px_rgb(var(--accent-500)/0.8)]"
+        aria-hidden
+      />
       <div className="flex w-full flex-wrap items-center justify-between gap-3">
         <div className="min-w-0 px-2">
           <p className="font-mono text-[0.55rem] uppercase tracking-[0.2em] text-primary">
@@ -89,7 +93,7 @@ export function ProfileSwitcher({
                     tabRefs.current[tab.key] = node;
                   }}
                   href={tab.href}
-                  scroll={false}
+                  scroll
                   role="tab"
                   id={`${baseId}-tab-${tab.key}`}
                   aria-selected={selected}
@@ -101,11 +105,21 @@ export function ProfileSwitcher({
                       size: "sm",
                     }),
                     "rounded-xl",
+                    selected
+                      ? "border-glow-300/40 shadow-[0_0_24px_-7px_rgb(var(--accent-500)/0.95)]"
+                      : "border-glow-500/25 bg-glow-500/[0.04] hover:border-glow-400/55 hover:bg-glow-500/12 hover:text-glow-300",
                   )}
                 >
                   {tab.label}
                   {tab.badge ? (
-                    <Badge variant={selected ? "secondary" : "outline"}>
+                    <Badge
+                      variant="outline"
+                      className={
+                        selected
+                          ? "border-primary-foreground/30 text-primary-foreground"
+                          : "border-glow-500/30 text-glow-300"
+                      }
+                    >
                       {tab.badge}
                     </Badge>
                   ) : null}
@@ -114,7 +128,12 @@ export function ProfileSwitcher({
             })}
           </div>
         ) : (
-          <Badge variant="outline">{tabs[0].label}</Badge>
+          <Badge
+            variant="outline"
+            className="border-glow-500/40 bg-glow-500/10 text-glow-300"
+          >
+            {tabs[0].label}
+          </Badge>
         )}
       </div>
     </div>

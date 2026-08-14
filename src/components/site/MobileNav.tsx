@@ -2,13 +2,14 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useState } from "react";
 
+import { useMaintenanceAccess } from "@/components/MaintenancePathGate";
 import { NAV_ITEMS } from "@/components/site/nav";
 import { Wordmark } from "@/components/site/Wordmark";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
-  SheetClose,
   SheetContent,
   SheetFooter,
   SheetHeader,
@@ -19,9 +20,14 @@ import { cn } from "@/lib/utils";
 
 export function MobileNav() {
   const pathname = usePathname();
+  const [open, setOpen] = useState(false);
+  const { isAccessible } = useMaintenanceAccess();
+  const visibleItems = NAV_ITEMS.filter((item) => isAccessible(item.href));
+
+  if (visibleItems.length === 0) return null;
 
   return (
-    <Sheet key={pathname}>
+    <Sheet key={pathname} open={open} onOpenChange={setOpen}>
       <SheetTrigger
         render={
           <Button
@@ -46,25 +52,22 @@ export function MobileNav() {
 
         <nav aria-label="Primary" className="flex-1 overflow-y-auto px-3 py-5">
           <ul className="flex flex-col gap-2">
-            {NAV_ITEMS.map((item, index) => {
+            {visibleItems.map((item, index) => {
               const active =
                 pathname === item.href || pathname.startsWith(`${item.href}/`);
 
               return (
                 <li key={item.href}>
-                  <SheetClose
-                    render={
-                      <Link
-                        href={item.href}
-                        aria-current={active ? "page" : undefined}
-                        className={cn(
-                          "group flex min-h-14 items-center justify-between rounded-xl px-4 transition",
-                          active
-                            ? "bg-primary text-primary-foreground"
-                            : "text-muted-foreground hover:bg-muted hover:text-foreground",
-                        )}
-                      />
-                    }
+                  <Link
+                    href={item.href}
+                    aria-current={active ? "page" : undefined}
+                    onClick={() => setOpen(false)}
+                    className={cn(
+                      "group flex min-h-14 items-center justify-between rounded-xl px-4 transition",
+                      active
+                        ? "bg-primary text-primary-foreground"
+                        : "text-muted-foreground hover:bg-muted hover:text-foreground",
+                    )}
                   >
                     <span className="font-display text-lg font-semibold tracking-[-0.03em]">
                       {item.label}
@@ -79,7 +82,7 @@ export function MobileNav() {
                     >
                       0{index + 1}
                     </span>
-                  </SheetClose>
+                  </Link>
                 </li>
               );
             })}

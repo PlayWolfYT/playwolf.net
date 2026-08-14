@@ -8,19 +8,22 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/components/ui/empty";
+import { cn } from "@/lib/utils";
 
 /** Dashed placeholder for a section with nothing in it yet. */
 export function EmptyState({
   children,
+  className,
   description,
   title,
 }: {
   children?: ReactNode;
+  className?: string;
   description: string;
   title: string;
 }) {
   return (
-    <Empty className="min-h-80 border bg-card/70">
+    <Empty className={cn("min-h-80 border bg-card/70", className)}>
       <EmptyHeader>
         <EmptyMedia variant="icon">
           <SearchXIcon />

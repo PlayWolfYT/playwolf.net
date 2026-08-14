@@ -70,7 +70,7 @@ export function ArtworkCard({
       // Hover feedback lives on the frame (border + glow), never the artwork:
       // the pointer crosses the image on its way to the controls around it,
       // and a large picture zooming under the cursor reads as jitter.
-      className={`group mx-auto overflow-hidden rounded-2xl border border-border bg-card/90 shadow-glow-sm backdrop-blur-sm transition duration-300 hover:border-glow-500/50 hover:shadow-glow-md ${
+      className={`group mx-auto overflow-hidden rounded-2xl border border-glow-500/30 bg-[linear-gradient(145deg,rgb(var(--accent-500)/0.12),rgb(var(--accent-700)/0.04)_38%,var(--card)_72%)] shadow-[0_26px_85px_-54px_rgb(var(--accent-500)/0.95),0_0_0_1px_rgb(var(--accent-500)/0.06)] backdrop-blur-sm transition duration-300 hover:border-glow-400/65 hover:shadow-[0_30px_90px_-46px_rgb(var(--accent-500)/0.95),0_0_0_1px_rgb(var(--accent-400)/0.12)] ${
         bounded ? "w-fit max-w-full" : `w-full ${frame.className}`
       }`}
     >

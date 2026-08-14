@@ -38,7 +38,7 @@ export function FeaturedFriends({ example }: { example: Example }) {
             <li key={friend.slug}>
               <article
                 id={`friend-${friend.slug}`}
-                className="scroll-mt-24 overflow-hidden rounded-2xl border border-border bg-card/90 shadow-glow-sm backdrop-blur-sm md:grid md:grid-cols-2 md:items-center"
+                className="scroll-mt-24 overflow-hidden rounded-2xl border border-glow-500/25 bg-glow-500/[0.055] shadow-[0_24px_70px_-48px_rgb(var(--accent-500)/0.9)] backdrop-blur-sm md:grid md:grid-cols-2 md:items-center"
               >
                 {friend.image ? (
                   <div
@@ -85,12 +85,16 @@ export function FeaturedFriends({ example }: { example: Example }) {
                       href={`/gallery?friend=${encodeURIComponent(friend.slug)}`}
                       className={cn(
                         buttonVariants({ variant: "outline", size: "sm" }),
-                        "rounded-xl",
+                        "rounded-xl border-glow-500/30 bg-glow-500/[0.06] text-glow-300 hover:border-glow-400/60 hover:bg-glow-500/15 hover:text-glow-300",
                       )}
                     >
                       More artwork
                     </Link>
-                    <LinkRow align="end" links={friend.links} />
+                    <LinkRow
+                      align="end"
+                      links={friend.links}
+                      className="[&_a]:border-glow-500/30 [&_a]:bg-glow-500/8 [&_a]:text-glow-300 [&_a]:hover:border-glow-400/60 [&_a]:hover:bg-glow-500/15"
+                    />
                   </div>
                 </div>
               </article>

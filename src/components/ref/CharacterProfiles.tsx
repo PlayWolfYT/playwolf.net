@@ -1,6 +1,7 @@
 import { ProfileSwitcher, type ProfileTab } from "@/components/ref/ProfileSwitcher";
 import { ProfileView } from "@/components/ref/ProfileView";
 import { buttonVariants } from "@/components/ui/button";
+import { profileThemeVars } from "@/lib/accent";
 import { PROFILE_KEYS, type Character, type ProfileKey } from "@/lib/content";
 import { cn } from "@/lib/utils";
 import { ArrowLeftIcon } from "lucide-react";
@@ -41,7 +42,10 @@ export function CharacterProfiles({
   });
 
   return (
-    <div className="w-full">
+    <div
+      className="w-full"
+      style={profileThemeVars(profile.accentColor) as React.CSSProperties}
+    >
       <ProfileSwitcher
         characterName={character.name}
         species={character.species}
@@ -59,7 +63,7 @@ export function CharacterProfiles({
           href="/ref"
           className={cn(
             buttonVariants({ variant: "outline", size: "lg" }),
-            "rounded-xl",
+            "rounded-xl border-glow-500/30 bg-glow-500/[0.06] text-glow-300 shadow-[0_14px_35px_-25px_rgb(var(--accent-500)/0.9)] hover:border-glow-400/60 hover:bg-glow-500/15 hover:text-glow-300",
           )}
         >
           <ArrowLeftIcon data-icon="inline-start" />
