@@ -508,9 +508,35 @@ and NPM's default `Host $host` is exactly right — leave it alone. Do not enabl
 "Cache Assets" here either; S3 responses carry their own validators and an extra cache layer
 in front of immutable object keys buys nothing while making stale content possible.
 
-If you expose this, the bucket needs Garage's website/anonymous-read permission for the
-media prefix, or every request returns 403. Grant read to anonymous only for the bucket you
-intend to be public.
+If you expose this, the bucket needs Garage's website/anonymous-read permission, or every
+request returns 403.
+
+> **Do not grant anonymous read on `playwolf-media`.** Garage's anonymous-read and website
+> grants are **bucket-scoped — there is no prefix-scoped grant.** Allowing the `anonymous`
+> key to read that bucket publishes every key in it, and
+> [`src/payload/originals/store.ts`](../src/payload/originals/store.ts) keeps the pristine,
+> pre-crop bytes of every framed upload under an `originals/` prefix **in that same bucket**.
+> Opening the bucket therefore publishes every uncropped original alongside the media you
+> meant to share — the full frame the crop tool exists to hide, reachable without the
+> auth-gated admin route that is otherwise the only reader. The keys are UUIDs, so they are
+> not guessable one at a time, but an unguessable name is not a permission.
+
+Two ways out, in order of preference:
+
+1. **Skip this section entirely.** Nothing in the app needs it: every image is served
+   same-origin through Payload's `/api/{collection}/file/…` route (which is also what keeps
+   media crawlable, see `src/app/robots.ts`), so Garage can stay internal to the Docker
+   network and no anonymous grant is needed at all. This is the default and the recommended
+   posture.
+2. **Use a second bucket** if you do want direct-from-Garage delivery — a public
+   `playwolf-media-public` for served media and a private `playwolf-media` retaining the
+   originals. Note that this needs a small code change first: `S3_BUCKET` in
+   [`src/payload/s3.ts`](../src/payload/s3.ts) is deliberately the single source of truth for
+   both the storage plugin and the originals sidecar, so splitting them means giving the
+   sidecar its own bucket variable rather than only editing Coolify.
+
+Whichever you choose, `garage bucket info <bucket>` should never list a grant for the
+`anonymous` key on a bucket that holds an `originals/` prefix.
 
 ### 6.4 Staging
 
@@ -626,13 +652,15 @@ at 2 a.m. without a deploy. Edited at `/admin` and takes effect immediately.
 
 ### 9.1 Coolify-managed variables
 
-Names below are the ones [`src/payload.config.ts`](../src/payload.config.ts) actually reads.
+Names below are the ones [`src/payload.config.ts`](../src/payload.config.ts) actually reads,
+plus `CRON_SECRET`, which is read by the reminder route rather than the config.
 
 | Variable               | Example                                                    | Secret | Notes                                                                                                                                                                                                                      |
 | ---------------------- | ---------------------------------------------------------- | :----: | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `NODE_ENV`             | `production`                                               |        | Already set by the Dockerfile                                                                                                                                                                                              |
 | `DATABASE_URL`         | `postgres://playwolf:<pw>@postgresql-abc123:5432/playwolf` |   ✓    | **`_URL`, not `_URI`** — Payload's docs use `DATABASE_URI`, this config does not. Internal Docker hostname; never `localhost`. URL-encode `@ : / ? #` in the password                                                      |
 | `PAYLOAD_SECRET`       | 64 random hex chars                                        |   ✓    | Signs auth tokens. **Changing it invalidates every session and breaks existing encrypted fields.** Generate once: `openssl rand -hex 32`. Store it in your password manager — it is not recoverable from a database backup |
+| `CRON_SECRET`          | 64 random hex chars                                        |   ✓    | Authenticates the scheduled reminder run ([section 15](#15-scheduled-tasks--commission-reminders)). Unset, that route 401s everything and reminders silently never send. `openssl rand -hex 32`                            |
 | `NEXT_PUBLIC_SITE_URL` | `https://playwolf.net`                                     |        | Public origin for OG/Twitter image URLs. **`https://` here** — this is what browsers see, unlike the Coolify service URL. No trailing slash. Build-time; see below                                                         |
 | `S3_ENDPOINT`          | `http://garage:3900`                                       |        | Internal Docker hostname, plain HTTP inside the network. Defaults to exactly this if unset                                                                                                                                 |
 | `S3_REGION`            | `garage`                                                   |        | Garage ignores it, the AWS SDK insists on it                                                                                                                                                                               |
@@ -779,9 +807,13 @@ docker exec -it <garage-container> /garage bucket info playwolf-media   # object
 - [ ] **13. Backups are configured and have run once.** Follow [BACKUP.md](BACKUP.md); do not
       consider the deployment finished until a backup exists and has been listed at the
       offsite target.
-- [ ] **14. Record the secrets** — `PAYLOAD_SECRET`, Postgres password, Garage key pair,
-      Coolify admin login, offsite S3 credentials — in your password manager. Several of
-      these cannot be recovered from any backup.
+- [ ] **14. Record the secrets** — `PAYLOAD_SECRET`, `CRON_SECRET`, Postgres password, Garage
+      key pair, Coolify admin login, offsite S3 credentials — in your password manager.
+      Several of these cannot be recovered from any backup.
+- [ ] **15. The reminder cron is scheduled and returns `ok`.** Nothing calls it on its own
+      ([section 15](#15-scheduled-tasks--commission-reminders)). Run the task once by hand and
+      confirm a `200` with `{"ok":true,…}`; a `401` means `CRON_SECRET` does not match, and no
+      task at all means reminders never send while looking like nothing was ever due.
 
 ---
 
@@ -844,6 +876,9 @@ docker system prune -af --filter 'until=168h'   # images unused for a week
 | Port reachable that UFW says is blocked                   | The Docker/UFW trap ([2.6](#26-firewall-and-the-dockerufw-trap))                                                                |
 | Every image slow for minutes after a deploy               | `/app/.next/cache` volume missing ([5.4](#54-persistent-storage))                                                               |
 | Build OOM-killed                                          | Raise VM RAM to 8 GB, or deploy the prebuilt GHCR image ([5.5](#55-alternative-deploy-the-prebuilt-ghcr-image))                 |
+| Commission reminders never arrive                         | No scheduled task, or `CRON_SECRET` missing/mismatched so the run 401s ([15](#15-scheduled-tasks--commission-reminders))        |
+| Reminder task fails but reminders did arrive              | A backlog or a reminder with no next date also clears `ok`; `errors` says which ([15.3](#153-reading-the-response))             |
+| Stack will not start, "required variable … is missing"    | A `${VAR:?}`-guarded value is unset or empty — most recently `CRON_SECRET` ([9.1](#91-coolify-managed-variables))               |
 
 ---
 
@@ -904,7 +939,79 @@ own restore drill.
 
 ---
 
-## 15. Assumptions
+## 15. Scheduled tasks — commission reminders
+
+In-progress commissions can carry a follow-up reminder (`Artworks → Follow-up reminder`),
+which pushes an ntfy/email nudge when it comes due. **The app has no internal scheduler.**
+Nothing fires unless something outside it calls the endpoint, so a deployment that skips this
+section has a reminder feature that silently never sends — the failure looks exactly like
+"no reminders were due".
+
+`POST /api/cron/commission-reminders` is the run. Authenticate it with either
+`Authorization: Bearer $CRON_SECRET` or `x-cron-secret: $CRON_SECRET`; **without
+`CRON_SECRET` set the route answers 401 to every request**, which is why
+[`docker-compose.yml`](../docker-compose.yml) guards it with `${CRON_SECRET:?}` and refuses to
+start the stack rather than boot into that state.
+
+Schedule `POST`, not `GET`. Both verbs work — `GET` is kept for poking at it by hand — but the
+run sends notifications and writes to every document it touches, which is not something a
+`GET` should do.
+
+### 15.1 As a Coolify scheduled task (preferred)
+
+On the `web` application, `Scheduled Tasks → + Add`, one task, `0 9 * * *` (any daily time):
+
+```sh
+wget -qO- --header="Authorization: Bearer $CRON_SECRET" \
+  --post-data='' http://127.0.0.1:3000/api/cron/commission-reminders
+```
+
+Two things about that command:
+
+- **`wget`, not `curl`.** Coolify runs the task inside the application container, and the
+  runtime image is `node:22-alpine` — BusyBox wget is present, curl is not. BusyBox wget
+  exits non-zero on a 4xx/5xx, so a failed run fails the task.
+- **`127.0.0.1:3000`, not the public origin.** Staying inside the container skips NPM and the
+  rate limiter in [`src/proxy.ts`](../src/proxy.ts) entirely, and works even while the site is
+  in maintenance mode. `CRON_SECRET` is already in the container's environment, so the shell
+  expands it there.
+
+### 15.2 From the host, or from anywhere else
+
+If you would rather not depend on Coolify's scheduler, a host crontab entry works the same
+way against the public origin:
+
+```bash
+0 9 * * * curl -fsS -X POST -H "Authorization: Bearer $CRON_SECRET" \
+  https://playwolf.net/api/cron/commission-reminders
+```
+
+This path goes through NPM and is rate-limited to 6 requests per minute by
+[`src/proxy.ts`](../src/proxy.ts); a daily task is nowhere near that, but a retry loop would
+be.
+
+### 15.3 Reading the response
+
+```json
+{ "ok": true, "sent": 2, "errors": [] }
+```
+
+`ok` answers **"did this run leave anything undone"**, and the status code follows it — `200`
+when `ok`, `500` otherwise — so `curl -fsS` or BusyBox wget fails on its own without anyone
+remembering to assert on the body. Three things clear `ok`, and `errors` says which:
+
+| `errors` entry                                | What it means                                                                                                                                                                                                    |
+| --------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `<slug>: <message>`                           | That reminder did not send. `nextAt` was left alone, so the next run retries it. Usually the ntfy/email transport                                                                                                |
+| `N further reminder(s) … deferred`            | More were due than one run processes (100). Nothing was lost; the next run takes the rest. Persisting means the schedule is not keeping up                                                                       |
+| `N reminder(s) are enabled with no next date` | Enabled with a NULL `nextAt`. These can never come due, because the run selects on `nextAt <= now` and SQL never matches NULL. Needs a manual fix: open each artwork and re-save the reminder, or clear the flag |
+
+**Re-running is always safe.** Every reminder that sent already advanced its own `nextAt`, so
+a retry after a partial failure notifies nobody twice.
+
+---
+
+## 16. Assumptions
 
 This runbook was written against the roadmap's intended architecture while the Payload and
 Garage work was still in progress on another branch. The following are **assumptions to
