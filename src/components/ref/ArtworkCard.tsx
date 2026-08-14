@@ -22,6 +22,12 @@ type ArtworkCardProps = {
    * to blur gated 18+ slides from the very first render (no unblurred flash).
    */
   imageClassName?: string;
+  /**
+   * Set on the one card that is the page's largest above-the-fold image, so
+   * the browser fetches it eagerly at high priority instead of discovering it
+   * through the lazy-loading queue. At most one per route.
+   */
+  priority?: boolean;
 };
 
 /**
@@ -47,6 +53,7 @@ export function ArtworkCard({
   fit = "page",
   isWip = false,
   imageClassName,
+  priority = false,
 }: ArtworkCardProps) {
   const frame = frameFor(src);
   const bounded = fit === "viewport";
@@ -57,6 +64,7 @@ export function ArtworkCard({
       alt={alt}
       width={src.width}
       height={src.height}
+      priority={priority}
       placeholder={placeholderFor(src)}
       sizes={`(max-width: ${frame.px}px) 100vw, ${frame.px}px`}
       className={`${

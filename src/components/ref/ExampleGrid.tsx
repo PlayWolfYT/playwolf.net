@@ -6,6 +6,7 @@ import { BackButton } from "@/components/ref/BackButton";
 import { ShimmerImage } from "@/components/ref/ShimmerImage";
 import { VersionBadge } from "@/components/ref/VersionBadge";
 import { WipTape } from "@/components/ref/WipTape";
+import { EmptyState } from "@/components/site/EmptyState";
 
 type ExampleGridProps = {
   examples: Example[];
@@ -48,14 +49,10 @@ export function ExampleGrid({
       ) : null}
 
       {examples.length === 0 ? (
-        <div className="rounded-3xl border border-dashed border-white/[0.1] bg-void-lift/40 px-8 py-16 text-center">
-          <p className="font-display text-lg font-medium text-parchment">
-            Nothing here yet
-          </p>
-          <p className="mx-auto mt-2 max-w-xs text-sm leading-relaxed text-parchment-muted">
-            Examples will appear here soon. Check back later!
-          </p>
-        </div>
+        <EmptyState
+          title="Nothing here yet"
+          description="Examples will appear here soon. Check back later!"
+        />
       ) : (
         <ul className="flex w-full flex-wrap justify-center gap-4">
           {examples.map((example) => {
@@ -63,6 +60,9 @@ export function ExampleGrid({
             const thumbSrc = exampleThumb(example);
             const thumbSizes =
               "(max-width: 640px) 50vw, (max-width: 1024px) 33vw, (max-width: 1280px) 25vw, (max-width: 1536px) 20vw, 17vw";
+            // No `loading` prop: the grid always sits below a reference sheet,
+            // so lazy — `next/image`'s default — is right for every tile, and
+            // spelling it out would collide with `priority` if that ever changed.
             const thumb = thumbSrc ? (
               <>
                 <Image
@@ -70,7 +70,6 @@ export function ExampleGrid({
                   alt=""
                   aria-hidden
                   fill
-                  loading="lazy"
                   placeholder={placeholderFor(thumbSrc)}
                   sizes={thumbSizes}
                   className="scale-110 object-cover blur-2xl"
@@ -79,7 +78,6 @@ export function ExampleGrid({
                   src={thumbSrc}
                   alt={example.title}
                   fill
-                  loading="lazy"
                   placeholder={placeholderFor(thumbSrc)}
                   sizes={thumbSizes}
                   className="relative z-10 object-contain"

@@ -18,11 +18,20 @@ const CARD_CLASS =
  * section.
  */
 export function GalleryGrid({ items }: { items: GalleryItem[] }) {
+  // The first tile that actually has art is this page's LCP candidate — not
+  // simply the first tile, which with `?wip=1` on is often a placeholder card
+  // with no image at all, leaving the real one to load lazily.
+  const lcpIndex = items.findIndex((item) => exampleThumb(item.example));
+
   return (
     <ul className="flex w-full flex-wrap gap-4">
-      {items.map(({ character, example, profile }) => {
+      {items.map(({ character, example, profile }, index) => {
         const href = `/ref/${character.slug}/${profile}/${example.slug}`;
         const thumbSrc = exampleThumb(example);
+        // Both layers share one `src`, so eager-loading the pair costs a single
+        // request. Everything after it stays lazy, which is `next/image`'s
+        // default — no `loading` prop needed.
+        const priority = index === lcpIndex;
         const thumb = thumbSrc ? (
           <>
             <Image
@@ -30,7 +39,11 @@ export function GalleryGrid({ items }: { items: GalleryItem[] }) {
               alt=""
               aria-hidden
               fill
-              loading="lazy"
+              priority={priority}
+              // Same `src` as the layer below, so this renders the preload link
+              // React keeps when it de-duplicates the pair. Without it that link
+              // would be the one *without* a priority hint.
+              fetchPriority={priority ? "high" : undefined}
               placeholder={placeholderFor(thumbSrc)}
               sizes={THUMB_SIZES}
               className="scale-110 object-cover blur-2xl"
@@ -39,7 +52,7 @@ export function GalleryGrid({ items }: { items: GalleryItem[] }) {
               src={thumbSrc}
               alt={example.title}
               fill
-              loading="lazy"
+              priority={priority}
               placeholder={placeholderFor(thumbSrc)}
               sizes={THUMB_SIZES}
               className="relative z-10 object-contain"
