@@ -4,11 +4,17 @@ import { notFound } from "next/navigation";
 
 import { BackArrow } from "@/components/ref/BackArrow";
 import { ShimmerImage } from "@/components/ref/ShimmerImage";
+import { absoluteUrl, JsonLd, type JsonLdNode } from "@/components/site/JsonLd";
 import { LinkRow } from "@/components/site/LinkRow";
 import { buildImageMetadata } from "@/lib/embed";
-import { placeholderFor, PROJECT_STATUS_LABELS } from "@/lib/content";
+import { placeholderFor, PROJECT_STATUS_LABELS, type Project } from "@/lib/content";
 import { getProject } from "@/lib/references";
-import { RichTextContent, richTextToPlainText } from "@/lib/rich-text";
+import {
+  RichTextContent,
+  richTextToMetaDescription,
+  richTextToPlainText,
+  truncateForMetaDescription,
+} from "@/lib/rich-text";
 
 type PageProps = { params: Promise<{ slug: string }> };
 
@@ -17,17 +23,40 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const project = await getProject(slug);
   if (!project) return {};
 
-  const description = project.summary ?? richTextToPlainText(project.body);
+  // `summary` is an unbounded textarea, so it needs clipping as much as the
+  // rich-text fallback does.
+  const description =
+    truncateForMetaDescription(project.summary) ??
+    richTextToMetaDescription(project.body);
+  const pagePath = `/projects/${project.slug}`;
 
-  if (!project.cover) return { title: project.title, description };
+  if (!project.cover) {
+    return { title: project.title, description, alternates: { canonical: pagePath } };
+  }
 
   return buildImageMetadata({
     title: project.title,
     image: project.cover,
     alt: project.title,
     description,
-    pagePath: `/projects/${project.slug}`,
+    pagePath,
   });
+}
+
+function projectGraph(project: Project): JsonLdNode {
+  return {
+    "@type": "CreativeWork",
+    name: project.title,
+    url: absoluteUrl(`/projects/${project.slug}`),
+    // Untruncated on purpose: the meta description has a display budget, this
+    // does not.
+    description: project.summary ?? richTextToPlainText(project.body),
+    image: project.cover ? absoluteUrl(project.cover.src) : undefined,
+    dateModified: project.updatedAt,
+    creativeWorkStatus: PROJECT_STATUS_LABELS[project.status],
+    ...(project.year ? { copyrightYear: project.year } : {}),
+    author: { "@type": "Person", name: "playwolf" },
+  };
 }
 
 export default async function ProjectPage({ params }: PageProps) {
@@ -37,6 +66,8 @@ export default async function ProjectPage({ params }: PageProps) {
 
   return (
     <article className="mx-auto w-full max-w-3xl px-4 pb-24 pt-16 sm:px-8 sm:pt-24">
+      <JsonLd nodes={projectGraph(project)} />
+
       <header className="text-center">
         <p className="font-mono text-[0.65rem] uppercase tracking-[0.28em] text-glow-500">
           {PROJECT_STATUS_LABELS[project.status]}
@@ -58,6 +89,8 @@ export default async function ProjectPage({ params }: PageProps) {
             src={project.cover.src}
             alt={project.title}
             fill
+            // This route's LCP element.
+            priority
             unoptimized={project.cover.unoptimized}
             placeholder={placeholderFor(project.cover)}
             blurDataURL={project.cover.blurDataURL}

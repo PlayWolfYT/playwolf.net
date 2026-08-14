@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 
+import { EmptyState } from "@/components/site/EmptyState";
 import { PageHeader } from "@/components/site/PageHeader";
 import { ProjectCard } from "@/components/site/ProjectCard";
 import { getProjects } from "@/lib/references";
@@ -7,6 +8,7 @@ import { getProjects } from "@/lib/references";
 export const metadata: Metadata = {
   title: "Projects",
   description: "Things built, in progress, and planned.",
+  alternates: { canonical: "/projects" },
 };
 
 export default async function ProjectsPage() {
@@ -21,13 +23,11 @@ export default async function ProjectsPage() {
       />
 
       {projects.length === 0 ? (
-        <div className="mt-12 rounded-3xl border border-dashed border-white/[0.1] bg-void-lift/40 px-8 py-16 text-center">
-          <p className="font-display text-lg font-medium text-parchment">
-            Nothing here yet
-          </p>
-          <p className="mx-auto mt-2 max-w-xs text-sm leading-relaxed text-parchment-muted">
-            Projects will appear here as they are ready.
-          </p>
+        <div className="mt-12">
+          <EmptyState
+            title="Nothing here yet"
+            description="Projects will appear here as they are ready."
+          />
         </div>
       ) : (
         <ul className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 import { CharacterProfiles } from "@/components/ref/CharacterProfiles";
 import { buildImageMetadata } from "@/lib/embed";
-import { richTextToPlainText } from "@/lib/rich-text";
+import { richTextToMetaDescription } from "@/lib/rich-text";
 import { getCharacter, getDefaultProfileKey, getMainArt } from "@/lib/references";
 
 type PageProps = { params: Promise<{ character: string }> };
@@ -13,19 +13,20 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   if (!character) return {};
 
   const title = character.name;
-  const description = richTextToPlainText(
+  const description = richTextToMetaDescription(
     character.profiles[getDefaultProfileKey(character)]?.description,
   );
+  const pagePath = `/ref/${character.slug}`;
 
   const mainArt = getMainArt(character);
-  if (!mainArt) return { title, description };
+  if (!mainArt) return { title, description, alternates: { canonical: pagePath } };
 
   return buildImageMetadata({
     title,
     image: mainArt.src,
     alt: mainArt.alt,
     description,
-    pagePath: `/ref/${character.slug}`,
+    pagePath,
   });
 }
 

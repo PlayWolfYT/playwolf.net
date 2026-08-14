@@ -1,18 +1,37 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 
 import { SparkStar } from "@/components/BrandBackdrop";
 import { BlurText } from "@/components/motion/BlurText";
 import { Reveal } from "@/components/motion/Reveal";
 import { CharacterCard } from "@/components/ref/CharacterCard";
+import { EmptyState } from "@/components/site/EmptyState";
 import { LinkRow } from "@/components/site/LinkRow";
 import { ProjectCard } from "@/components/site/ProjectCard";
 import { getCharacters, getProjects, getSiteSettings } from "@/lib/references";
-import { RichTextContent } from "@/lib/rich-text";
+import { RichTextContent, truncateForMetaDescription } from "@/lib/rich-text";
 
 /** Landing copy lives in `siteSettings`, but the page must stand up without it. */
 const FALLBACK_TITLE = "Something fun is on the way";
 const FALLBACK_TAGLINE =
   "Character references now, a fuller portfolio soon. Have a look around.";
+
+/**
+ * The landing page describes itself with the same hero copy a visitor sees,
+ * so editing it in the admin updates the search result and the embed too.
+ * `heroTitle` goes through the `%s · playwolf.net` template rather than
+ * replacing it, keeping the domain in the title where it is the brand.
+ */
+export async function generateMetadata(): Promise<Metadata> {
+  const { heroTitle, heroTagline } = await getSiteSettings();
+
+  return {
+    // Absent rather than `undefined` so the layout's default still applies.
+    ...(heroTitle ? { title: heroTitle } : {}),
+    description: truncateForMetaDescription(heroTagline ?? FALLBACK_TAGLINE),
+    alternates: { canonical: "/" },
+  };
+}
 
 function SectionHeading({ children, id }: { children: React.ReactNode; id: string }) {
   return (
@@ -108,19 +127,17 @@ export default async function Home() {
           </div>
 
           {shown.length === 0 ? (
-            <div className="mt-6 rounded-3xl border border-dashed border-white/[0.1] bg-void-lift/40 px-8 py-16 text-center">
-              <p className="font-display text-lg font-medium text-parchment">
-                Coming soon
-              </p>
-              <p className="mx-auto mt-2 max-w-xs text-sm leading-relaxed text-parchment-muted">
-                Projects will show up here as they are ready.
-              </p>
+            <div className="mt-6">
+              <EmptyState
+                title="Coming soon"
+                description="Projects will show up here as they are ready."
+              />
             </div>
           ) : (
             <ul className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {shown.map((project) => (
                 <li key={project.slug}>
-                  <ProjectCard project={project} />
+                  <ProjectCard project={project} headingLevel={3} />
                 </li>
               ))}
             </ul>
@@ -145,7 +162,7 @@ export default async function Home() {
             <ul className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {characters.slice(0, 3).map((character) => (
                 <li key={character.slug}>
-                  <CharacterCard character={character} />
+                  <CharacterCard character={character} headingLevel={3} />
                 </li>
               ))}
             </ul>

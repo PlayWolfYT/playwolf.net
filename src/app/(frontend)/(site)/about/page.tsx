@@ -2,13 +2,14 @@ import type { Metadata } from "next";
 
 import { PageHeader } from "@/components/site/PageHeader";
 import { getSiteSettings } from "@/lib/references";
-import { RichTextContent, richTextToPlainText } from "@/lib/rich-text";
+import { RichTextContent, richTextToMetaDescription } from "@/lib/rich-text";
 
 export async function generateMetadata(): Promise<Metadata> {
   const { about } = await getSiteSettings();
   return {
     title: "About",
-    description: richTextToPlainText(about) ?? "About playwolf.",
+    description: richTextToMetaDescription(about) ?? "About playwolf.",
+    alternates: { canonical: "/about" },
   };
 }
 
