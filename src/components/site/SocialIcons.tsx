@@ -1,3 +1,5 @@
+import { cn } from "@/lib/utils";
+
 type IconProps = { className?: string };
 
 export function XIcon({ className }: IconProps) {
@@ -94,7 +96,7 @@ function MaskIcon({ src, className }: { src: string; className?: string }) {
   return (
     <span
       aria-hidden
-      className={`${className ?? ""} inline-block bg-current`}
+      className={cn("inline-block size-4 shrink-0 bg-current", className)}
       style={{
         maskImage: `url(${src})`,
         WebkitMaskImage: `url(${src})`,

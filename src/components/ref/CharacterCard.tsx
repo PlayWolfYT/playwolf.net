@@ -1,31 +1,33 @@
+import { ArrowUpRightIcon } from "lucide-react";
 import Link from "next/link";
+
 import { SpotlightCard } from "@/components/motion/SpotlightCard";
 import { ShimmerImage } from "@/components/ref/ShimmerImage";
+import { Badge } from "@/components/ui/badge";
+import {
+  Card,
+  CardAction,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { accentVars } from "@/lib/accent";
-import type { Character } from "@/lib/content";
-import { getMainArt, placeholderFor } from "@/lib/content";
+import { getMainArt, placeholderFor, type Character } from "@/lib/content";
 
-type CharacterCardProps = {
-  character: Character;
-};
-
-export function CharacterCard({ character }: CharacterCardProps) {
+export function CharacterCard({ character }: { character: Character }) {
   const mainArt = getMainArt(character);
-  const href = `/ref/${character.slug}`;
-  // Tint the card with the character's accent (SFW preferred) so the
-  // overview hints at each character's colour before their page is opened.
   const accent = (character.profiles.sfw ?? character.profiles.nsfw)?.accentColor;
 
   return (
     <SpotlightCard>
       <Link
-        href={href}
+        href={`/ref/${character.slug}`}
         style={accent ? (accentVars(accent) as React.CSSProperties) : undefined}
-        className="group block h-full overflow-hidden rounded-3xl border border-white/[0.07] bg-gradient-to-br from-void-lift/90 to-void-panel/70 p-px shadow-glow-sm backdrop-blur-xl transition hover:border-glow-500/40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-glow-500"
+        className="group block h-full rounded-2xl focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring"
       >
-        <div className="h-full overflow-hidden rounded-[calc(1.5rem-1px)] shadow-inner-glow">
-          {/* Pre-cropped 1:1 frame; objectPosition is centered in toImageRef. */}
-          <div className="relative aspect-square w-full overflow-hidden bg-void-lift/60">
+        <Card className="h-full gap-0 py-0 transition duration-300 group-hover:-translate-y-1 group-hover:border-glow-500/55">
+          <div className="relative aspect-square w-full overflow-hidden bg-muted">
+            <div className="absolute inset-0 bg-rim-cyan opacity-60" />
             {mainArt ? (
               <ShimmerImage
                 src={mainArt.src.src}
@@ -34,30 +36,37 @@ export function CharacterCard({ character }: CharacterCardProps) {
                 unoptimized={mainArt.src.unoptimized}
                 placeholder={placeholderFor(mainArt.src)}
                 blurDataURL={mainArt.src.blurDataURL}
-                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 340px"
-                className="object-contain transition duration-500 group-hover:scale-105"
+                sizes="(max-width: 640px) 86vw, (max-width: 1024px) 50vw, 380px"
+                className="object-contain transition duration-500 group-hover:scale-[1.035]"
                 style={{ objectPosition: mainArt.src.objectPosition }}
               />
             ) : (
-              // No art yet — show the character's initial as a placeholder.
-              <div className="flex h-full w-full items-center justify-center">
-                <span className="font-display text-6xl font-medium text-parchment-dim/50">
+              <div className="relative flex h-full items-center justify-center">
+                <span className="brand-outline font-display text-8xl font-bold">
                   {character.name.charAt(0)}
                 </span>
               </div>
             )}
           </div>
-          <div className="p-5">
-            <h2 className="font-display text-lg font-medium tracking-tight text-parchment">
-              {character.name}
-            </h2>
-            {character.species ? (
-              <p className="mt-1 font-mono text-[0.65rem] uppercase tracking-[0.2em] text-parchment-dim">
-                {character.species}
-              </p>
-            ) : null}
-          </div>
-        </div>
+
+          <CardHeader className="border-t border-border py-(--card-spacing)">
+            <CardTitle>
+              <h2 className="font-display text-2xl font-bold tracking-[-0.055em]">
+                {character.name}
+              </h2>
+            </CardTitle>
+          </CardHeader>
+
+          <CardFooter className="mt-auto justify-between gap-3">
+            <span className="font-mono text-[0.58rem] uppercase tracking-[0.18em] text-muted-foreground">
+              {character.species}
+            </span>
+            <span className="inline-flex items-center gap-1 text-xs font-medium text-glow-400">
+              View character
+              <ArrowUpRightIcon aria-hidden />
+            </span>
+          </CardFooter>
+        </Card>
       </Link>
     </SpotlightCard>
   );

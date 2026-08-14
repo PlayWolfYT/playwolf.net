@@ -2,8 +2,10 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { LinkRow } from "@/components/site/LinkRow";
+import { buttonVariants } from "@/components/ui/button";
 import { placeholderFor, type Example, type FeaturedFriend } from "@/lib/content";
 import { RichTextContent } from "@/lib/rich-text";
+import { cn } from "@/lib/utils";
 
 function isFriend(person: Example["featuring"][number]): person is FeaturedFriend {
   return person.kind === "friend";
@@ -28,7 +30,7 @@ export function FeaturedFriends({ example }: { example: Example }) {
         </h2>
       </header>
 
-      <ul className="space-y-6">
+      <ul className="flex flex-col gap-6">
         {friends.map((friend, index) => {
           const imageOnRight = index % 2 === 1;
 
@@ -36,11 +38,11 @@ export function FeaturedFriends({ example }: { example: Example }) {
             <li key={friend.slug}>
               <article
                 id={`friend-${friend.slug}`}
-                className="scroll-mt-24 overflow-hidden rounded-3xl border border-white/[0.07] bg-gradient-to-br from-void-lift/90 to-void-panel/70 shadow-glow-sm backdrop-blur-xl md:grid md:grid-cols-2 md:items-center"
+                className="scroll-mt-24 overflow-hidden rounded-2xl border border-border bg-card/90 shadow-glow-sm backdrop-blur-sm md:grid md:grid-cols-2 md:items-center"
               >
                 {friend.image ? (
                   <div
-                    className={`relative aspect-[5/2] w-full overflow-hidden bg-void-lift/60 ${
+                    className={`relative aspect-5/2 w-full overflow-hidden bg-void-lift/60 ${
                       imageOnRight ? "md:order-2" : ""
                     }`}
                   >
@@ -81,11 +83,14 @@ export function FeaturedFriends({ example }: { example: Example }) {
                   <div className="mt-auto flex flex-col items-end gap-2 pt-4">
                     <Link
                       href={`/gallery?friend=${encodeURIComponent(friend.slug)}`}
-                      className="inline-flex min-h-11 items-center text-xs font-medium uppercase tracking-[0.2em] text-glow-400 transition hover:text-glow-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-glow-500"
+                      className={cn(
+                        buttonVariants({ variant: "outline", size: "sm" }),
+                        "rounded-xl",
+                      )}
                     >
                       More artwork
                     </Link>
-                    <LinkRow className="justify-end" links={friend.links} />
+                    <LinkRow align="end" links={friend.links} />
                   </div>
                 </div>
               </article>

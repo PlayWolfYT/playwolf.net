@@ -2,34 +2,53 @@ import Link from "next/link";
 
 import { LinkRow } from "@/components/site/LinkRow";
 import { NAV_ITEMS } from "@/components/site/nav";
+import { Wordmark } from "@/components/site/Wordmark";
+import { buttonVariants } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
 import { getSiteSettings } from "@/lib/references";
+import { cn } from "@/lib/utils";
 
 export async function SiteFooter() {
   const { links } = await getSiteSettings();
 
   return (
-    <footer className="relative z-10 border-t border-white/[0.07] bg-void/60 backdrop-blur-xl">
-      <div className="mx-auto flex w-full max-w-[120rem] flex-col items-center gap-6 px-4 py-10 sm:px-8">
-        <nav aria-label="Footer">
-          <ul className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2">
-            {NAV_ITEMS.map((section) => (
-              <li key={section.href}>
-                <Link
-                  href={section.href}
-                  className="inline-flex min-h-11 items-center text-xs font-medium uppercase tracking-[0.2em] text-parchment-dim transition hover:text-parchment focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-glow-500"
-                >
-                  {section.label}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </nav>
+    <footer className="relative z-10 border-t border-border bg-background/78 backdrop-blur-2xl">
+      <div className="mx-auto w-full max-w-7xl px-4 py-10 sm:px-6 lg:px-8 lg:py-14">
+        <div className="grid gap-10 lg:grid-cols-[1fr_auto] lg:items-end">
+          <div className="flex flex-col items-start gap-5">
+            <Wordmark />
+            <p className="max-w-md text-sm leading-relaxed text-muted-foreground">
+              My characters, favorite artwork, and small digital experiments, all in one
+              place.
+            </p>
+            <LinkRow links={links} align="start" />
+          </div>
 
-        <LinkRow links={links} />
+          <nav aria-label="Footer">
+            <ul className="grid grid-cols-2 gap-1 sm:grid-cols-5 lg:grid-cols-2">
+              {NAV_ITEMS.map((section) => (
+                <li key={section.href}>
+                  <Link
+                    href={section.href}
+                    className={cn(
+                      buttonVariants({ variant: "ghost", size: "sm" }),
+                      "w-full justify-start rounded-lg font-mono text-[0.62rem] uppercase tracking-[0.15em]",
+                    )}
+                  >
+                    {section.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </nav>
+        </div>
 
-        <p className="text-center font-mono text-[0.65rem] uppercase tracking-[0.2em] text-parchment-dim/70">
-          © {new Date().getFullYear()} playwolf.net
-        </p>
+        <Separator className="my-8" />
+
+        <div className="flex flex-col gap-2 font-mono text-[0.58rem] uppercase tracking-[0.2em] text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
+          <p>© {new Date().getFullYear()} playwolf.net</p>
+          <p>Made for fun</p>
+        </div>
       </div>
     </footer>
   );

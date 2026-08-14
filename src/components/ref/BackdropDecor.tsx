@@ -38,45 +38,45 @@ const items: DecorItem[] = [
   // FontAwesome solid paws wandering up the left gutter
   {
     Icon: FaPaw,
-    cls: "left-[3%] top-[76%] h-9 w-9 -rotate-[24deg] text-glow-500/20 hidden lg:block",
+    cls: "left-[3%] top-[76%] h-9 w-9 rotate-[-24deg] text-glow-500/20 hidden lg:block",
   },
   {
     Icon: FaPaw,
-    cls: "left-[6.5%] top-[64%] h-8 w-8 -rotate-[8deg] text-glow-500/20 hidden lg:block",
+    cls: "left-[6.5%] top-[64%] h-8 w-8 rotate-[-8deg] text-glow-500/20 hidden lg:block",
   },
   {
     Icon: FaPaw,
-    cls: "left-[3.5%] top-[52%] h-9 w-9 -rotate-[26deg] text-glow-500/[0.17] hidden lg:block",
+    cls: "left-[3.5%] top-[52%] h-9 w-9 rotate-[-26deg] text-glow-500/17 hidden lg:block",
   },
   {
     Icon: FaPaw,
-    cls: "left-[7%] top-[40%] h-8 w-8 -rotate-[6deg] text-glow-500/[0.17] hidden lg:block",
+    cls: "left-[7%] top-[40%] h-8 w-8 -rotate-6 text-glow-500/17 hidden lg:block",
   },
   {
     Icon: FaPaw,
-    cls: "left-[4.5%] top-[28%] h-7 w-7 -rotate-[22deg] text-glow-500/15 hidden lg:block",
+    cls: "left-[4.5%] top-[28%] h-7 w-7 rotate-[-22deg] text-glow-500/15 hidden lg:block",
   },
   {
     Icon: FaPaw,
-    cls: "left-[8%] top-[17%] h-6 w-6 -rotate-[4deg] text-glow-500/[0.12] hidden xl:block",
+    cls: "left-[8%] top-[17%] h-6 w-6 rotate-[-4deg] text-glow-500/12 hidden xl:block",
   },
 
   // Phosphor paw prints (with heel pad) heading down the right gutter
   {
     Icon: PiPawPrintFill,
-    cls: "right-[7%] top-[46%] h-8 w-8 rotate-[152deg] text-glow-500/[0.17] hidden lg:block",
+    cls: "right-[7%] top-[46%] h-8 w-8 rotate-152 text-glow-500/17 hidden lg:block",
   },
   {
     Icon: PiPawPrintFill,
-    cls: "right-[4%] top-[58%] h-9 w-9 rotate-[170deg] text-glow-500/20 hidden lg:block",
+    cls: "right-[4%] top-[58%] h-9 w-9 rotate-170 text-glow-500/20 hidden lg:block",
   },
   {
     Icon: PiPawPrintFill,
-    cls: "right-[8%] top-[70%] h-9 w-9 rotate-[150deg] text-glow-500/20 hidden lg:block",
+    cls: "right-[8%] top-[70%] h-9 w-9 rotate-150 text-glow-500/20 hidden lg:block",
   },
   {
     Icon: PiPawPrintFill,
-    cls: "right-[5%] top-[82%] h-10 w-10 rotate-[168deg] text-glow-500/20 hidden lg:block",
+    cls: "right-[5%] top-[82%] h-10 w-10 rotate-168 text-glow-500/20 hidden lg:block",
   },
 
   // Night-sky cluster, top right (Lucide strokes)
@@ -102,7 +102,7 @@ const items: DecorItem[] = [
   },
   {
     Icon: Cloud,
-    cls: "right-[17%] top-[14%] h-6 w-6 text-glow-500/[0.17] hidden xl:block",
+    cls: "right-[17%] top-[14%] h-6 w-6 text-glow-500/17 hidden xl:block",
     props: outline,
   },
 
@@ -114,12 +114,12 @@ const items: DecorItem[] = [
   },
   {
     Icon: Gamepad2,
-    cls: "right-[15%] top-[88%] h-8 w-8 rotate-[14deg] text-glow-500/25 hidden lg:block",
+    cls: "right-[15%] top-[88%] h-8 w-8 rotate-14 text-glow-500/25 hidden lg:block",
     props: outline,
   },
   {
     Icon: Zap,
-    cls: "left-[17%] top-[13%] h-5 w-5 rotate-[18deg] text-glow-500/25 hidden xl:block",
+    cls: "left-[17%] top-[13%] h-5 w-5 rotate-18 text-glow-500/25 hidden xl:block",
     props: outline,
   },
   {
@@ -129,7 +129,7 @@ const items: DecorItem[] = [
   },
   {
     Icon: Ghost,
-    cls: "right-[20%] top-[27%] h-6 w-6 rotate-6 text-glow-500/[0.17] hidden xl:block",
+    cls: "right-[20%] top-[27%] h-6 w-6 rotate-6 text-glow-500/17 hidden xl:block",
     props: outline,
   },
 
@@ -151,7 +151,7 @@ const items: DecorItem[] = [
   },
   {
     Icon: FaBone,
-    cls: "left-[13%] top-[68%] h-7 w-7 -rotate-[20deg] text-glow-500/[0.17] hidden xl:block",
+    cls: "left-[13%] top-[68%] h-7 w-7 rotate-[-20deg] text-glow-500/17 hidden xl:block",
   },
   {
     Icon: IoMusicalNotes,
@@ -179,7 +179,7 @@ const items: DecorItem[] = [
   },
   {
     Icon: Heart,
-    cls: "left-[16%] top-[47%] h-4 w-4 -rotate-[14deg] text-glow-500/[0.17] hidden xl:block",
+    cls: "left-[16%] top-[47%] h-4 w-4 rotate-[-14deg] text-glow-500/17 hidden xl:block",
     props: outline,
   },
   {
@@ -330,9 +330,9 @@ export function BackdropDecor() {
       {/* Thin accent rings, partially offscreen for depth */}
       <div className="absolute -left-24 top-[6%] hidden h-72 w-72 rounded-full border border-glow-500/15 lg:block" />
       <div className="absolute -right-32 top-[44%] hidden h-96 w-96 rounded-full border border-glow-500/10 lg:block" />
-      <div className="absolute -bottom-24 right-[20%] h-56 w-56 rounded-full border border-glow-500/[0.12]" />
+      <div className="absolute -bottom-24 right-[20%] h-56 w-56 rounded-full border border-glow-500/12" />
       <div className="absolute -left-16 bottom-[4%] hidden h-64 w-64 rounded-full border border-glow-500/10 xl:block" />
-      <div className="absolute right-[9%] top-[62%] hidden h-40 w-40 rounded-full border border-glow-500/[0.08] xl:block" />
+      <div className="absolute right-[9%] top-[62%] hidden h-40 w-40 rounded-full border border-glow-500/8 xl:block" />
 
       {/* Extra drifting glows */}
       <div className="absolute -left-20 top-[58%] hidden h-80 w-80 rounded-full bg-glow-500/15 blur-[110px] animate-drift [animation-delay:4s] lg:block" />

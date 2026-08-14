@@ -1,4 +1,7 @@
 import type { ImageRef } from "@/lib/content";
+import { ExternalLinkIcon } from "lucide-react";
+import { buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 type OpenImageLinkProps = {
   image: ImageRef;
@@ -21,9 +24,10 @@ export function OpenImageLink({
       href={image.original.url}
       target="_blank"
       rel="noreferrer"
-      className="inline-flex min-h-11 items-center justify-center rounded-full border border-glow-500/40 bg-glow-500/10 px-6 text-sm font-medium text-glow-400 shadow-glow-sm transition hover:border-glow-500/60 hover:bg-glow-500/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-glow-500"
+      className={cn(buttonVariants({ variant: "default", size: "lg" }), "rounded-xl")}
     >
       {label}
+      <ExternalLinkIcon data-icon="inline-end" />
     </a>
   );
 }

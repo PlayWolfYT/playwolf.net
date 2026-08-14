@@ -70,13 +70,11 @@ export function ArtworkCard({
       // Hover feedback lives on the frame (border + glow), never the artwork:
       // the pointer crosses the image on its way to the controls around it,
       // and a large picture zooming under the cursor reads as jitter.
-      className={`group mx-auto rounded-3xl border border-white/[0.07] bg-gradient-to-br from-void-lift/90 to-void-panel/70 shadow-glow-sm transition duration-300 hover:border-glow-500/40 hover:shadow-glow-md ${
+      className={`group mx-auto overflow-hidden rounded-2xl border border-border bg-card/90 shadow-glow-sm backdrop-blur-sm transition duration-300 hover:border-glow-500/50 hover:shadow-glow-md ${
         bounded ? "w-fit max-w-full" : `w-full ${frame.className}`
       }`}
     >
-      <div
-        className={`relative overflow-hidden rounded-t-3xl ${artist ? "" : "rounded-b-3xl"}`}
-      >
+      <div className="relative overflow-hidden">
         <div className="relative">
           {image}
           {isWip ? <WipTape /> : null}
