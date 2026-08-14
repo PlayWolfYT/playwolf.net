@@ -7,14 +7,21 @@ import type {
 } from "payload";
 
 /**
- * Tag every Payload-backed fetch carries, so a change anywhere invalidates
- * pages that join across collections (an artwork title on a character page,
- * a friend's name on a "featuring" chip) without each hook having to know
- * which pages exist.
+ * Catch-all tag, for reads that join across collections — an artwork title on a
+ * character page, a friend's name on a "featuring" chip — so a change anywhere
+ * invalidates them without each hook having to know which pages exist.
+ *
+ * Every write emits it, but not every read carries it: a read that depends on a
+ * known, small set of collections should list those with `collectionTag`
+ * instead, so an unrelated save stops rebuilding it.
  */
 export const CONTENT_TAG = "payload";
 
-/** Per-collection tag, for reads that only depend on one collection. */
+/**
+ * Per-collection tag. A read tagged this way must name *every* collection it
+ * touches, populated relationships included — a project's cover lives in
+ * `project-images`, and re-cropping it never touches the project row.
+ */
 export function collectionTag(slug: string): string {
   return `payload:${slug}`;
 }

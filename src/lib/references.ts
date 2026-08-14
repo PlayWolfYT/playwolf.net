@@ -1,15 +1,19 @@
 import { unstable_cache } from "next/cache";
 
+import type { TransformCollectionWithSelect } from "payload";
+
 import type {
   Artist as StoredArtist,
   Artwork as StoredArtwork,
+  ArtworksSelect,
   Character as StoredCharacter,
   CharacterImage as StoredCharacterImage,
+  CharactersSelect,
   Friend as StoredFriend,
   FriendImage as StoredFriendImage,
   Media as StoredMedia,
-  Project as StoredProject,
   ProjectImage as StoredProjectImage,
+  ProjectsSelect,
   SiteImage as StoredSiteImage,
   Tag as StoredTag,
 } from "@/payload-types";
@@ -35,7 +39,7 @@ import type {
 } from "@/lib/content";
 import { castWithSubject, DEFAULT_SITE_SETTINGS, sortExamples } from "@/lib/content";
 import { getPayloadClient } from "@/lib/payload";
-import { CONTENT_TAG } from "@/payload/hooks/revalidate";
+import { collectionTag, CONTENT_TAG } from "@/payload/hooks/revalidate";
 import {
   DEFAULT_WIP_ICON_COUNT,
   DEFAULT_WIP_ICONS,
@@ -62,6 +66,110 @@ export {
 
 import { PROFILE_KEYS } from "@/lib/content";
 import { pickUploadRenderSource } from "@/lib/uploadSource";
+
+/* ------------------------------------------------------------------ *
+ * What the loaders ask Payload for
+ * ------------------------------------------------------------------ */
+
+/**
+ * The fields the mappers below actually read. Listing them keeps depth-2
+ * population from dragging whole documents through the cache, and keeps the
+ * authenticated-only field groups out of it a second way, independent of access
+ * control.
+ *
+ * Adding a field to a mapper means adding it here — see `LoadedCharacter` and
+ * friends for why forgetting to is a compile error rather than a blank page.
+ */
+const CHARACTER_FIELDS = {
+  name: true,
+  species: true,
+  slug: true,
+  // Sort key only.
+  order: true,
+  mainArt: true,
+  sfw: true,
+  nsfw: true,
+} satisfies CharactersSelect;
+
+const ARTWORK_FIELDS = {
+  title: true,
+  slug: true,
+  character: true,
+  profile: true,
+  lifecycle: true,
+  image: true,
+  altImages: true,
+  altArtworks: true,
+  wipImages: true,
+  overviewDisplay: true,
+  overviewWipImage: true,
+  wipPlaceholder: true,
+  showWipHistory: true,
+  artist: true,
+  featuring: true,
+  tags: true,
+  // Sort keys only.
+  order: true,
+  createdAt: true,
+  // Sitemap `lastModified`.
+  updatedAt: true,
+  // Deliberately absent: `commission` and `reminder`, which are
+  // authenticated-only, and the `altOf` join — `buildAltNeighbours` rebuilds
+  // both directions of the alt graph from `altArtworks`, and leaving the join
+  // out of the selection saves a query per artwork.
+} satisfies ArtworksSelect;
+
+const PROJECT_FIELDS = {
+  title: true,
+  slug: true,
+  summary: true,
+  coverImage: true,
+  body: true,
+  links: true,
+  status: true,
+  year: true,
+  featured: true,
+  // Sort key only.
+  order: true,
+  // Sitemap `lastModified`.
+  updatedAt: true,
+} satisfies ProjectsSelect;
+
+/**
+ * Trims the *populated* documents, which `select` does not reach.
+ *
+ * Uploads are deliberately left whole. Payload rebuilds an upload's `url` from
+ * its `filename` in an `afterRead` hook, so an upload trimmed to `url` alone
+ * comes back with `url: null` — a blank image with nothing to catch it. `sizes`
+ * has to stay intact for the same reason, and because `pickUploadRenderSource`
+ * decides whether an upload is framed by looking for a `frame` key on it.
+ */
+const ARTWORK_POPULATE = {
+  // Alt links are read for their id alone, to rebuild the symmetric alt graph.
+  // Populating them in full costs a nested character, media document and join
+  // query per link; `slug` is just the cheapest field that is not the id.
+  artworks: { slug: true },
+  // A cast member needs a name and something to link to. The profile tree
+  // belongs to the characters query, not to every artwork that mentions one.
+  characters: { name: true, slug: true },
+} as const;
+
+/**
+ * The documents the loaders receive: `id` plus the selected fields, narrowed the
+ * way Payload narrows them. Mapping against these rather than against the full
+ * generated documents is what makes an unselected field a compile error instead
+ * of a silently missing image.
+ *
+ * Populated relationships are *not* covered — `populate` is a runtime-only
+ * option that Payload's types do not model — so `ARTWORK_POPULATE` has to be
+ * kept honest by hand.
+ */
+type LoadedCharacter = TransformCollectionWithSelect<
+  "characters",
+  typeof CHARACTER_FIELDS
+>;
+type LoadedArtwork = TransformCollectionWithSelect<"artworks", typeof ARTWORK_FIELDS>;
+type LoadedProject = TransformCollectionWithSelect<"projects", typeof PROJECT_FIELDS>;
 
 /* ------------------------------------------------------------------ *
  * Mapping: stored shape → the shape components consume
@@ -106,6 +214,36 @@ type StoredUpload =
   | StoredSiteImage;
 
 /**
+ * The origin Payload prefixes onto every upload `url`, kept in step with the
+ * `serverURL` in `src/payload.config.ts` by reading the same variable with the
+ * same fallback.
+ */
+const SITE_ORIGIN = ((): string | undefined => {
+  try {
+    return new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "https://playwolf.net").origin;
+  } catch {
+    return undefined;
+  }
+})();
+
+/**
+ * Setting `serverURL` turns every upload `url` from `/api/media/file/x.webp`
+ * into `https://playwolf.net/api/media/file/x.webp`, and `next/image` treats any
+ * absolute URL as remote — so without this every image on the site throws
+ * "Invalid src prop" against an empty `images.remotePatterns`. Media is served
+ * from this origin, so the prefix is noise; dropping it puts uploads back on
+ * `next/image`'s local path, which is the invariant `next.config.ts` documents.
+ *
+ * A URL on any *other* origin is left alone: that is the case `remotePatterns`
+ * exists for. `metadataBase` in the root layout still absolutises the relative
+ * result for `og:image`, which is where absolute URLs are actually required.
+ */
+function toSameOriginPath(url: string): string {
+  if (!SITE_ORIGIN || !url.startsWith(`${SITE_ORIGIN}/`)) return url;
+  return url.slice(SITE_ORIGIN.length);
+}
+
+/**
  * Picks the render source for an upload. Framed libraries bake the admin crop
  * into the main file / matching derivatives — see `pickUploadRenderSource`.
  * Their focal point must not drive a second `object-cover` crop on the site.
@@ -118,18 +256,21 @@ function toImageRef(
   if (!media?.url || !media.width || !media.height) return undefined;
 
   const original = {
-    url: media.url,
+    url: toSameOriginPath(media.url),
     width: media.width,
     height: media.height,
   };
 
+  // Every candidate `pickUploadRenderSource` can return is one of the URLs
+  // handed to it verbatim, and each derivative carries the same prefix as the
+  // main file, so stripping the winner covers `sizes` too.
   const picked = pickUploadRenderSource({
     original: { src: original.url, width: original.width, height: original.height },
     sizes: media.sizes,
   });
 
   return {
-    src: picked.src,
+    src: toSameOriginPath(picked.src),
     width: picked.width,
     height: picked.height,
     blurDataURL: media.blurDataURL ?? undefined,
@@ -208,7 +349,7 @@ function toFriend(friend: StoredFriend): Featured {
  * character is always in the picture, so it is prepended rather than typed in
  * a second time.
  */
-function toFeatured(artwork: StoredArtwork): Featured[] {
+function toFeatured(artwork: LoadedArtwork): Featured[] {
   const others: Featured[] = (artwork.featuring ?? []).flatMap((entry) => {
     const person = resolved(entry.value);
     if (!person) return [];
@@ -226,7 +367,7 @@ function toFeatured(artwork: StoredArtwork): Featured[] {
   );
 }
 
-function toWipImages(entries: StoredArtwork["wipImages"]): Example["wipImages"] {
+function toWipImages(entries: LoadedArtwork["wipImages"]): Example["wipImages"] {
   return (entries ?? []).flatMap((entry) => {
     const src = toImageRef(entry.image);
     if (!src) return [];
@@ -245,7 +386,7 @@ function toWipImages(entries: StoredArtwork["wipImages"]): Example["wipImages"] 
  * In-progress pieces may omit a final image; overview / first WIP fill the gap
  * for `overviewImage`, while `src` stays undefined until the final lands.
  */
-function toExample(artwork: StoredArtwork, alts: AltSlide[] = []): Example | undefined {
+function toExample(artwork: LoadedArtwork, alts: AltSlide[] = []): Example | undefined {
   const isWip = artwork.lifecycle === "in_progress";
   const src = toImageRef(artwork.image);
   if (!isWip && !src) return undefined;
@@ -256,6 +397,7 @@ function toExample(artwork: StoredArtwork, alts: AltSlide[] = []): Example | und
   return {
     slug: artwork.slug,
     title: artwork.title,
+    updatedAt: artwork.updatedAt,
     src,
     isWip,
     overviewDisplay: artwork.overviewDisplay === "wipImage" ? "wipImage" : "generated",
@@ -282,7 +424,7 @@ function relationId(value: number | { id: number }): number {
  * `altArtworks` edge is registered in both directions — scanning the whole
  * corpus covers the reverse direction without reading the join field.
  */
-function buildAltNeighbours(artworks: StoredArtwork[]): Map<number, number[]> {
+function buildAltNeighbours(artworks: LoadedArtwork[]): Map<number, number[]> {
   const neighbours = new Map<number, number[]>();
 
   const link = (a: number, b: number) => {
@@ -322,7 +464,7 @@ function toProfile(
 
 /** Falls back to the first image reference sheet, mirroring the admin's hint. */
 function toMainArt(
-  stored: StoredCharacter,
+  stored: LoadedCharacter,
   profiles: Character["profiles"],
 ): Character["mainArt"] {
   const explicit = toImageRef(stored.mainArt?.image);
@@ -346,6 +488,18 @@ function toMainArt(
 
 /* ------------------------------------------------------------------ *
  * Loading
+ *
+ * Every loader below reads as an anonymous caller (`overrideAccess: false`), so
+ * Payload's own access control decides what may enter a shared cache entry.
+ * That is safe only because each collection these queries reach is
+ * `read: anyone` — `characters`, `artworks`, `projects`, `artists`, `tags`,
+ * `friends`, `media` and the four cropped upload libraries — and because none of
+ * them relate to `users`, the one collection that is `read: authenticated`.
+ * Restricting the read access of any of those would silently empty the public
+ * site instead of raising an error. What anonymous access *does* strip is the
+ * three authenticated-only field groups (`artworks.commission`,
+ * `artworks.reminder`, `siteSettings.notifications`), which is the point: no
+ * public mapper reads them and they must never be cached.
  * ------------------------------------------------------------------ */
 
 async function loadCharacters(): Promise<Character[]> {
@@ -360,6 +514,8 @@ async function loadCharacters(): Promise<Character[]> {
       depth: 1,
       limit: 0,
       sort: ["order", "name"],
+      overrideAccess: false,
+      select: CHARACTER_FIELDS,
     }),
     payload.find({
       collection: "artworks",
@@ -368,6 +524,9 @@ async function loadCharacters(): Promise<Character[]> {
       depth: 2,
       limit: 0,
       sort: ["order", "createdAt"],
+      overrideAccess: false,
+      select: ARTWORK_FIELDS,
+      populate: ARTWORK_POPULATE,
     }),
   ]);
 
@@ -377,7 +536,7 @@ async function loadCharacters(): Promise<Character[]> {
   );
   const altNeighbours = buildAltNeighbours(artworks.docs);
 
-  function toAltSlides(artwork: StoredArtwork): AltSlide[] {
+  function toAltSlides(artwork: LoadedArtwork): AltSlide[] {
     // Inline variants always lead; linked counterparts follow in link order,
     // same-rating ones before cross-rating ones.
     const alts: AltSlide[] = (artwork.altImages ?? []).flatMap((entry) => {
@@ -511,26 +670,21 @@ export async function getArtworkAdminMeta(
 ): Promise<ExampleCommission | undefined> {
   const payload = await getPayloadClient();
 
-  const characters = await payload.find({
-    collection: "characters",
-    where: { slug: { equals: characterSlug } },
-    limit: 1,
-    depth: 0,
-  });
-  const character = characters.docs[0];
-  if (!character) return undefined;
-
+  // Querying through the relationship's own slug rather than resolving the
+  // character first — one round trip, and the same triple that identifies the
+  // artwork in its URL.
   const artworks = await payload.find({
     collection: "artworks",
     where: {
       and: [
         { slug: { equals: slug } },
         { profile: { equals: profile } },
-        { character: { equals: character.id } },
+        { "character.slug": { equals: characterSlug } },
       ],
     },
     limit: 1,
     depth: 0,
+    select: { commission: true },
     overrideAccess: true,
   });
 
@@ -586,7 +740,11 @@ export async function getGallery(): Promise<GalleryItem[]> {
 
 async function loadSiteSettings(): Promise<SiteSettings> {
   const payload = await getPayloadClient();
-  const settings = await payload.findGlobal({ slug: "siteSettings", depth: 1 });
+  const settings = await payload.findGlobal({
+    slug: "siteSettings",
+    depth: 1,
+    overrideAccess: false,
+  });
 
   return {
     maintenanceMode: Boolean(settings.maintenanceMode),
@@ -618,15 +776,25 @@ const cachedSiteSettings = unstable_cache(loadSiteSettings, ["site:settings"], {
 export async function getSiteSettings(): Promise<SiteSettings> {
   try {
     return await cachedSiteSettings();
-  } catch {
+  } catch (error) {
+    // The fallback lifts maintenance mode, which is the inverse of what the
+    // operator asked for, so a serving instance must not do it quietly.
+    // `next build` is the one place where there is legitimately no database.
+    if (process.env.NEXT_PHASE !== "phase-production-build") {
+      console.warn(
+        "[references] site settings unreadable — serving defaults, so maintenance mode is OFF",
+        error,
+      );
+    }
     return DEFAULT_SITE_SETTINGS;
   }
 }
 
-function toProject(stored: StoredProject): Project {
+function toProject(stored: LoadedProject): Project {
   return {
     slug: stored.slug,
     title: stored.title,
+    updatedAt: stored.updatedAt,
     summary: stored.summary ?? undefined,
     cover: toImageRef(stored.coverImage),
     body: stored.body ?? undefined,
@@ -644,13 +812,22 @@ async function loadProjects(): Promise<Project[]> {
     depth: 1,
     limit: 0,
     sort: ["order", "-year", "title"],
+    overrideAccess: false,
+    select: PROJECT_FIELDS,
   });
 
   return projects.docs.map(toProject);
 }
 
+/**
+ * Narrower than `CONTENT_TAG`: a project is only ever assembled from its own
+ * document and its cover upload, so saving an artwork has no business
+ * rebuilding this. Both tags are needed — a re-crop rewrites the cover's URL and
+ * dimensions without touching the project row. The rich-text editor allows
+ * neither uploads nor internal document links, so `body` adds no third source.
+ */
 const cachedProjects = unstable_cache(loadProjects, ["site:projects"], {
-  tags: [CONTENT_TAG],
+  tags: [collectionTag("projects"), collectionTag("project-images")],
 });
 
 export function getProjects(): Promise<Project[]> {
@@ -698,18 +875,33 @@ export function getProfileParams() {
   );
 }
 
+export type ExampleParamsOptions = {
+  /**
+   * Drop in-progress pieces. For the sitemap: a WIP page is a placeholder, so
+   * advertising it wastes crawl budget — but it keeps a working URL, a working
+   * embed and no `noindex`, so anything already linked still resolves.
+   *
+   * Rating is *not* filtered, here or anywhere else. After Dark work stays
+   * listed and indexable; reference URLs go straight to artists and have to
+   * unfurl without the recipient opening the link.
+   */
+  publicOnly?: boolean;
+};
+
 /** Routes for `/ref/[character]/[profile]/[slug]`. */
-export function getExampleParams() {
+export function getExampleParams({ publicOnly }: ExampleParamsOptions = {}) {
   return enumerate((characters) =>
     characters.flatMap((character) =>
       PROFILE_KEYS.flatMap((key) => {
         const profile = character.profiles[key];
         if (!profile) return [];
-        return profile.examples.map((example) => ({
-          character: character.slug,
-          profile: key,
-          slug: example.slug,
-        }));
+        return profile.examples
+          .filter((example) => !(publicOnly && example.isWip))
+          .map((example) => ({
+            character: character.slug,
+            profile: key,
+            slug: example.slug,
+          }));
       }),
     ),
   );
