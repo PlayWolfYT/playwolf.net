@@ -6,6 +6,7 @@ import {
   hexToRgb,
   MIN_TEXT_CONTRAST,
   MIN_UI_CONTRAST,
+  profileThemeVars,
   relativeLuminance,
   validateAccentColor,
   VOID_RGB,
@@ -109,7 +110,7 @@ describe("accent contrast floor", () => {
   };
 
   test("the default cyan already clears every floor, so it is not touched", () => {
-    expect(ratioOf(accentVars("#3abef9")["--accent-500"])).toBeCloseTo(9.62, 1);
+    expect(ratioOf(accentVars("#3abef9")["--accent-500"])).toBeCloseTo(9.23, 1);
     expect(accentVars("#3abef9")["--accent-500"]).toBe("58 190 249");
     expectFloorsMet("#3abef9");
   });
@@ -122,7 +123,7 @@ describe("accent contrast floor", () => {
   });
 
   test("a deep navy is lifted above the text floor but stays blue", () => {
-    // 1.5:1 against #050506 — unreadable as chip or eyebrow copy.
+    // 1.4:1 against #0d0c0b — unreadable as chip or eyebrow copy.
     expect(contrastRatio(hexToRgb("#1b2a5e"), VOID_RGB)).toBeLessThan(
       MIN_TEXT_CONTRAST,
     );
@@ -188,7 +189,37 @@ describe("validateAccentColor", () => {
 
   test("rejects a colour too dark to render as chosen, quoting the ratio", () => {
     const message = validateAccentColor("#1b2a5e");
-    expect(message).toContain("1.5:1");
-    expect(message).toContain("#050506");
+    expect(message).toContain("1.4:1");
+    expect(message).toContain("#0d0c0b");
+  });
+});
+
+describe("profileThemeVars", () => {
+  /**
+   * Expectations are read off `accentVars` rather than hard-coded, because the
+   * ramp lifts an accent that misses the contrast floor — `#dc2626` is one such
+   * colour. Pinning literals here would assert the unlifted ramp and quietly
+   * turn into a second, contradictory source of truth for the maths.
+   */
+  test("maps Tailwind and semantic UI tokens to the profile ramp", () => {
+    const ramp = accentVars("#dc2626");
+    const vars = profileThemeVars("#dc2626");
+
+    expect(vars["--accent-500"]).toBe(ramp["--accent-500"]);
+    expect(vars["--color-glow-500"]).toBe(`rgb(${ramp["--accent-500"]})`);
+    expect(vars["--primary"]).toBe(`rgb(${ramp["--accent-500"]})`);
+    expect(vars["--ring"]).toBe(`rgb(${ramp["--accent-400"]})`);
+    expect(vars["--border"]).toBe(`rgb(${ramp["--accent-400"]} / 0.2)`);
+    expect(vars["--background-image-rim-cyan"]).toContain(
+      `rgb(${ramp["--accent-500"]} / 0.2)`,
+    );
+  });
+
+  test("carries the contrast floor into every derived theme token", () => {
+    // Dark enough to be lifted, so the semantic tokens must not echo the input.
+    expect(profileThemeVars("#dc2626")["--primary"]).not.toBe("rgb(220 38 38)");
+    expect(ratioOf(profileThemeVars("#dc2626")["--accent-500"])).toBeGreaterThanOrEqual(
+      MIN_TEXT_CONTRAST,
+    );
   });
 });

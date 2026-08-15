@@ -28,11 +28,12 @@ export default function GlobalError({
   reset: () => void;
 }) {
   return (
-    <html lang="en" className="scroll-smooth" suppressHydrationWarning>
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} ${outfit.variable} font-sans`}
-        suppressHydrationWarning
-      >
+    <html
+      lang="en"
+      className={`${geistSans.variable} ${geistMono.variable} ${outfit.variable} scroll-smooth`}
+      suppressHydrationWarning
+    >
+      <body className="font-sans" suppressHydrationWarning>
         <ErrorPageFrame
           eyebrow="Critical error"
           title={"The site can't load right now"}
@@ -42,7 +43,7 @@ export default function GlobalError({
             Try again
           </button>
           {process.env.NODE_ENV === "development" && error.message ? (
-            <p className="basis-full break-words text-center font-mono text-[11px] leading-relaxed text-coral-soft/85">
+            <p className="basis-full wrap-break-word text-center font-mono text-[11px] leading-relaxed text-coral-soft/85">
               {error.message}
             </p>
           ) : null}

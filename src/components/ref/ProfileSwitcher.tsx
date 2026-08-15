@@ -1,18 +1,19 @@
 "use client";
 
-import { useRef } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import { useRef } from "react";
+
 import { useNsfwConsent } from "@/components/site/NsfwConsent";
+import { Badge } from "@/components/ui/badge";
+import { buttonVariants } from "@/components/ui/button";
 import { isProfileKey, type ProfileKey } from "@/lib/content";
+import { cn } from "@/lib/utils";
 
 export type ProfileTab = {
   key: ProfileKey;
-  /** Switch label, e.g. "SFW" / "After Dark" */
   label: string;
-  /** Small marker rendered inside the switch segment, e.g. `18+` */
   badge?: string;
-  /** Canonical URL for this profile */
   href: string;
 };
 
@@ -23,25 +24,18 @@ type ProfileSwitcherProps = {
 };
 
 function keyFromPathname(pathname: string): ProfileKey {
-  // /ref/<char>[/<profile>[/<slug>]]
   const segment = pathname.split("/").filter(Boolean)[2];
   return segment && isProfileKey(segment) ? segment : "sfw";
 }
 
 /**
- * Sticky profile bar + SFW / After Dark switch via real App Router
- * navigation (`<Link scroll={false}>`). Each route renders only its own
- * profile markup — the inactive panel is never in the HTML.
- *
  * Because these are two URLs rather than two panels, the switch is a `nav`
  * landmark with `aria-current="page"` — not a `tablist`. The ARIA tabs pattern
  * expects a roving `tabIndex`, which took After Dark out of the tab order
- * entirely even though it is an ordinary link to an ordinary page. The
- * `aria-label` keeps this landmark apart from `SiteHeader`'s "Primary" nav,
- * which the `/ref` layout renders above it.
- *
- * Active state is derived from `usePathname()` so the sliding indicator
- * and accent theme stay in sync with the URL on click and back/forward.
+ * entirely even though it is an ordinary link to an ordinary page, and
+ * `role="tab"` promises a `tabpanel` that does not exist. The `aria-label`
+ * keeps this landmark apart from `SiteHeader`'s "Primary" nav, which the `/ref`
+ * layout renders above it.
  */
 export function ProfileSwitcher({
   characterName,
@@ -58,15 +52,15 @@ export function ProfileSwitcher({
   const pathKey = keyFromPathname(pathname);
   const active = tabs.some((tab) => tab.key === pathKey) ? pathKey : tabs[0].key;
 
-  // Arrow keys still move between the two profiles without a click, so the 18+
-  // warning has to be asked for here as well — the provider's click gate never
-  // sees these.
   const switchTo = async (tab: ProfileTab) => {
     if (tab.key === active) return;
     if (tab.key === "nsfw" && !(await confirmNsfw())) return;
-    router.push(tab.href, { scroll: false });
+    router.push(tab.href, { scroll: true });
   };
 
+  // Arrow keys still move between the two profiles without a click, so the 18+
+  // warning has to be asked for here as well — the provider's click gate never
+  // sees these.
   const onKeyDown = (event: React.KeyboardEvent, index: number) => {
     const delta = event.key === "ArrowRight" ? 1 : event.key === "ArrowLeft" ? -1 : 0;
     if (delta === 0) return;
@@ -76,36 +70,30 @@ export function ProfileSwitcher({
     tabRefs.current[next.key]?.focus();
   };
 
-  const activeIndex = Math.max(
-    tabs.findIndex((tab) => tab.key === active),
-    0,
-  );
-
   return (
-    <div className="sticky top-[calc(3.5rem+env(safe-area-inset-top,0px))] z-20 -mx-4 mb-10 border-b border-white/[0.07] bg-void/75 px-4 backdrop-blur-xl sm:-mx-8 sm:px-8">
-      <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-x-4 gap-y-2 py-3">
-        <div className="min-w-0">
-          <h1 className="truncate font-display text-lg font-medium tracking-tight text-parchment sm:text-xl">
+    <div className="sticky top-[calc(4.5rem+env(safe-area-inset-top,0px))] z-20 mb-10 overflow-hidden rounded-2xl border border-glow-500/35 bg-[linear-gradient(120deg,rgb(var(--accent-500)/0.12),rgb(var(--accent-700)/0.04)_45%,rgb(var(--accent-500)/0.08))] p-3 shadow-[0_20px_70px_-42px_rgb(var(--accent-500)/0.95)] backdrop-blur-2xl">
+      <span
+        className="pointer-events-none absolute inset-x-8 top-0 h-px bg-linear-to-r from-transparent via-glow-300/90 to-transparent shadow-[0_0_18px_rgb(var(--accent-500)/0.8)]"
+        aria-hidden
+      />
+      <div className="flex w-full flex-wrap items-center justify-between gap-3">
+        <div className="min-w-0 px-2">
+          <p className="font-mono text-[0.55rem] uppercase tracking-[0.2em] text-primary">
+            Active character
+          </p>
+          <h1 className="mt-1 truncate font-display text-xl font-bold tracking-[-0.045em]">
             {characterName}
           </h1>
           {species ? (
-            <p className="mt-0.5 truncate font-mono text-[0.6rem] uppercase tracking-[0.2em] text-parchment-dim">
-              {species}
-            </p>
+            <p className="mt-0.5 truncate text-xs text-muted-foreground">{species}</p>
           ) : null}
         </div>
 
         {tabs.length > 1 ? (
           <nav
             aria-label="Character profiles"
-            className="relative grid min-h-11 flex-none select-none grid-cols-2 items-stretch rounded-full border border-white/15 bg-void/80 p-1"
+            className="flex flex-wrap items-center gap-2"
           >
-            {/* Sliding indicator */}
-            <span
-              aria-hidden
-              className="absolute inset-y-1 left-1 w-[calc(50%-0.25rem)] rounded-full border border-glow-500/50 bg-glow-500/15 shadow-glow-sm transition-transform duration-300 ease-out"
-              style={{ transform: `translateX(${activeIndex * 100}%)` }}
-            />
             {tabs.map((tab, index) => {
               const selected = tab.key === active;
               return (
@@ -115,32 +103,45 @@ export function ProfileSwitcher({
                     tabRefs.current[tab.key] = node;
                   }}
                   href={tab.href}
-                  scroll={false}
+                  scroll
                   aria-current={selected ? "page" : undefined}
                   onKeyDown={(event) => onKeyDown(event, index)}
-                  className={`relative z-10 flex items-center justify-center gap-1.5 rounded-full px-4 font-display text-xs font-semibold uppercase tracking-[0.14em] transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-glow-500 sm:px-5 sm:text-sm ${
+                  className={cn(
+                    buttonVariants({
+                      variant: selected ? "default" : "outline",
+                      size: "sm",
+                    }),
+                    "rounded-xl",
                     selected
-                      ? "text-glow-300"
-                      : "text-parchment-dim hover:text-parchment"
-                  }`}
+                      ? "border-glow-300/40 shadow-[0_0_24px_-7px_rgb(var(--accent-500)/0.95)]"
+                      : "border-glow-500/25 bg-glow-500/[0.04] hover:border-glow-400/55 hover:bg-glow-500/12 hover:text-glow-300",
+                  )}
                 >
                   {tab.label}
                   {tab.badge ? (
-                    <span
-                      className={`rounded-full border px-1.5 py-px font-mono text-[0.6rem] font-normal tracking-[0.1em] ${
+                    <Badge
+                      variant="outline"
+                      className={
                         selected
-                          ? "border-glow-500/50 text-glow-400"
-                          : "border-white/15 text-parchment-dim"
-                      }`}
+                          ? "border-primary-foreground/30 text-primary-foreground"
+                          : "border-glow-500/30 text-glow-300"
+                      }
                     >
                       {tab.badge}
-                    </span>
+                    </Badge>
                   ) : null}
                 </Link>
               );
             })}
           </nav>
-        ) : null}
+        ) : (
+          <Badge
+            variant="outline"
+            className="border-glow-500/40 bg-glow-500/10 text-glow-300"
+          >
+            {tabs[0].label}
+          </Badge>
+        )}
       </div>
     </div>
   );

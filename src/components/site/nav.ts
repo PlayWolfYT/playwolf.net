@@ -1,5 +1,6 @@
 /** The site's sections, in the order the header and footer both list them. */
 export const NAV_ITEMS = [
+  { href: "/", label: "Home" },
   { href: "/gallery", label: "Gallery" },
   { href: "/ref", label: "References" },
   { href: "/projects", label: "Projects" },

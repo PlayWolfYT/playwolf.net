@@ -1,6 +1,8 @@
 "use client";
 
+import { ArrowLeftIcon } from "lucide-react";
 import { useSyncExternalStore } from "react";
+import { Button } from "@/components/ui/button";
 
 function subscribe() {
   // History length is fixed for this document view; no external subscription.
@@ -25,15 +27,15 @@ export function MaintenanceBackButton() {
   if (!canGoBack) return null;
 
   return (
-    <button
+    <Button
       type="button"
+      variant="outline"
+      size="lg"
       onClick={() => window.history.back()}
-      className="mt-8 inline-flex min-h-11 items-center gap-2 rounded-full border border-white/[0.12] bg-white/[0.04] px-5 text-sm font-medium text-parchment-muted transition hover:border-glow-500/40 hover:bg-glow-500/10 hover:text-parchment focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-glow-500"
+      className="rounded-xl w-full"
     >
-      <span aria-hidden className="text-glow-400">
-        ←
-      </span>
-      Back
-    </button>
+      <ArrowLeftIcon data-icon="inline-start" />
+      Go back
+    </Button>
   );
 }
