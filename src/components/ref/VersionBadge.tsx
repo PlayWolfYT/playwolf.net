@@ -1,4 +1,6 @@
 import type { Example } from "@/lib/content";
+import { Layers2Icon } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
 /**
  * Corner chip on grid thumbs for pieces with same-rating alternate versions.
@@ -12,22 +14,10 @@ export function VersionBadge({ example }: { example: Example }) {
   const count = sameRating.length + 1;
 
   return (
-    <span className="absolute right-2 top-2 z-20 inline-flex items-center gap-1 rounded-full border border-white/10 bg-void/75 px-2 py-1 font-mono text-[0.6rem] text-parchment-muted backdrop-blur">
-      <svg
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        className="h-3 w-3"
-        aria-hidden
-      >
-        <rect x="8" y="8" width="12" height="12" rx="2" />
-        <path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2" />
-      </svg>
+    <Badge className="absolute right-2 top-2 z-20">
+      <Layers2Icon data-icon="inline-start" />
       {count}
       <span className="sr-only">versions</span>
-    </span>
+    </Badge>
   );
 }

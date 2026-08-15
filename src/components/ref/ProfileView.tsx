@@ -3,6 +3,8 @@ import { ExampleGrid } from "@/components/ref/ExampleGrid";
 import { Reveal } from "@/components/motion/Reveal";
 import { OpenImageLink } from "@/components/ref/OpenImageLink";
 import { SheetPlaceholder } from "@/components/ref/SheetPlaceholder";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { RichTextContent } from "@/lib/rich-text";
 import { isImageSheet, isWipSheet, type Profile, type ProfileKey } from "@/lib/content";
 
@@ -40,15 +42,26 @@ export function ProfileView({ profile, profileKey, basePath }: ProfileViewProps)
 
       {profile.description ? (
         <Reveal>
-          <section className="mx-auto mt-10 max-w-2xl rounded-2xl border border-glow-500/25 bg-glow-500/10 px-6 py-5 text-center shadow-inner-glow">
-            <h2 className="font-display text-xs font-medium uppercase tracking-[0.28em] text-parchment-dim">
-              About
-            </h2>
-            <RichTextContent
-              className="mt-3 text-sm leading-relaxed text-parchment-muted"
-              value={profile.description}
+          <Card className="relative mx-auto mt-10 max-w-3xl overflow-hidden border-glow-500/30 bg-glow-500/[0.08] shadow-[inset_0_1px_0_rgb(var(--accent-300)/0.14),0_24px_70px_-48px_rgb(var(--accent-500)/0.9)] [--card-spacing:--spacing(6)] sm:[--card-spacing:--spacing(8)]">
+            <span
+              className="pointer-events-none absolute inset-x-12 top-0 h-px bg-linear-to-r from-transparent via-glow-300/85 to-transparent"
+              aria-hidden
             />
-          </section>
+            <CardHeader>
+              <Badge
+                variant="outline"
+                className="border-glow-500/35 bg-glow-500/10 text-glow-300"
+              >
+                About this profile
+              </Badge>
+            </CardHeader>
+            <CardContent className="relative">
+              <RichTextContent
+                className="text-base leading-relaxed text-foreground/80"
+                value={profile.description}
+              />
+            </CardContent>
+          </Card>
         </Reveal>
       ) : null}
 
