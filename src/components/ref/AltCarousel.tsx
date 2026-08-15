@@ -8,6 +8,8 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { ArtworkCard, frameFor } from "@/components/ref/ArtworkCard";
 import { OpenImageLink } from "@/components/ref/OpenImageLink";
 import { useNsfwConsent } from "@/components/site/NsfwConsent";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   placeholderFor,
   type AltSlide,
@@ -35,9 +37,6 @@ type AltCarouselProps = {
   main: { src: ImageRef; artist?: Artist; isWip?: boolean };
   alts: AltSlide[];
 };
-
-const CHEVRON_CLASS =
-  "absolute top-1/2 z-20 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-white/15 bg-void/75 text-parchment-muted backdrop-blur transition hover:border-glow-500/50 hover:text-glow-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-glow-500";
 
 /**
  * The artwork plus its alternate versions as one swappable image. The main
@@ -101,11 +100,9 @@ export function AltCarousel({ alt, main, alts }: AltCarouselProps) {
           <button
             type="button"
             onClick={() => void reveal(index)}
-            className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-4 rounded-3xl bg-void/40 px-6 text-center backdrop-blur-sm focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-coral-soft"
+            className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-4 rounded-3xl bg-void/40 px-6 text-center backdrop-blur-xs focus-visible:outline-solid focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-coral-soft"
           >
-            <span className="inline-flex items-center rounded-full border border-coral-soft/50 bg-void/80 px-3 py-1 font-mono text-[0.65rem] uppercase tracking-[0.25em] text-coral-soft">
-              18+
-            </span>
+            <Badge variant="destructive">18+ / reveal</Badge>
             <span className="font-display text-lg font-semibold tracking-tight text-parchment sm:text-xl">
               After Dark version
             </span>
@@ -117,22 +114,26 @@ export function AltCarousel({ alt, main, alts }: AltCarouselProps) {
 
         {count > 1 ? (
           <>
-            <button
+            <Button
               type="button"
+              variant="outline"
+              size="icon"
               onClick={() => setIndex((value) => (value - 1 + count) % count)}
               aria-label="Previous version"
-              className={`${CHEVRON_CLASS} left-3`}
+              className="absolute left-3 top-1/2 z-20 -translate-y-1/2 rounded-full border-glow-500/40 bg-background/80 text-glow-300 shadow-[0_0_24px_-10px_rgb(var(--accent-500)/0.9)] hover:border-glow-400/70 hover:bg-glow-500/15 hover:text-glow-300"
             >
-              <ChevronLeft aria-hidden className="h-5 w-5" />
-            </button>
-            <button
+              <ChevronLeft aria-hidden />
+            </Button>
+            <Button
               type="button"
+              variant="outline"
+              size="icon"
               onClick={() => setIndex((value) => (value + 1) % count)}
               aria-label="Next version"
-              className={`${CHEVRON_CLASS} right-3`}
+              className="absolute right-3 top-1/2 z-20 -translate-y-1/2 rounded-full border-glow-500/40 bg-background/80 text-glow-300 shadow-[0_0_24px_-10px_rgb(var(--accent-500)/0.9)] hover:border-glow-400/70 hover:bg-glow-500/15 hover:text-glow-300"
             >
-              <ChevronRight aria-hidden className="h-5 w-5" />
-            </button>
+              <ChevronRight aria-hidden />
+            </Button>
           </>
         ) : null}
       </div>
@@ -154,7 +155,7 @@ export function AltCarousel({ alt, main, alts }: AltCarouselProps) {
           {current.sourceHref ? (
             <Link
               href={current.sourceHref}
-              className="text-xs text-glow-400 underline-offset-4 transition hover:text-glow-300 hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-glow-500"
+              className="text-xs text-glow-400 underline-offset-4 transition hover:text-glow-300 hover:underline focus-visible:outline-solid focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-glow-500"
             >
               View this version&rsquo;s page
               {current.gated ? <span className="sr-only"> (18+ content)</span> : null}
@@ -176,10 +177,10 @@ export function AltCarousel({ alt, main, alts }: AltCarouselProps) {
                     slide.label ? ` — ${slide.label}` : ""
                   }${slide.gated ? " (18+)" : ""}`}
                   aria-current={active}
-                  className={`relative h-20 w-20 overflow-hidden rounded-xl border transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-glow-500 ${
+                  className={`relative h-20 w-20 overflow-hidden rounded-xl border transition focus-visible:outline-solid focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-glow-500 ${
                     active
                       ? "border-glow-500/70 shadow-glow-sm"
-                      : "border-white/10 opacity-70 hover:border-white/25 hover:opacity-100"
+                      : "border-glow-500/20 opacity-70 hover:border-glow-400/55 hover:opacity-100"
                   }`}
                 >
                   <Image
@@ -196,7 +197,7 @@ export function AltCarousel({ alt, main, alts }: AltCarouselProps) {
                       aria-hidden
                       className="absolute inset-0 z-10 flex items-center justify-center bg-void/30"
                     >
-                      <span className="rounded-full border border-coral-soft/50 bg-void/80 px-1.5 py-0.5 font-mono text-[0.6rem] tracking-[0.1em] text-coral-soft">
+                      <span className="rounded-full border border-coral-soft/50 bg-void/80 px-1.5 py-0.5 font-mono text-[0.6rem] tracking-widest text-coral-soft">
                         18+
                       </span>
                     </span>
