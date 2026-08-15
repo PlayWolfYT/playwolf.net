@@ -1,12 +1,12 @@
 import type { ReactNode } from "react";
 
 /**
- * Track widths of the six-across thumbnail grids (`GalleryGrid`,
- * `ExampleGrid`). Shared with the skeletons so a loading state reserves the
- * same columns the real cards land in and nothing jumps when they arrive.
+ * The thumbnail grid container shared by `GalleryGrid` and `ExampleGrid`.
+ * Repeated here so a loading state reserves the same columns the real cards
+ * land in and nothing jumps when they arrive — keep the three in step.
  */
-export const THUMB_TRACK_CLASS =
-  "w-[calc((100%-1rem)/2)] sm:w-[calc((100%-2rem)/3)] lg:w-[calc((100%-3rem)/4)] xl:w-[calc((100%-4rem)/5)] 2xl:w-[calc((100%-5rem)/6)]";
+export const THUMB_GRID_CLASS =
+  "grid w-full grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4 xl:grid-cols-5";
 
 /**
  * One placeholder bone with the accent shimmer sweeping across it. Shape, size

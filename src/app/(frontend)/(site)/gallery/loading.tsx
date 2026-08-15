@@ -3,7 +3,7 @@ import {
   SkeletonPageHeader,
   SkeletonScreen,
   SkeletonThumbCard,
-  THUMB_TRACK_CLASS,
+  THUMB_GRID_CLASS,
 } from "@/components/site/Skeleton";
 
 /**
@@ -43,11 +43,9 @@ export default function GalleryLoading() {
 
       <Skeleton className="mx-auto mt-6 h-3 w-20 rounded bg-white/[0.04]" />
 
-      <div className="mt-6 flex w-full flex-wrap gap-4">
+      <div className={`mt-6 ${THUMB_GRID_CLASS}`}>
         {Array.from({ length: 12 }).map((_, index) => (
-          <div key={index} className={THUMB_TRACK_CLASS}>
-            <SkeletonThumbCard captionLines={2} />
-          </div>
+          <SkeletonThumbCard key={index} captionLines={2} />
         ))}
       </div>
     </SkeletonScreen>

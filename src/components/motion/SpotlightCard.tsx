@@ -6,13 +6,14 @@ import { useRef, useState } from "react";
 type SpotlightCardProps = {
   children: React.ReactNode;
   className?: string;
+  style?: React.CSSProperties;
 };
 
 /**
  * React Bits-style pointer spotlight combined with Motion's spring hover.
  * The decorative layer ignores pointer events, so nested links remain intact.
  */
-export function SpotlightCard({ children, className = "" }: SpotlightCardProps) {
+export function SpotlightCard({ children, className = "", style }: SpotlightCardProps) {
   const cardRef = useRef<HTMLDivElement>(null);
   // Measured once when the pointer arrives. `getBoundingClientRect()` on every
   // `pointermove` forced a synchronous layout per event, on a card that is
@@ -43,6 +44,7 @@ export function SpotlightCard({ children, className = "" }: SpotlightCardProps) 
     <motion.div
       ref={cardRef}
       className={`relative h-full rounded-3xl ${className}`}
+      style={style}
       onPointerMove={moveSpotlight}
       onPointerEnter={enter}
       onPointerLeave={leave}

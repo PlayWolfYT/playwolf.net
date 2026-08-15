@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 
-import { accentVars, hexToRgb } from "@/lib/accent";
+import { accentVars, hexToRgb, profileThemeVars } from "@/lib/accent";
 
 describe("hexToRgb", () => {
   test("reads six-digit hex with or without the hash", () => {
@@ -54,5 +54,18 @@ describe("accentVars", () => {
     expect(step("--accent-400")).toBeGreaterThan(step("--accent-500"));
     expect(step("--accent-500")).toBeGreaterThan(step("--accent-600"));
     expect(step("--accent-600")).toBeGreaterThan(step("--accent-700"));
+  });
+});
+
+describe("profileThemeVars", () => {
+  test("maps Tailwind and semantic UI tokens to the profile ramp", () => {
+    const vars = profileThemeVars("#dc2626");
+
+    expect(vars["--accent-500"]).toBe("220 38 38");
+    expect(vars["--color-glow-500"]).toBe("rgb(220 38 38)");
+    expect(vars["--primary"]).toBe("rgb(220 38 38)");
+    expect(vars["--ring"]).toBe("rgb(227 81 81)");
+    expect(vars["--border"]).toBe("rgb(227 81 81 / 0.2)");
+    expect(vars["--background-image-rim-cyan"]).toContain("rgb(220 38 38 / 0.2)");
   });
 });

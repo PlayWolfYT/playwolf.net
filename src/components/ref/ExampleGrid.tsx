@@ -1,23 +1,21 @@
 import Image from "next/image";
 import Link from "next/link";
-import type { Example } from "@/lib/content";
-import { exampleThumb, placeholderFor } from "@/lib/content";
+
 import { BackButton } from "@/components/ref/BackButton";
 import { ShimmerImage } from "@/components/ref/ShimmerImage";
 import { VersionBadge } from "@/components/ref/VersionBadge";
 import { WipTape } from "@/components/ref/WipTape";
 import { EmptyState } from "@/components/site/EmptyState";
+import { Card, CardHeader, CardTitle } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import { exampleThumb, placeholderFor, type Example } from "@/lib/content";
 
 type ExampleGridProps = {
   examples: Example[];
-  /** Route prefix for detail links, e.g. `/ref/playwuff/sfw` */
   basePath: string;
-  /** When omitted, no header is rendered (page owns the heading). */
   title?: string;
   description?: string;
-  /** When false, omit the back button (page owns navigation). Defaults to true. */
   showBackButton?: boolean;
-  /** Fallback for the back button when there is no history */
   backHref?: string;
 };
 
@@ -34,92 +32,90 @@ export function ExampleGrid({
   return (
     <section className="w-full">
       {hasHeader ? (
-        <header className="mb-8 text-center">
+        <header className="mb-8">
+          <p className="font-mono text-[0.58rem] uppercase tracking-[0.22em] text-primary">
+            Image set
+          </p>
           {title ? (
-            <h2 className="font-display text-xl font-semibold tracking-tight text-parchment sm:text-2xl">
+            <h2 className="mt-2 font-display text-4xl font-bold tracking-[-0.06em] sm:text-6xl">
               {title}
             </h2>
           ) : null}
           {description ? (
-            <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-parchment-muted">
+            <p className="mt-3 max-w-md text-sm leading-relaxed text-muted-foreground">
               {description}
             </p>
           ) : null}
+          <Separator className="mt-6 bg-linear-to-r from-glow-500/60 via-glow-300/25 to-transparent" />
         </header>
       ) : null}
 
       {examples.length === 0 ? (
         <EmptyState
           title="Nothing here yet"
-          description="Examples will appear here soon. Check back later!"
+          description="Examples will appear here as soon as they are ready."
+          className="border-glow-500/25 bg-glow-500/[0.055] shadow-[0_20px_60px_-42px_rgb(var(--accent-500)/0.85)]"
         />
       ) : (
-        <ul className="flex w-full flex-wrap justify-center gap-4">
+        <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4 xl:grid-cols-5">
           {examples.map((example) => {
             const detailHref = `${basePath}/${example.slug}`;
             const thumbSrc = exampleThumb(example);
             const thumbSizes =
-              "(max-width: 640px) 50vw, (max-width: 1024px) 33vw, (max-width: 1280px) 25vw, (max-width: 1536px) 20vw, 17vw";
+              "(max-width: 640px) 50vw, (max-width: 1024px) 33vw, (max-width: 1280px) 25vw, 20vw";
             // No `loading` prop: the grid always sits below a reference sheet,
             // so lazy — `next/image`'s default — is right for every tile, and
             // spelling it out would collide with `priority` if that ever changed.
-            const thumb = thumbSrc ? (
-              <>
-                <Image
-                  src={thumbSrc}
-                  alt=""
-                  aria-hidden
-                  fill
-                  placeholder={placeholderFor(thumbSrc)}
-                  sizes={thumbSizes}
-                  className="scale-110 object-cover blur-2xl"
-                />
-                <ShimmerImage
-                  src={thumbSrc}
-                  alt={example.title}
-                  fill
-                  placeholder={placeholderFor(thumbSrc)}
-                  sizes={thumbSizes}
-                  className="relative z-10 object-contain"
-                />
-              </>
-            ) : (
-              <div className="flex h-full items-center justify-center bg-void-lift/80 px-3 text-center font-mono text-[0.65rem] uppercase tracking-[0.2em] text-parchment-dim">
-                {example.isWip ? "WIP" : "No image"}
-              </div>
-            );
-
-            const card =
-              "overflow-hidden rounded-2xl border border-white/[0.07] bg-void-lift/60 shadow-glow-sm transition hover:border-glow-500/40";
-            const caption = (
-              <p className="truncate px-3 py-2.5 text-sm font-medium text-parchment">
-                {example.title}
-              </p>
-            );
 
             return (
-              <li
-                key={example.slug}
-                className="w-[calc((100%-1rem)/2)] sm:w-[calc((100%-2rem)/3)] lg:w-[calc((100%-3rem)/4)] xl:w-[calc((100%-4rem)/5)] 2xl:w-[calc((100%-5rem)/6)]"
-              >
-                {/* One link per card, not one per region: the thumbnail and the
-                    caption go to the same place, and two adjacent links with the
-                    same destination is noise for anyone using a screen reader. */}
+              <li key={example.slug}>
                 <Link
                   href={detailHref}
-                  className={`group block ${card} focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-glow-500`}
+                  className="group block h-full rounded-2xl focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring"
                 >
-                  <div className="relative aspect-square w-full overflow-hidden">
-                    <div className="absolute inset-0 origin-center transition duration-500 group-hover:scale-105">
-                      {thumb}
+                  <Card className="h-full gap-0 border-glow-500/25 bg-glow-500/[0.045] py-0 shadow-[0_18px_55px_-40px_rgb(var(--accent-500)/0.85)] transition duration-300 group-hover:-translate-y-1 group-hover:border-glow-400/65 group-hover:bg-glow-500/[0.075] group-hover:shadow-[0_24px_65px_-36px_rgb(var(--accent-500)/0.95)]">
+                    <div className="relative aspect-square w-full overflow-hidden bg-muted">
+                      <div
+                        className="pointer-events-none absolute inset-0 z-10 bg-rim-cyan opacity-45"
+                        aria-hidden
+                      />
+                      {thumbSrc ? (
+                        <>
+                          <Image
+                            src={thumbSrc}
+                            alt=""
+                            aria-hidden
+                            fill
+                            placeholder={placeholderFor(thumbSrc)}
+                            sizes={thumbSizes}
+                            className="scale-110 object-cover blur-2xl opacity-65"
+                          />
+                          <ShimmerImage
+                            src={thumbSrc}
+                            alt={example.title}
+                            fill
+                            placeholder={placeholderFor(thumbSrc)}
+                            sizes={thumbSizes}
+                            className="relative z-10 object-contain transition duration-500 group-hover:scale-[1.035]"
+                          />
+                        </>
+                      ) : (
+                        <div className="flex h-full items-center justify-center bg-grid-soft bg-size-[28px_28px] px-3 text-center font-mono text-[0.58rem] uppercase tracking-[0.18em] text-muted-foreground">
+                          {example.isWip ? "Work in progress" : "Image pending"}
+                        </div>
+                      )}
                       {example.isWip ||
                       (!example.src && example.wipImages.length > 0) ? (
                         <WipTape />
                       ) : null}
+                      <VersionBadge example={example} />
                     </div>
-                    <VersionBadge example={example} />
-                  </div>
-                  {caption}
+                    <CardHeader className="border-t border-glow-500/20 pt-(--card-spacing)">
+                      <CardTitle className="truncate transition-colors group-hover:text-glow-300">
+                        {example.title}
+                      </CardTitle>
+                    </CardHeader>
+                  </Card>
                 </Link>
               </li>
             );
