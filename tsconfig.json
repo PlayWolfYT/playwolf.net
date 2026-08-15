@@ -37,5 +37,11 @@
      `bun:test` module; `tsc` has neither, so both test extensions are excluded
      rather than only `.ts` — a `.test.tsx` would otherwise fail typecheck on
      the import alone. */
-  "exclude": ["node_modules", "**/*.test.ts", "**/*.test.tsx", "scripts"]
+  "exclude": [
+    "node_modules",
+    "**/*.test.ts",
+    "**/*.test.tsx",
+    "scripts/garage-bootstrap.ts",
+    "scripts/verify-framed-crop.ts"
+  ]
 }

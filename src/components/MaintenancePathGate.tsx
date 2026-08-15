@@ -1,7 +1,7 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 
 import { MaintenanceScreen } from "@/components/MaintenanceScreen";
 import { isPathExcludedFromMaintenance } from "@/lib/maintenance";
@@ -11,6 +11,21 @@ type MaintenanceStatus = {
   maintenanceMessage?: string;
   maintenanceExcludedPaths: string[];
 };
+
+const MaintenanceStatusContext = createContext<MaintenanceStatus | null>(null);
+
+export function useMaintenanceAccess() {
+  const status = useContext(MaintenanceStatusContext);
+
+  return {
+    isAccessible(pathname: string) {
+      return (
+        !status?.maintenanceMode ||
+        isPathExcludedFromMaintenance(pathname, status.maintenanceExcludedPaths)
+      );
+    },
+  };
+}
 
 type MaintenancePathGateProps = MaintenanceStatus & {
   children: React.ReactNode;
@@ -64,5 +79,9 @@ export function MaintenancePathGate({
     return <MaintenanceScreen message={status.maintenanceMessage} />;
   }
 
-  return children;
+  return (
+    <MaintenanceStatusContext.Provider value={status}>
+      {children}
+    </MaintenanceStatusContext.Provider>
+  );
 }

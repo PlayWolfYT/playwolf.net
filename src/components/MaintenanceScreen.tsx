@@ -1,77 +1,137 @@
-import { BrandBackdrop, SparkStar } from "@/components/BrandBackdrop";
-import { MaintenanceBackButton } from "@/components/MaintenanceBackButton";
+import { ConstructionIcon } from "lucide-react";
 
-/**
- * `message` comes from the `siteSettings` global, so the reason for the outage
- * can be changed without a deploy. Blank falls back to the standing copy.
- */
+import { BrandBackdrop, SparkStar } from "@/components/BrandBackdrop";
+import { Blaze } from "@/components/canvasui/Blaze";
+import { FlameWrap } from "@/components/canvasui/FlameWrap";
+import { MaintenanceBackButton } from "@/components/MaintenanceBackButton";
+import { Wordmark } from "@/components/site/Wordmark";
+import { Badge } from "@/components/ui/badge";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+
 export function MaintenanceScreen({ message }: { message?: string }) {
   return (
-    <main className="relative isolate flex min-h-dvh flex-col items-center justify-center overflow-hidden bg-void px-6 py-16">
-      <div
-        className="pointer-events-none absolute inset-x-0 top-0 h-[100lvh] overflow-hidden"
-        aria-hidden
+    <main className="relative isolate min-h-svh bg-background">
+      {/* `fixed` + `100lvh` keeps the blaze/backdrop stable when mobile browser
+          chrome shows/hides. An `absolute` `h-lvh` child inside `h-dvh` (Blaze
+          also uses `overflow: auto` on its capture box) makes that layer
+          scrollable by the chrome delta. The shell uses `svh` so the page
+          never grows past the visible area while the toolbar is showing. */}
+      <Blaze
+        className="pointer-events-none fixed inset-x-0 top-0 h-lvh w-full overflow-hidden"
+        style={{ position: "fixed" }}
+        height={0.86}
+        distortion={0.72}
+        distortionScale={0.65}
+        speed={0.82}
+        sparks={0.9}
+        sparkDensity={1.65}
+        sparkSize={1.1}
+        layers={5}
+        smoke={0.68}
+        glow={1.65}
+        sparkColor={[0.35, 0.86, 1]}
+        smokeColor={[0.08, 0.3, 0.9]}
       >
-        <BrandBackdrop density="full" />
-      </div>
+        <div className="relative h-full overflow-hidden">
+          <div
+            className="pointer-events-none absolute inset-0 overflow-hidden"
+            aria-hidden
+          >
+            <BrandBackdrop density="full" />
+          </div>
 
-      <div className="relative z-10 flex w-full max-w-lg flex-col items-center">
-        <div className="mb-10 flex items-center justify-center gap-3">
-          <span className="relative flex h-2 w-2">
-            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-glow-400/40 opacity-75" />
-            <span className="relative inline-flex h-2 w-2 rounded-full bg-glow-500 shadow-glow-sm ring-4 ring-glow-500/25" />
-          </span>
-          <span className="font-mono text-xs uppercase tracking-[0.35em] text-parchment-dim">
-            Status
-          </span>
-          <span className="rounded-full border border-glow-500/35 bg-glow-500/10 px-3 py-1 text-xs font-medium text-glow-400 shadow-glow-sm">
-            Maintenance
-          </span>
+          <div
+            className="pointer-events-none absolute left-[8%] top-[14%] size-64 rounded-full border border-glow-500/20 animate-drift sm:size-96"
+            aria-hidden
+          />
+          <SparkStar className="pointer-events-none absolute right-[12%] top-[18%] size-8 text-glow-400/65 animate-twinkle sm:size-12" />
+          <SparkStar className="pointer-events-none absolute bottom-[16%] left-[14%] size-5 text-glow-300/45 animate-twinkle [animation-delay:1.2s]" />
         </div>
+      </Blaze>
 
-        <div className="relative w-full rounded-3xl border border-white/[0.08] bg-gradient-to-b from-white/[0.07] to-white/[0.02] p-px shadow-glow-md backdrop-blur-2xl">
-          <div className="absolute -right-6 -top-4 text-glow-500/50 animate-twinkle">
-            <SparkStar className="h-5 w-5" />
-          </div>
-          <div className="absolute -left-4 top-1/3 text-glow-500/30">
-            <SparkStar className="h-3 w-3" />
-          </div>
+      <div className="relative z-10 flex min-h-svh items-center justify-center px-4 py-16 sm:px-8 sm:py-40">
+        <FlameWrap
+          className="relative z-10 w-full max-w-2xl"
+          color={[0.18, 0.7, 1]}
+          intensity={0.78}
+          height={120}
+          spread={18}
+          radius={30}
+          speed={0.45}
+          scale={0.68}
+          turbulence={0.68}
+          turbulenceScale={0.75}
+          turbulenceReach={28}
+          sparks={1.7}
+          sparkSize={0.45}
+          sparkDensity={1.25}
+          sparkSpeed={1.15}
+          rim={2.4}
+          melt={3}
+          distortion={8}
+          smoke={1.2}
+          ember={1.8}
+          scorch={0.35}
+        >
+          <Card className="relative w-full overflow-hidden rounded-3xl border border-glow-500/25 bg-card/94 shadow-glow-lg [--card-spacing:--spacing(7)] sm:[--card-spacing:--spacing(10)]">
+            <div
+              className="pointer-events-none absolute inset-x-12 top-0 h-px bg-linear-to-r from-transparent via-glow-400/90 to-transparent shadow-[0_0_24px_rgb(var(--accent-500)/0.75)]"
+              aria-hidden
+            />
+            <div
+              className="pointer-events-none absolute -right-24 top-24 size-72 rounded-full bg-glow-500/12 blur-3xl"
+              aria-hidden
+            />
+            <CardHeader>
+              <div className="flex flex-wrap items-center justify-between gap-4">
+                <Wordmark />
+                <Badge variant="secondary">
+                  <span className="size-1.5 animate-pulse rounded-full bg-secondary-foreground" />
+                  Site maintenance
+                </Badge>
+              </div>
+              <CardTitle className="mt-8 text-4xl font-bold leading-[0.92] tracking-[-0.06em] sm:mt-10 sm:text-6xl sm:leading-[0.88] sm:tracking-[-0.07em] lg:text-7xl">
+                In maintenance
+              </CardTitle>
+            </CardHeader>
 
-          <div className="relative rounded-[calc(1.5rem-1px)] bg-void-panel/80 px-8 py-12 shadow-inner-glow sm:px-12 sm:py-14">
-            <p className="text-center font-display text-sm font-medium uppercase tracking-[0.22em] text-glow-500">
-              playwolf.net
-            </p>
-            <h1 className="mt-4 text-center font-display text-4xl font-semibold tracking-tight text-parchment sm:text-5xl">
-              Website{" "}
-              <span className="bg-gradient-to-r from-glow-300 via-glow-500 to-glow-600 bg-clip-text text-transparent">
-                in development
-              </span>
-            </h1>
-            {message ? (
-              <p className="mx-auto mt-6 max-w-md whitespace-pre-line text-center text-base leading-relaxed text-parchment-muted">
-                {message}
+            <CardContent className="space-y-6">
+              <p className="max-w-xl whitespace-pre-line text-base leading-relaxed text-muted-foreground">
+                {message ?? "We’re making a few improvements behind the scenes."}
               </p>
-            ) : (
-              <>
-                <p className="mx-auto mt-6 max-w-md text-center text-base leading-relaxed text-parchment-muted">
-                  The website is still currently in development as I dont have much time
-                  to work on it.
-                </p>
-                <p className="mx-auto mt-6 max-w-md text-center text-base leading-relaxed text-parchment-muted">
-                  Please check back again later~
-                </p>
-              </>
-            )}
-            <div className="mx-auto mt-10 h-px max-w-xs bg-gradient-to-r from-transparent via-glow-500/55 to-transparent" />
-          </div>
-        </div>
 
-        <MaintenanceBackButton />
+              <div className="relative overflow-hidden rounded-2xl border border-glow-500/25 bg-glow-500/8 p-4 shadow-inner-glow">
+                <div className="relative flex items-center gap-3">
+                  <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-glow-500/15 text-glow-300">
+                    <ConstructionIcon aria-hidden />
+                  </span>
+                  <div>
+                    <p className="font-display text-sm font-semibold">
+                      Work is underway
+                    </p>
+                    <p className="mt-0.5 text-sm text-muted-foreground">
+                      The site will be available again once maintenance is complete.
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <MaintenanceBackButton />
+            </CardContent>
 
-        <p className="mt-10 text-center text-xs text-parchment-dim/80">
-          © <span suppressHydrationWarning>{new Date().getFullYear()}</span>{" "}
-          playwolf.net
-        </p>
+            <CardFooter className="flex-col items-start">
+              <p className="font-mono text-[0.58rem] uppercase tracking-[0.2em] text-muted-foreground">
+                © <span suppressHydrationWarning>{new Date().getFullYear()}</span>{" "}
+                playwolf.net
+              </p>
+            </CardFooter>
+          </Card>
+        </FlameWrap>
       </div>
     </main>
   );
