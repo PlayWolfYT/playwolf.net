@@ -1,8 +1,15 @@
 import type { Metadata } from "next";
+import { FolderKanbanIcon } from "lucide-react";
 
-import { EmptyState } from "@/components/site/EmptyState";
 import { PageHeader } from "@/components/site/PageHeader";
-import { ProjectCard } from "@/components/site/ProjectCard";
+import { ProjectBoard } from "@/components/site/ProjectBoard";
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/components/ui/empty";
 import { getProjects } from "@/lib/references";
 
 export const metadata: Metadata = {
@@ -15,28 +22,27 @@ export default async function ProjectsPage() {
   const projects = await getProjects();
 
   return (
-    <div className="mx-auto w-full max-w-6xl px-4 pb-24 pt-16 sm:px-8 sm:pt-24">
+    <div className="mx-auto w-full max-w-7xl px-4 pb-24 pt-12 sm:px-6 sm:pt-20 lg:px-8 lg:pb-32">
       <PageHeader
-        eyebrow="playwolf.net"
+        eyebrow="Things I make"
         title="Projects"
-        lede="Things built, in progress, and planned."
+        lede="Web experiments, useful tools, and ideas I wanted to try for myself."
       />
 
       {projects.length === 0 ? (
-        <div className="mt-12">
-          <EmptyState
-            title="Nothing here yet"
-            description="Projects will appear here as they are ready."
-          />
-        </div>
+        <Empty className="mt-10 min-h-80 border bg-card/70">
+          <EmptyHeader>
+            <EmptyMedia variant="icon">
+              <FolderKanbanIcon />
+            </EmptyMedia>
+            <EmptyTitle>No projects here yet</EmptyTitle>
+            <EmptyDescription>
+              I&rsquo;ll add them whenever there is something worth sharing.
+            </EmptyDescription>
+          </EmptyHeader>
+        </Empty>
       ) : (
-        <ul className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {projects.map((project) => (
-            <li key={project.slug}>
-              <ProjectCard project={project} />
-            </li>
-          ))}
-        </ul>
+        <ProjectBoard projects={projects} />
       )}
     </div>
   );

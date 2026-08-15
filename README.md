@@ -31,6 +31,44 @@ Open [http://localhost:3000](http://localhost:3000). Admin lives at
 Maintenance mode is toggled under **Site settings → Status** in the admin — it
 is not an environment variable.
 
+### Seed data
+
+With Postgres and Garage running, populate every public content area plus an
+admin account:
+
+```bash
+bun run seed
+```
+
+The command is idempotent: it updates its named fixtures, repairs any seeded
+upload whose Garage objects are missing, and leaves unrelated content alone.
+Placeholder uploads come from [`placehold.co`](https://placehold.co) and are
+labelled and colour-coded for the state they represent; an equivalent image is
+generated locally if that service is unavailable. If Next is running, the seed
+also invalidates its content and route caches (`SEED_FRONTEND_URL` overrides the
+default `http://localhost:3000`).
+
+Fixtures use descriptive prefixes (`CH`, `ART`, `FR`, `AR`, `TG`, and `PR`) and
+state exactly what they cover, such as `CH Single SFW Profile - Without Ref`.
+The scenario catalog is explicit so coverage remains reviewable, while shared
+loops handle repetitive upserts. Use `seed:fresh` after adding, removing, or
+renaming scenarios so retired fixtures do not remain beside the new matrix.
+
+For a completely clean fixture database, stop the dev server and run:
+
+```bash
+bun run seed:fresh
+```
+
+This deletes uploads through Payload (including Garage objects), drops and
+rebuilds the Payload database schema, and seeds it again. Restart the dev server
+afterward so it cannot retain pre-seed cached content.
+
+The development login is `testing@testing.com` / `testing`. Override
+it with `SEED_ADMIN_EMAIL` and `SEED_ADMIN_PASSWORD`. Production seeding is
+blocked unless `SEED_ALLOW_PRODUCTION=true`; destructive production or remote
+resets additionally require `SEED_ALLOW_DESTRUCTIVE=true`.
+
 ## Production
 
 ```bash

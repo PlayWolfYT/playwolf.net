@@ -5,8 +5,11 @@ import { EmptyState } from "@/components/site/EmptyState";
 import { FacetBar, galleryHref, parseFilter } from "@/components/site/FacetBar";
 import { GalleryGrid } from "@/components/site/GalleryGrid";
 import { PageHeader } from "@/components/site/PageHeader";
+import { Badge } from "@/components/ui/badge";
+import { buttonVariants } from "@/components/ui/button";
 import { matchesFilter } from "@/lib/content";
 import { getGallery } from "@/lib/references";
+import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = {
   title: "Gallery",
@@ -25,22 +28,27 @@ export default async function GalleryPage({ searchParams }: PageProps) {
   const shown = items.filter((item) => matchesFilter(item, filter));
 
   return (
-    <div className="mx-auto w-full max-w-[100rem] px-4 pb-24 pt-16 sm:px-8 sm:pt-24">
+    <div className="mx-auto w-full max-w-7xl px-4 pb-24 pt-12 sm:px-6 sm:pt-20 lg:px-8 lg:pb-32">
       <PageHeader
-        eyebrow="Everything, everywhere"
+        eyebrow="Image index"
         title="Gallery"
-        lede="Every piece across every character. Narrow it down by whoever drew it, whoever is in it, or what it is."
+        lede="Every piece across every character. Filter by artist, cast, tag, or state without losing the shareable URL."
       />
 
-      <div className="mt-12">
+      <div className="mt-10">
         <FacetBar filter={filter} items={items} />
       </div>
 
-      <p className="mt-6 text-center font-mono text-[0.65rem] uppercase tracking-[0.2em] text-parchment-dim">
-        {shown.length} {shown.length === 1 ? "piece" : "pieces"}
-      </p>
+      <div className="mt-5 flex items-center justify-between gap-4">
+        <p className="font-mono text-[0.6rem] uppercase tracking-[0.2em] text-muted-foreground">
+          Result set
+        </p>
+        <Badge variant="outline">
+          {shown.length} {shown.length === 1 ? "piece" : "pieces"}
+        </Badge>
+      </div>
 
-      <div className="mt-6">
+      <div className="mt-5">
         {shown.length === 0 ? (
           <EmptyState
             title="Nothing matches"
@@ -51,7 +59,10 @@ export default async function GalleryPage({ searchParams }: PageProps) {
                 includeNsfw: filter.includeNsfw,
                 includeWip: filter.includeWip,
               })}
-              className="inline-flex min-h-11 items-center justify-center rounded-full border border-glow-500/40 bg-glow-500/10 px-6 text-sm font-medium text-glow-400 transition hover:bg-glow-500/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-glow-500"
+              className={cn(
+                buttonVariants({ variant: "default", size: "lg" }),
+                "rounded-xl",
+              )}
             >
               Clear filters
             </Link>

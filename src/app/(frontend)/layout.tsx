@@ -1,33 +1,34 @@
 import type { Metadata, Viewport } from "next";
-import { Geist, Geist_Mono, Outfit } from "next/font/google";
+import { IBM_Plex_Mono, Manrope, Syne } from "next/font/google";
 import { cookies } from "next/headers";
 import { NsfwConsentProvider } from "@/components/site/NsfwConsent";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import { ogImage, OG_SITE_FIELDS } from "@/lib/embed";
 import { NSFW_CONSENT_COOKIE } from "@/lib/nsfw";
 import { getSiteSettings } from "@/lib/references";
 import "../globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const manrope = Manrope({
+  variable: "--font-manrope",
   subsets: ["latin"],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const ibmPlexMono = IBM_Plex_Mono({
+  variable: "--font-ibm-plex-mono",
   subsets: ["latin"],
+  weight: ["400", "500", "600"],
 });
 
-/** Only the weights the display styles actually ask for; 700 is never used. */
-const outfit = Outfit({
-  variable: "--font-outfit",
+const syne = Syne({
+  variable: "--font-syne",
   subsets: ["latin"],
-  weight: ["300", "400", "500", "600"],
+  weight: ["400", "500", "600", "700", "800"],
 });
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://playwolf.net";
 
 const siteDescription =
-  "Character reference sheets, art examples, and portfolio for playwolf.";
+  "PlayWolf's personal site for characters, artwork, and side projects.";
 
 /**
  * Site-wide defaults only. Deliberately absent:
@@ -82,7 +83,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export const viewport: Viewport = {
-  themeColor: "#050506",
+  themeColor: "#0d0c0b",
   viewportFit: "cover",
 };
 
@@ -132,18 +133,21 @@ export default async function RootLayout({
   const nsfwConsent = cookieStore.get(NSFW_CONSENT_COOKIE)?.value === "1";
 
   return (
-    <html lang="en" className="scroll-smooth" suppressHydrationWarning>
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} ${outfit.variable} font-sans`}
-        suppressHydrationWarning
-      >
-        {/* The provider renders `children` whether or not consent was given —
-            the warning is an overlay on top. That is required, not an
-            oversight: link unfurlers and Google Images read the markup without
-            a consent cookie, and After Dark references have to embed. */}
-        <NsfwConsentProvider initialConsent={nsfwConsent}>
-          {children}
-        </NsfwConsentProvider>
+    <html
+      lang="en"
+      className={`${manrope.variable} ${ibmPlexMono.variable} ${syne.variable} scroll-smooth`}
+      suppressHydrationWarning
+    >
+      <body className="font-sans" suppressHydrationWarning>
+        <TooltipProvider>
+          {/* The provider renders `children` whether or not consent was given —
+              the warning is an overlay on top. That is required, not an
+              oversight: link unfurlers and Google Images read the markup without
+              a consent cookie, and After Dark references have to embed. */}
+          <NsfwConsentProvider initialConsent={nsfwConsent}>
+            {children}
+          </NsfwConsentProvider>
+        </TooltipProvider>
       </body>
     </html>
   );

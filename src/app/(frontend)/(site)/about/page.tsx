@@ -1,6 +1,14 @@
 import type { Metadata } from "next";
+import { PenLineIcon } from "lucide-react";
 
 import { PageHeader } from "@/components/site/PageHeader";
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/components/ui/empty";
 import { getSiteSettings } from "@/lib/references";
 import { RichTextContent, richTextToMetaDescription } from "@/lib/rich-text";
 
@@ -17,21 +25,31 @@ export default async function AboutPage() {
   const { about } = await getSiteSettings();
 
   return (
-    <div className="mx-auto w-full max-w-3xl px-4 pb-24 pt-16 sm:px-8 sm:pt-24">
-      <PageHeader eyebrow="playwolf.net" title="About" />
+    <div className="mx-auto w-full max-w-7xl px-4 pb-24 pt-12 sm:px-6 sm:pt-20 lg:px-8 lg:pb-32">
+      <PageHeader
+        eyebrow="About me"
+        title="Hi, I&rsquo;m PlayWolf."
+        lede="This is my small corner of the internet for characters, art, code, and things I make because they sound fun."
+      />
 
-      <div className="mt-12 rounded-3xl border border-white/[0.07] bg-gradient-to-br from-void-lift/90 to-void-panel/70 px-6 py-8 shadow-glow-sm backdrop-blur-xl sm:px-10 sm:py-10">
-        {about ? (
+      {about ? (
+        <article className="mt-12 max-w-3xl">
           <RichTextContent
-            className="text-sm leading-relaxed text-parchment-muted"
+            className="text-base leading-8 text-muted-foreground sm:text-lg"
             value={about}
           />
-        ) : (
-          <p className="text-center text-sm leading-relaxed text-parchment-muted">
-            Nothing written here yet — check back soon.
-          </p>
-        )}
-      </div>
+        </article>
+      ) : (
+        <Empty className="mt-10 min-h-96 border bg-card/70">
+          <EmptyHeader>
+            <EmptyMedia variant="icon">
+              <PenLineIcon />
+            </EmptyMedia>
+            <EmptyTitle>I haven&rsquo;t written this part yet</EmptyTitle>
+            <EmptyDescription>There will be more about me here soon.</EmptyDescription>
+          </EmptyHeader>
+        </Empty>
+      )}
     </div>
   );
 }

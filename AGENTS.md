@@ -62,15 +62,22 @@ fails at _upload time_, so the app still boots and renders without Garage runnin
   pushes schema changes directly on first connect — do **not** run `bun run migrate` locally
   (migrations only apply in production via `prodMigrations`). The first request after boot
   is slow ("Pulling schema from database…") while it syncs.
-- **First `/admin` visit on an empty DB** shows Payload's create-first-user form —
-  there is no seed/CLI step. `smoke-seed.ts` seeds sample content but does not create a user.
+- **Seed commands are available.** `bun run seed` idempotently adds/updates the
+  complete fixture set, including an admin; `bun run seed:fresh` removes uploaded
+  objects, drops/rebuilds the Payload schema, and reseeds it. Run the fresh variant
+  with `bun run dev` stopped, then restart it so Next reconnects to the rebuilt
+  schema. Fixtures are named by scenario (`CH`, `ART`, `FR`, `AR`, `TG`, `PR`) and
+  defined as explicit catalogs applied through shared upsert loops. Use the fresh
+  variant after renaming/removing scenarios so retired fixtures disappear. The first
+  `/admin` visit only shows Payload's create-first-user form when the database has
+  not been seeded.
   Admin styling lives in `src/app/(payload)/custom.scss` (CSS variables / BEM per Payload docs).
 - **Commission reminders** hit `GET/POST /api/cron/commission-reminders` with
   `Authorization: Bearer $CRON_SECRET` (or `x-cron-secret`). Schedule daily in Coolify.
-- **Frontend content is cached with `unstable_cache`** and refreshed via `revalidateTag`
-  hooks on save. After creating/editing content in `/admin`, the public page (e.g.
-  `/projects`) can lag by a moment; reload after a second and it appears. This is expected,
-  not a bug.
+- **Production frontend content is cached with `unstable_cache`; development reads are
+  uncached.** Admin writes immediately expire the shared content tag. The seed CLI calls the
+  authenticated `/api/cache/revalidate` boundary when Next is running; after an offline
+  `seed:fresh`, starting Next is sufficient.
 - **No email adapter** is configured, so Payload logs "No email adapter provided" and writes
   emails to the console — harmless in dev.
 - **`force-dynamic` in `src/app/(frontend)/layout.tsx` is permanent** — five separate blockers

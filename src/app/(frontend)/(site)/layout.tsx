@@ -45,11 +45,11 @@ export default async function SiteLayout({
   const { links } = await getSiteSettings();
 
   return (
-    <div className="relative isolate flex min-h-dvh flex-col bg-void">
+    <div className="relative isolate flex min-h-dvh flex-col bg-background">
       <JsonLd nodes={identityGraph(links.map((link) => link.url))} />
       {/* `100lvh` keeps the layer stable when mobile browser chrome shows/hides. */}
       <div
-        className="pointer-events-none fixed inset-x-0 top-0 h-[100lvh] overflow-hidden"
+        className="pointer-events-none fixed inset-x-0 top-0 h-lvh overflow-hidden"
         aria-hidden
       >
         <BrandBackdrop density="soft" />
