@@ -4,6 +4,7 @@ import { SparkStar } from "@/components/BrandBackdrop";
 import { ArtistBar } from "@/components/ref/ArtistBar";
 import { WipQuoteCycler } from "@/components/ref/WipQuoteCycler";
 import { WipTape } from "@/components/ref/WipTape";
+import { Progress, ProgressLabel, ProgressValue } from "@/components/ui/progress";
 import { hexToRgb, type Rgb } from "@/lib/accent";
 import type { RefSheetWip, WipIconName } from "@/lib/content";
 
@@ -141,8 +142,17 @@ function scatterSlots(count: number, ratio: number, random: () => number) {
  * the active profile accent.
  */
 export async function SheetPlaceholder({ sheet }: SheetPlaceholderProps) {
-  const { badge, subtitle, quotes, icons, iconCount, gradient, interval, aspect } =
-    sheet.wip;
+  const {
+    badge,
+    subtitle,
+    quotes,
+    icons,
+    iconCount,
+    gradient,
+    interval,
+    aspect,
+    progress,
+  } = sheet.wip;
 
   const iconComponents = await loadIcons(icons);
   const usable = icons.filter((name) => name in iconComponents);
@@ -220,13 +230,13 @@ export async function SheetPlaceholder({ sheet }: SheetPlaceholderProps) {
 
   return (
     <figure className="mx-auto w-full min-w-0 max-w-4xl">
-      <div className="group rounded-3xl bg-gradient-to-br from-glow-500/45 via-white/[0.07] to-glow-700/30 p-px shadow-glow-md transition hover:from-glow-500/55">
+      <div className="group rounded-3xl bg-linear-to-br from-glow-500/45 via-white/[0.07] to-glow-700/30 p-px shadow-glow-md transition hover:from-glow-500/55">
         <div className="overflow-hidden rounded-[calc(1.5rem-1px)] bg-void">
           <div
-            className="relative w-full min-w-0 overflow-hidden sm:[aspect-ratio:var(--wip-aspect)]"
+            className="relative w-full min-w-0 overflow-hidden sm:aspect-(--wip-aspect)"
             style={frameStyle}
           >
-            <div className="relative flex w-full min-w-0 flex-col items-center px-6 pb-10 pt-14 sm:absolute sm:inset-0 sm:px-10 sm:py-14">
+            <div className="relative flex min-h-full w-full min-w-0 flex-col items-center px-6 pb-10 pt-14 sm:px-10 sm:py-14">
               {sheet.kind === "wip" ? (
                 <div className="pointer-events-none absolute inset-0 z-20 origin-center transition duration-500 group-hover:scale-[1.02]">
                   <WipTape />
@@ -234,11 +244,11 @@ export async function SheetPlaceholder({ sheet }: SheetPlaceholderProps) {
               ) : null}
               {/* Stage atmosphere */}
               <div
-                className="pointer-events-none absolute inset-0 bg-gradient-to-br from-void-lift via-void-panel to-void"
+                className="pointer-events-none absolute inset-0 bg-linear-to-br from-void-lift via-void-panel to-void"
                 aria-hidden
               />
               <div
-                className="pointer-events-none absolute inset-0 bg-[size:34px_34px] bg-grid-soft opacity-70 [mask-image:radial-gradient(ellipse_at_center,transparent_12%,black_72%)]"
+                className="pointer-events-none absolute inset-0 bg-size-[34px_34px] bg-grid-soft opacity-70 mask-[radial-gradient(ellipse_at_center,transparent_12%,black_72%)]"
                 aria-hidden
               />
               {washStyle ? (
@@ -256,7 +266,7 @@ export async function SheetPlaceholder({ sheet }: SheetPlaceholderProps) {
 
               {/* Icon scatter — faded toward the centre so the copy stays legible */}
               <div
-                className="pointer-events-none absolute inset-0 [mask-image:radial-gradient(ellipse_58%_62%_at_center,transparent_25%,black_82%)]"
+                className="pointer-events-none absolute inset-0 mask-[radial-gradient(ellipse_58%_62%_at_center,transparent_25%,black_82%)]"
                 aria-hidden
               >
                 {dust.map((dot, position) => (
@@ -293,7 +303,7 @@ export async function SheetPlaceholder({ sheet }: SheetPlaceholderProps) {
 
               {/* Slow sheen sweeping across the frame */}
               <span
-                className="pointer-events-none absolute inset-0 bg-shimmer animate-shimmer [animation-duration:7s]"
+                className="pointer-events-none absolute inset-0 bg-shimmer animate-shimmer animation-duration-[7s]"
                 aria-hidden
               />
 
@@ -303,7 +313,7 @@ export async function SheetPlaceholder({ sheet }: SheetPlaceholderProps) {
                 aria-hidden
               />
               <span
-                className="pointer-events-none absolute inset-[1.15rem] rounded-2xl border border-dashed border-white/[0.06]"
+                className="pointer-events-none absolute inset-[1.15rem] rounded-2xl border border-dashed border-white/6"
                 aria-hidden
               />
               <span
@@ -324,7 +334,7 @@ export async function SheetPlaceholder({ sheet }: SheetPlaceholderProps) {
               />
 
               {/* Badge tab hanging from the top edge */}
-              <span className="absolute left-1/2 top-0 z-20 inline-flex -translate-x-1/2 items-center gap-2 rounded-b-2xl border-x border-b border-glow-500/30 bg-void/85 px-4 py-1.5 font-mono text-[0.6rem] font-medium uppercase tracking-[0.28em] text-glow-300 backdrop-blur">
+              <span className="absolute left-1/2 top-0 z-20 inline-flex -translate-x-1/2 items-center gap-2 rounded-b-2xl border-x border-b border-glow-500/30 bg-void/85 px-4 py-1.5 font-mono text-[0.6rem] font-medium uppercase tracking-[0.28em] text-glow-300 backdrop-blur-sm">
                 <span
                   className="h-1.5 w-1.5 rounded-full bg-glow-400 animate-slow-pulse"
                   aria-hidden
@@ -332,15 +342,14 @@ export async function SheetPlaceholder({ sheet }: SheetPlaceholderProps) {
                 {badge}
               </span>
 
-              {/* Content column — w-full so text-center is relative to the frame;
-                  min-h-full + justify-center vertically centres copy inside the
-                  locked aspect box from sm up. */}
-              <div className="relative z-10 flex w-full min-h-full flex-col items-center justify-center text-center">
+              {/* The content remains in flow so long quotes and progress details
+                  can grow a wide aspect frame instead of being clipped. */}
+              <div className="relative z-10 flex min-h-full w-full flex-col items-center justify-center text-center">
                 <h2
-                  className={`w-full break-words bg-clip-text font-display text-2xl font-medium tracking-tight text-transparent sm:text-3xl ${
+                  className={`w-full wrap-break-word bg-clip-text font-display text-2xl font-medium tracking-tight text-transparent sm:text-3xl ${
                     tinted
                       ? ""
-                      : "bg-gradient-to-r from-parchment via-glow-300 to-parchment"
+                      : "bg-linear-to-r from-parchment via-glow-300 to-parchment"
                   }`}
                   style={titleStyle}
                 >
@@ -351,9 +360,9 @@ export async function SheetPlaceholder({ sheet }: SheetPlaceholderProps) {
                   className="mt-4 flex items-center justify-center gap-3"
                   aria-hidden
                 >
-                  <span className="h-px w-12 bg-gradient-to-r from-transparent to-glow-500/50 sm:w-16" />
+                  <span className="h-px w-12 bg-linear-to-r from-transparent to-glow-500/50 sm:w-16" />
                   <SparkStar className="h-3 w-3 animate-twinkle text-glow-400/80" />
-                  <span className="h-px w-12 bg-gradient-to-l from-transparent to-glow-500/50 sm:w-16" />
+                  <span className="h-px w-12 bg-linear-to-l from-transparent to-glow-500/50 sm:w-16" />
                 </div>
 
                 <p className="mt-5 w-full font-mono text-[0.62rem] uppercase tracking-[0.24em] text-parchment-dim">
@@ -362,6 +371,12 @@ export async function SheetPlaceholder({ sheet }: SheetPlaceholderProps) {
 
                 <div className="mt-5 flex w-full flex-col items-center">
                   <WipQuoteCycler quotes={quotes} interval={interval} />
+                  {typeof progress === "number" ? (
+                    <Progress value={progress} className="mt-6 w-full max-w-sm">
+                      <ProgressLabel>Progress</ProgressLabel>
+                      <ProgressValue />
+                    </Progress>
+                  ) : null}
                 </div>
               </div>
             </div>

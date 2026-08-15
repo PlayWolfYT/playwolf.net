@@ -66,9 +66,9 @@ export function WipQuoteCycler({ quotes, interval }: WipQuoteCyclerProps) {
 
   return (
     <>
-      <div className="flex min-h-[3.25rem] w-full max-w-md items-center justify-center">
+      <div className="flex min-h-14 w-full max-w-md items-center justify-center py-1">
         <p
-          className={`text-center font-display text-lg font-light italic leading-snug text-glow-300/90 transition-all duration-500 sm:text-xl ${
+          className={`pb-1 text-center font-display text-lg font-light italic leading-snug text-glow-300/90 transition-all duration-500 sm:text-xl ${
             visible
               ? "translate-y-0 opacity-100 blur-0"
               : "translate-y-1 opacity-0 blur-[2px]"

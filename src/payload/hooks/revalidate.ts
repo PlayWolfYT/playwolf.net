@@ -36,14 +36,14 @@ export function documentTag(slug: string, id: number | string): string {
  * exactly where the Payload CLI runs (`payload migrate`, seeds, scripts). A
  * failed cache purge must never fail the write that triggered it.
  *
- * Next 16 requires a cache-life profile; `max` expires every entry carrying the
- * tag regardless of the profile it was written with, which is what an editor
- * pressing Save expects.
+ * Next 16's `max` profile is stale-while-revalidate, so the first request after
+ * an editor presses Save still receives old content. `{ expire: 0 }` makes
+ * admin writes read-after-write consistent.
  */
 function purge(tags: string[], payload: Payload): void {
   for (const tag of tags) {
     try {
-      revalidateTag(tag, "max");
+      revalidateTag(tag, { expire: 0 });
     } catch (error) {
       payload.logger.warn(
         { err: error, tag },

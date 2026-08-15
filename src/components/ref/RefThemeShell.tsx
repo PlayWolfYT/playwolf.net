@@ -1,7 +1,7 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { accentVars } from "@/lib/accent";
+import { profileThemeVars } from "@/lib/accent";
 import { isProfileKey, type AccentMap, type ProfileKey } from "@/lib/content";
 
 /**
@@ -32,7 +32,7 @@ function parseRefPath(
  * this client component never pulls the content layer into the browser bundle.
  * `usePathname()` resolves during rendering, so the HTML already carries the
  * right colours and there is no flash on navigation. Unknown characters and
- * `/ref` itself fall back to the `:root` default (cyan).
+ * `/ref` itself fall back to the root brand accent.
  */
 export function RefThemeShell({
   accentMap,
@@ -50,8 +50,8 @@ export function RefThemeShell({
 
   return (
     <div
-      className="relative isolate flex min-h-dvh flex-col bg-void"
-      style={accent ? (accentVars(accent) as React.CSSProperties) : undefined}
+      className="relative isolate flex min-h-dvh flex-col bg-background"
+      style={accent ? (profileThemeVars(accent) as React.CSSProperties) : undefined}
     >
       {children}
     </div>

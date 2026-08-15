@@ -1,5 +1,9 @@
 import type { ReactNode } from "react";
+import { ArrowUpRightIcon, GlobeIcon as WebsiteIcon } from "lucide-react";
+import { buttonVariants } from "@/components/ui/button";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import type { ContentLink, LinkKind } from "@/lib/content";
+import { cn } from "@/lib/utils";
 import {
   BlueskyIcon,
   BoostyIcon,
@@ -11,7 +15,6 @@ import {
   LinktreeIcon,
   PatreonIcon,
   TelegramIcon,
-  GlobeIcon,
   TrelloIcon,
   TwitchIcon,
   VGenIcon,
@@ -19,7 +22,7 @@ import {
   YoutubeIcon,
 } from "@/components/site/SocialIcons";
 
-const ICON_CLASS = "h-[18px] w-[18px]";
+const ICON_CLASS = "";
 
 type Presentation = {
   label: string;
@@ -38,7 +41,7 @@ type Presentation = {
 const PRESENTATION: Record<LinkKind, Presentation> = {
   website: {
     label: "Website",
-    icon: <GlobeIcon className={ICON_CLASS} />,
+    icon: <WebsiteIcon />,
     hoverClass: "hover:text-glow-400",
   },
   twitter: {
@@ -184,31 +187,84 @@ function buildLinks(links: ContentLink[]): RenderedLink[] {
 export function LinkRow({
   className = "",
   links,
+  align = "center",
+  mode = "icons",
 }: {
   className?: string;
   links: ContentLink[];
+  align?: "start" | "center" | "end";
+  mode?: "icons" | "directory";
 }) {
   const rendered = buildLinks(links);
   if (rendered.length === 0) return null;
 
+  if (mode === "directory") {
+    return (
+      <div className={cn("grid gap-3 sm:grid-cols-2", className)}>
+        {rendered.map((link) => {
+          const isMail = link.href.startsWith("mailto:");
+          return (
+            <a
+              key={link.key}
+              href={link.href}
+              target={isMail ? undefined : "_blank"}
+              rel={isMail ? undefined : "noreferrer"}
+              className={cn(
+                buttonVariants({ variant: "outline", size: "lg" }),
+                "h-auto min-h-16 justify-between rounded-xl px-5 whitespace-normal",
+                link.hoverClass,
+              )}
+            >
+              <span className="flex min-w-0 items-center gap-3">
+                {link.icon}
+                <span className="truncate text-left">{link.label}</span>
+              </span>
+              <ArrowUpRightIcon data-icon="inline-end" />
+            </a>
+          );
+        })}
+      </div>
+    );
+  }
+
   return (
-    <div className={`flex flex-wrap items-center justify-center gap-2 ${className}`}>
+    <div
+      className={cn(
+        "flex flex-wrap items-center gap-2",
+        align === "start" && "justify-start",
+        align === "center" && "justify-center",
+        align === "end" && "justify-end",
+        className,
+      )}
+    >
       {rendered.map((link) => {
         const isMail = link.href.startsWith("mailto:");
         return (
-          <a
-            key={link.key}
-            href={link.href}
-            target={isMail ? undefined : "_blank"}
-            rel={isMail ? undefined : "noreferrer"}
-            aria-label={link.label}
-            className={`group/social relative flex h-11 w-11 items-center justify-center rounded-full border border-white/10 bg-void/70 text-parchment-muted transition hover:border-white/25 hover:bg-white/[0.06] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-glow-500 ${link.hoverClass}`}
-          >
-            {link.icon}
-            <span className="pointer-events-none absolute bottom-full left-1/2 z-20 mb-2 max-w-[14rem] -translate-x-1/2 translate-y-1 whitespace-pre-line break-words rounded-md border border-white/10 bg-void-panel px-2 py-1 text-center text-[0.7rem] font-medium leading-snug text-parchment opacity-0 shadow-glow-sm transition duration-150 group-hover/social:translate-y-0 group-hover/social:opacity-100 group-focus-visible/social:translate-y-0 group-focus-visible/social:opacity-100">
-              {link.label}
-            </span>
-          </a>
+          <Tooltip key={link.key}>
+            <TooltipTrigger
+              render={
+                <a
+                  href={link.href}
+                  target={isMail ? undefined : "_blank"}
+                  rel={isMail ? undefined : "noreferrer"}
+                  aria-label={link.label}
+                  className={cn(
+                    buttonVariants({ variant: "outline", size: "icon" }),
+                    "rounded-xl bg-background/70 text-muted-foreground",
+                    link.hoverClass,
+                  )}
+                />
+              }
+            >
+              {link.icon}
+              <span className="sr-only">{link.label}</span>
+            </TooltipTrigger>
+            <TooltipContent>
+              <span className="max-w-56 whitespace-pre-line wrap-break-word text-center">
+                {link.label}
+              </span>
+            </TooltipContent>
+          </Tooltip>
         );
       })}
     </div>
