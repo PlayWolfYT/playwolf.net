@@ -17,6 +17,11 @@ services:
       NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-https://playwolf.net}
       DATABASE_URL: postgresql://${POSTGRES_USER:-playwolf}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-playwolf}
       PAYLOAD_SECRET: ${PAYLOAD_SECRET:?Set PAYLOAD_SECRET in your environment}
+      # Authenticates the scheduled commission-reminder run. Required rather
+      # than optional on purpose: unset, /api/cron/commission-reminders answers
+      # 401 to everything, so reminders quietly never send and nothing logs it.
+      # A stack that will not start is the louder of the two failures.
+      CRON_SECRET: ${CRON_SECRET:?Set CRON_SECRET to a long random value; the reminder cron authenticates with it}
       # Garage is reachable only on the internal network; the browser never
       # talks to it directly, it goes through Payload's own media route.
       S3_ENDPOINT: http://garage:3900

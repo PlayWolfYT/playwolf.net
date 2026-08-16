@@ -8,6 +8,7 @@ import * as migration_20260811_201308_framed_upload_sizes from './20260811_20130
 import * as migration_20260812_005200_framed_crop_source from './20260812_005200_framed_crop_source';
 import * as migration_20260812_105447_alt_versions from './20260812_105447_alt_versions';
 import * as migration_20260813_141500_twitch_youtube_link_kinds from './20260813_141500_twitch_youtube_link_kinds';
+import * as migration_20260814_131257_hot_query_indexes from './20260814_131257_hot_query_indexes';
 
 export const migrations = [
   {
@@ -53,11 +54,16 @@ export const migrations = [
   {
     up: migration_20260812_105447_alt_versions.up,
     down: migration_20260812_105447_alt_versions.down,
-    name: '20260812_105447_alt_versions'
+    name: '20260812_105447_alt_versions',
   },
   {
     up: migration_20260813_141500_twitch_youtube_link_kinds.up,
     down: migration_20260813_141500_twitch_youtube_link_kinds.down,
     name: '20260813_141500_twitch_youtube_link_kinds',
+  },
+  {
+    up: migration_20260814_131257_hot_query_indexes.up,
+    down: migration_20260814_131257_hot_query_indexes.down,
+    name: '20260814_131257_hot_query_indexes',
   },
 ];

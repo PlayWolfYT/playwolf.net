@@ -49,6 +49,9 @@ export const Characters: CollectionConfig = {
       name: "order",
       type: "number",
       defaultValue: 0,
+      // Sort key for the /ref overview; unindexed it sorts the whole collection
+      // on every request.
+      index: true,
       admin: {
         description: "Lower sorts first on the /ref overview.",
         position: "sidebar",
