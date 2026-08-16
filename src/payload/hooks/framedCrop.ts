@@ -1,4 +1,5 @@
 import type {
+  CollectionAfterChangeHook,
   CollectionAfterDeleteHook,
   CollectionBeforeOperationHook,
   PayloadRequest,
@@ -6,8 +7,8 @@ import type {
 import sharp from "sharp";
 
 import {
+  clampRectToOutset,
   FULL_FRAME_RECT,
-  normalizeRect,
   padAndExtractForRect,
   rectsAlmostEqual,
   type Rect,
@@ -49,6 +50,57 @@ type MutatingArgs = {
   req: PayloadRequest;
 };
 
+/**
+ * Ceiling on the canvas `extend` may produce, checked before sharp allocates.
+ *
+ * `clampRectToOutset` already bounds the crop to the frame's stage, which caps
+ * the canvas at `(1 + 2 × maxOutset)²` times the original — but the *original*
+ * is only bounded by the 32 MB upload limit, and 32 MB of PNG can decode to
+ * hundreds of megapixels. Both limits are needed; this is the one that does not
+ * depend on the request being well-formed.
+ *
+ * 100 MP leaves real headroom: the widest derivative this site emits is 2560px,
+ * and the drawer's own default selection on a 4096×4096 friend avatar (the
+ * largest outset of any frame) pads to roughly 60 MP.
+ */
+const MAX_PADDED_PIXELS = 100_000_000;
+
+/**
+ * Sidecar keys replaced during this request, keyed by `collection:id`, waiting
+ * for the save to actually succeed before they are dropped. Keyed rather than
+ * a single value because one bulk update runs this hook once per document and
+ * `req.context` is shared across all of them.
+ */
+const SUPERSEDED_ORIGINALS = "framedCropSupersededOriginals";
+
+function contextSlot(req: PayloadRequest, name: string): Map<string, string> {
+  const context = req.context as Record<string, unknown>;
+  const existing = context[name];
+  if (existing instanceof Map) return existing as Map<string, string>;
+  const created = new Map<string, string>();
+  context[name] = created;
+  return created;
+}
+
+function contextKey(collection: string, id: number | string): string {
+  return `${collection}:${id}`;
+}
+
+function takeContextKey(
+  req: PayloadRequest,
+  name: string,
+  collection: string,
+  id: number | string | undefined,
+): string | undefined {
+  if (id == null) return undefined;
+  const slot = (req.context as Record<string, unknown>)[name];
+  if (!(slot instanceof Map)) return undefined;
+  const key = contextKey(collection, id);
+  const value = slot.get(key);
+  slot.delete(key);
+  return typeof value === "string" && value.length > 0 ? value : undefined;
+}
+
 type UploadEditsCrop = {
   x?: number;
   y?: number;
@@ -82,6 +134,7 @@ export const framedCropBeforeOperation: CollectionBeforeOperationHook = async ({
   args,
   collection,
   operation,
+  overrideAccess,
   req,
 }) => {
   if (operation !== "create" && operation !== "update") return args;
@@ -89,14 +142,32 @@ export const framedCropBeforeOperation: CollectionBeforeOperationHook = async ({
   const slug = collection.slug;
   if (!isFramedSlug(slug)) return args;
 
+  /**
+   * `beforeOperation` runs *before* `executeAccess`, so an anonymous
+   * `POST /api/site-images` reaches everything below — decoding an attacker's
+   * file with sharp and writing a permanent `originals/` object — and only then
+   * gets its 403. Returning the args untouched hands the request straight to
+   * the access check that refuses it, having stored nothing.
+   *
+   * `overrideAccess` is the same flag the operation feeds `executeAccess`, so
+   * this cannot diverge from it: the Local API (seeds, migrations) defaults it
+   * to true and keeps working with no user.
+   */
+  if (!overrideAccess && !req.user) return args;
+
   const mutating = args as MutatingArgs;
+  const frame = UPLOAD_FRAMES[slug];
   const file = req.file;
   const hasNewFile = Boolean(file?.data?.length);
   const uploadEdits = readUploadEdits(req);
   // Admin sends uploadEdits via qs; after qs.parse every number is a string.
   // Stock Payload cropImage coerces those strings — we must too, or we miss
   // the crop, skip clearing uploadEdits.crop, and sharp dies on left < 0.
-  const incomingCrop = cropFromUploadEdits(uploadEdits) ?? cropFromData(mutating.data);
+  const requestedCrop = cropFromUploadEdits(uploadEdits) ?? cropFromData(mutating.data);
+  // The rect is request data all the way from the browser, and every canvas
+  // dimension below is derived from it. Clamp before anything measures it.
+  const incomingCrop =
+    requestedCrop && clampRectToOutset(requestedCrop, frame.maxOutset);
   const hasUploadEditsCrop = hasCropProperty(uploadEdits);
 
   // Bulk updates have no id; without a new file there is nothing for us to do.
@@ -120,8 +191,12 @@ export const framedCropBeforeOperation: CollectionBeforeOperationHook = async ({
     return args;
   }
 
-  const frame = UPLOAD_FRAMES[slug];
-  const rect = normalizeRect(incomingCrop ?? previousCrop ?? FULL_FRAME_RECT);
+  // Documents written before the clamp existed can still hold an unbounded
+  // rect, so the stored value goes through it too.
+  const rect = clampRectToOutset(
+    incomingCrop ?? previousCrop ?? FULL_FRAME_RECT,
+    frame.maxOutset,
+  );
 
   mutating.data = mutating.data ?? {};
 
@@ -134,11 +209,6 @@ export const framedCropBeforeOperation: CollectionBeforeOperationHook = async ({
   };
 
   if (hasNewFile && file?.data) {
-    const previousKey = originalDoc?.source?.key;
-    if (typeof previousKey === "string" && previousKey.length > 0) {
-      await deleteOriginal(previousKey);
-    }
-
     sourceBytes = file.data;
     const meta = await sharp(sourceBytes).metadata();
     const width = meta.width ?? 0;
@@ -149,6 +219,28 @@ export const framedCropBeforeOperation: CollectionBeforeOperationHook = async ({
 
     const key = buildOriginalKey(slug, file.name);
     await putOriginal(key, sourceBytes, file.mimetype);
+
+    /**
+     * Store first, release second. Dropping the old sidecar before the new
+     * `source.key` is committed loses the original outright if the save then
+     * fails: `getOriginal` answers a missing key with `null` by design, so the
+     * next re-crop adopts the already-cropped WebP as the "original" and every
+     * pixel outside the last crop is gone, silently. Deferring the delete to
+     * `afterChange` costs an orphaned object when a save fails, which is
+     * garbage someone can collect rather than data nobody can recover.
+     */
+    const previousKey = originalDoc?.source?.key;
+    if (
+      mutating.id != null &&
+      typeof previousKey === "string" &&
+      previousKey.length > 0 &&
+      previousKey !== key
+    ) {
+      contextSlot(req, SUPERSEDED_ORIGINALS).set(
+        contextKey(slug, mutating.id),
+        previousKey,
+      );
+    }
 
     sourceMeta = {
       width,
@@ -216,9 +308,42 @@ export const framedCropBeforeOperation: CollectionBeforeOperationHook = async ({
 };
 
 /**
+ * Releases the sidecar a replacement upload superseded, now that the row
+ * naming the replacement is committed. See the store-first comment above for
+ * why this cannot happen while the crop is still being derived.
+ */
+export const reclaimFramedOriginalAfterChange: CollectionAfterChangeHook = async ({
+  collection,
+  doc,
+  req,
+}) => {
+  const key = takeContextKey(
+    req,
+    SUPERSEDED_ORIGINALS,
+    collection.slug,
+    (doc as CropDoc | undefined)?.id,
+  );
+  if (!key) return doc;
+
+  try {
+    await deleteOriginal(key);
+  } catch (error) {
+    req.payload.logger.warn(
+      { err: error, key },
+      "Failed to delete superseded framed-crop original sidecar",
+    );
+  }
+
+  return doc;
+};
+
+/**
  * Drop the sidecar when the document itself is deleted. Runs after the row is
  * gone so a failed delete cannot orphan the public file while removing the
  * only recoverable original.
+ *
+ * `source` is authenticated-only rather than `hidden`, so it is still on the
+ * document handed to this hook — a delete that got this far had a user.
  */
 export const cleanupFramedOriginalAfterDelete: CollectionAfterDeleteHook = async ({
   doc,
@@ -455,6 +580,28 @@ async function adoptMainFileAsOriginal({
   };
 }
 
+/**
+ * Resolves an upload's `url` against the configured `serverURL`, and refuses
+ * anything that does not land on it.
+ *
+ * The base used to come from the request's `Origin`/`Host`, both of which the
+ * caller chooses freely — so an upload with a relative `url` could be turned
+ * into a server-side GET against any host the attacker named, with this
+ * process's network position. `serverURL` is configuration, not request data,
+ * which makes it the only trustworthy base available here.
+ */
+function trustedFileURL(url: string, req: PayloadRequest): URL | null {
+  const base = req.payload.config.serverURL;
+  if (!base) return null;
+
+  try {
+    const resolved = new URL(url, base);
+    return resolved.origin === new URL(base).origin ? resolved : null;
+  } catch {
+    return null;
+  }
+}
+
 async function fetchMainFileViaUrl(
   originalDoc: CropDoc | null,
   req: PayloadRequest,
@@ -462,18 +609,20 @@ async function fetchMainFileViaUrl(
   const url = originalDoc?.url;
   if (typeof url !== "string" || !url) return null;
 
-  try {
-    let fileURL = url;
-    if (!url.startsWith("http")) {
-      const baseUrl =
-        req.headers.get("origin") || `${req.protocol}://${req.headers.get("host")}`;
-      fileURL = `${baseUrl}${url}`;
-    }
+  const fileURL = trustedFileURL(url, req);
+  if (!fileURL) {
+    req.payload.logger.warn(
+      { serverURL: req.payload.config.serverURL, url },
+      "Refusing to fetch a framed-crop main file off this deployment's own origin",
+    );
+    return null;
+  }
 
-    const res = await fetch(fileURL, {
-      headers: { cookie: req.headers.get("cookie") ?? "" },
-      method: "GET",
-    });
+  try {
+    // No credentials: every framed collection is `read: anyone`, so the file
+    // route needs none, and forwarding the operator's session cookie would let
+    // this fetch reach anything that session can.
+    const res = await fetch(fileURL, { method: "GET" });
     if (!res.ok) return null;
     return Buffer.from(await res.arrayBuffer());
   } catch (error) {
@@ -521,7 +670,15 @@ async function cropToWebp({
   source: Buffer;
   sourceSize: { width: number; height: number };
 }): Promise<Buffer> {
-  const { pad, extract } = padAndExtractForRect(rect, sourceSize);
+  const { pad, padded, extract } = padAndExtractForRect(rect, sourceSize);
+
+  const paddedPixels = padded.width * padded.height;
+  if (paddedPixels > MAX_PADDED_PIXELS) {
+    throw new Error(
+      `framedCrop: refusing to pad to ${padded.width}×${padded.height} ` +
+        `(${paddedPixels} pixels, ceiling ${MAX_PADDED_PIXELS})`,
+    );
+  }
 
   // Defensive: sharp.extract rejects negatives outright. padAndExtractForRect
   // is supposed to guarantee non-negative offsets after extend — never bypass.

@@ -1,6 +1,7 @@
 import { describe, expect, test } from "bun:test";
 
 import {
+  clampRectToOutset,
   focalPointInCrop,
   FULL_FRAME_RECT,
   maxAspectRect,
@@ -133,6 +134,96 @@ describe("normalizeRect", () => {
     expect(normalizeRect({ x: 0, y: 0, width: 100, height: 0 })).toEqual(
       FULL_FRAME_RECT,
     );
+  });
+});
+
+describe("clampRectToOutset", () => {
+  test("leaves anything the drawer's stage could have produced alone", () => {
+    for (const outset of [0.5, 1]) {
+      const stageRect = stageRectToOriginal(
+        { x: 12, y: 8, width: 60, height: 40 },
+        outset,
+      );
+      expect(
+        rectsAlmostEqual(clampRectToOutset(stageRect, outset), stageRect, 1e-9),
+      ).toBe(true);
+    }
+  });
+
+  test("the whole stage is exactly the boundary, not past it", () => {
+    expect(clampRectToOutset({ x: -50, y: -50, width: 200, height: 200 }, 0.5)).toEqual(
+      {
+        x: -50,
+        y: -50,
+        width: 200,
+        height: 200,
+      },
+    );
+  });
+
+  test("an outset of zero confines the crop to the original", () => {
+    expect(clampRectToOutset({ x: -80, y: 40, width: 400, height: 90 }, 0)).toEqual({
+      x: 0,
+      y: 10,
+      width: 100,
+      height: 90,
+    });
+  });
+
+  test("pulls an out-of-bounds rect back onto the stage", () => {
+    expect(clampRectToOutset({ x: 400, y: -400, width: 50, height: 50 }, 0.5)).toEqual({
+      x: 100,
+      y: -50,
+      width: 50,
+      height: 50,
+    });
+  });
+
+  /**
+   * The finding this exists for: `uploadEdits[crop]` comes straight off the
+   * request, and an unclamped 80000% rect asks libvips for a canvas measured in
+   * gigapixels. Everything here is arithmetic — nothing allocates.
+   */
+  test("a hostile rect cannot outgrow the frame's own stage", () => {
+    const source = { width: 2000, height: 1125 };
+    const hostile: Rect = { x: -40_000, y: -40_000, width: 80_000, height: 80_000 };
+
+    const unclamped = padAndExtractForRect(hostile, source);
+    expect(unclamped.padded.width * unclamped.padded.height).toBeGreaterThan(1e12);
+
+    for (const outset of [0, 0.5, 1]) {
+      const { padded } = padAndExtractForRect(
+        clampRectToOutset(hostile, outset),
+        source,
+      );
+      const growth = 1 + 2 * outset;
+      expect(padded.width).toBeLessThanOrEqual(source.width * growth);
+      expect(padded.height).toBeLessThanOrEqual(source.height * growth);
+    }
+  });
+
+  test("bounds hold for every rect, including degenerate ones", () => {
+    const coordinates = [-1e6, -37, 0, 100, 250, 1e6];
+    const sizes = [Number.NaN, 1, 233, 5000, 1e7];
+
+    for (const outset of [0, 0.25, 0.5, 1]) {
+      const limit = outset * 100;
+      for (const x of coordinates) {
+        for (const y of coordinates) {
+          for (const width of sizes) {
+            for (const height of sizes) {
+              const rect = clampRectToOutset({ x, y, width, height }, outset);
+              expect(rect.width).toBeGreaterThan(0);
+              expect(rect.height).toBeGreaterThan(0);
+              expect(rect.x).toBeGreaterThanOrEqual(-limit);
+              expect(rect.y).toBeGreaterThanOrEqual(-limit);
+              expect(rect.x + rect.width).toBeLessThanOrEqual(100 + limit + 1e-9);
+              expect(rect.y + rect.height).toBeLessThanOrEqual(100 + limit + 1e-9);
+            }
+          }
+        }
+      }
+    }
   });
 });
 

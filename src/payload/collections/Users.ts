@@ -13,6 +13,18 @@ export const Users: CollectionConfig = {
     tokenExpiration: 60 * 60 * 24 * 7,
     maxLoginAttempts: 8,
     lockTime: 1000 * 60 * 10,
+    cookies: {
+      /**
+       * `Lax`, not `Strict`: the admin is routinely entered by top-level
+       * navigation from outside the site (a bookmark, a link in a mail), and
+       * `Strict` would withhold the cookie on exactly that first request and
+       * bounce the operator to the login screen. `secure` is conditional
+       * because local dev is plain HTTP and a Secure cookie would never be
+       * stored there.
+       */
+      sameSite: "Lax",
+      secure: process.env.NODE_ENV === "production",
+    },
   },
   access: {
     admin: authenticatedAdmin,
