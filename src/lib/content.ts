@@ -90,6 +90,8 @@ export const PROJECT_STATUS_LABELS: Record<ProjectStatus, string> = {
 export type Project = {
   slug: string;
   title: string;
+  /** Payload's own last-edit stamp; the sitemap reports it as `lastModified`. */
+  updatedAt: string;
   summary?: string;
   cover?: ImageRef;
   body?: RichTextValue;
@@ -270,6 +272,11 @@ export type AltSlide = {
 export type Example = {
   slug: string;
   title: string;
+  /**
+   * Payload's own last-edit stamp. The sitemap reports it as `lastModified`,
+   * and a character page's freshness is the newest of its examples.
+   */
+  updatedAt: string;
   /** Final deliverable; absent while an in-progress commission has none yet. */
   src?: ImageRef;
   isWip: boolean;

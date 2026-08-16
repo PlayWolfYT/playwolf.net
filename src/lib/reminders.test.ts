@@ -59,6 +59,7 @@ describe("processCommissionReminders", () => {
         },
       }),
       find: async () => ({
+        totalDocs: 1,
         docs: [
           {
             id: 7,
@@ -107,6 +108,7 @@ describe("processCommissionReminders", () => {
     const payload = {
       findGlobal: async () => ({ notifications: { channel: "ntfy" } }),
       find: async () => ({
+        totalDocs: 1,
         docs: [
           {
             id: 1,
@@ -135,5 +137,124 @@ describe("processCommissionReminders", () => {
 
     expect(result.sent).toBe(0);
     expect(result.errors[0]).toContain("ntfy: down");
+  });
+
+  test("reports reminders left behind by the per-run limit", async () => {
+    const notifyFn: NotifyFn = async () => ({ ok: true, via: ["ntfy"], errors: [] });
+
+    const payload = {
+      findGlobal: async () => ({ notifications: { channel: "ntfy" } }),
+      find: async () => ({
+        // One page fetched out of a much larger due set.
+        totalDocs: 142,
+        docs: [
+          {
+            id: 1,
+            title: "X",
+            slug: "x",
+            profile: "sfw",
+            reminder: {
+              enabled: true,
+              interval: 1,
+              unit: "days",
+              nextAt: "2020-01-01T00:00:00.000Z",
+            },
+          },
+        ],
+      }),
+      update: async () => ({}),
+    };
+
+    const result = await processCommissionReminders(
+      payload as never,
+      notifyFn,
+      new Date("2026-08-10T12:00:00.000Z"),
+    );
+
+    expect(result.sent).toBe(1);
+    expect(result.errors).toEqual([
+      "141 further reminder(s) were due but deferred past this run's limit of 100",
+    ]);
+  });
+
+  // The due query and `isReminderDue` can only disagree over a `nextAt` the
+  // guard cannot parse. Such a document is re-selected forever and never sent,
+  // so the skip has to leave a trace rather than being silently dropped.
+  test("reports a document the due query returned but the re-check rejected", async () => {
+    const notifyFn = mock<NotifyFn>(async () => ({
+      ok: true,
+      via: ["ntfy"],
+      errors: [],
+    }));
+
+    const payload = {
+      findGlobal: async () => ({ notifications: { channel: "ntfy" } }),
+      find: async () => ({
+        totalDocs: 1,
+        docs: [
+          {
+            id: 1,
+            title: "X",
+            slug: "x",
+            profile: "sfw",
+            reminder: {
+              enabled: true,
+              interval: 1,
+              unit: "days",
+              nextAt: "not a date",
+            },
+          },
+        ],
+      }),
+      update: async () => {
+        throw new Error("should not update");
+      },
+    };
+
+    const result = await processCommissionReminders(
+      payload as never,
+      notifyFn,
+      new Date("2026-08-10T12:00:00.000Z"),
+    );
+
+    expect(result.sent).toBe(0);
+    expect(notifyFn).not.toHaveBeenCalled();
+    expect(result.errors).toEqual([
+      "1 reminder(s) were selected as due but rejected on re-check (unusable reminder.nextAt) and will repeat every run",
+    ]);
+  });
+
+  test("says nothing about a backlog when the whole due set fitted", async () => {
+    const notifyFn: NotifyFn = async () => ({ ok: true, via: ["ntfy"], errors: [] });
+
+    const payload = {
+      findGlobal: async () => ({ notifications: { channel: "ntfy" } }),
+      find: async () => ({
+        totalDocs: 1,
+        docs: [
+          {
+            id: 1,
+            title: "X",
+            slug: "x",
+            profile: "sfw",
+            reminder: {
+              enabled: true,
+              interval: 1,
+              unit: "days",
+              nextAt: "2020-01-01T00:00:00.000Z",
+            },
+          },
+        ],
+      }),
+      update: async () => ({}),
+    };
+
+    const result = await processCommissionReminders(
+      payload as never,
+      notifyFn,
+      new Date("2026-08-10T12:00:00.000Z"),
+    );
+
+    expect(result).toEqual({ sent: 1, errors: [] });
   });
 });
