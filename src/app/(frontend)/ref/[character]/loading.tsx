@@ -1,8 +1,4 @@
-import {
-  Skeleton,
-  SkeletonScreen,
-  THUMB_GRID_CLASS,
-} from "@/components/site/Skeleton";
+import { Skeleton, SkeletonScreen, THUMB_GRID_CLASS } from "@/components/site/Skeleton";
 
 /** Profile bar, description line, reference sheet frame and example grid. */
 export default function CharacterLoading() {
