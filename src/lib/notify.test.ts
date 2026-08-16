@@ -104,6 +104,49 @@ describe("sendNotification", () => {
     });
   });
 
+  test("posts over plain http when the server is loopback", async () => {
+    const calls: string[] = [];
+    const fetchImpl: typeof fetch = async (url) => {
+      calls.push(String(url));
+      return new Response("ok", { status: 200 });
+    };
+
+    const result = await sendNotification(
+      {
+        channel: "ntfy",
+        ntfy: { serverUrl: "http://localhost:8080", topic: "playwolf", token: "tok" },
+      },
+      { title: "Ping", message: "hello" },
+      fetchImpl,
+    );
+
+    expect(result.ok).toBe(true);
+    expect(calls).toEqual(["http://localhost:8080/playwolf"]);
+  });
+
+  // The field `validate` on `serverUrl` only runs on save, so a plaintext URL
+  // stored before that check existed would still be sent to.
+  test("refuses a plaintext non-loopback server instead of sending the token", async () => {
+    let requested = false;
+    const fetchImpl: typeof fetch = async () => {
+      requested = true;
+      return new Response("ok", { status: 200 });
+    };
+
+    const result = await sendNotification(
+      {
+        channel: "ntfy",
+        ntfy: { serverUrl: "http://ntfy.sh", topic: "playwolf", token: "tok" },
+      },
+      { title: "Ping", message: "hello" },
+      fetchImpl,
+    );
+
+    expect(requested).toBe(false);
+    expect(result.ok).toBe(false);
+    expect(result.errors[0]).toContain("https");
+  });
+
   test("reports an error when nothing is configured", async () => {
     const result = await sendNotification(
       { channel: "both" },

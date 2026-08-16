@@ -3,6 +3,7 @@ import { ArrowUpRightIcon, GlobeIcon as WebsiteIcon } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import type { ContentLink, LinkKind } from "@/lib/content";
+import { safeHref } from "@/lib/safe-url";
 import { cn } from "@/lib/utils";
 import {
   BlueskyIcon,
@@ -152,16 +153,39 @@ type RenderedLink = {
   hoverClass: string;
 };
 
+/**
+ * `links.url` is validated on save, but rows stored before that validation
+ * existed still go straight into an `href`, so the scheme is re-checked here and
+ * an unusable link is dropped from the row rather than rendered.
+ *
+ * The `mailto:` strip is for the same reason: `detectLinkKind` classifies a
+ * pasted `mailto:` as `email`, which used to render as `mailto:mailto:…`.
+ */
+function hrefFor(link: ContentLink): string | undefined {
+  if (link.kind === "email") {
+    const address = link.url.trim().replace(/^mailto:/i, "");
+    return address ? `mailto:${address}` : undefined;
+  }
+  return safeHref(link.url);
+}
+
 function buildLinks(links: ContentLink[]): RenderedLink[] {
+  const usable = links
+    .map((link) => ({ href: hrefFor(link), link }))
+    .filter((entry): entry is { href: string; link: ContentLink } =>
+      Boolean(entry.href),
+    );
+
   // Two Telegrams with neither a description nor a distinguishable handle would
-  // otherwise render as two identical tooltips, so they get numbered.
+  // otherwise render as two identical tooltips, so they get numbered. Counted
+  // over the usable rows so the numbering has no gaps.
   const totals = new Map<LinkKind, number>();
-  for (const link of links) {
+  for (const { link } of usable) {
     totals.set(link.kind, (totals.get(link.kind) ?? 0) + 1);
   }
   const seen = new Map<LinkKind, number>();
 
-  return links.map((link, index) => {
+  return usable.map(({ href, link }, index) => {
     const presentation = PRESENTATION[link.kind];
     const position = (seen.get(link.kind) ?? 0) + 1;
     seen.set(link.kind, position);
@@ -172,7 +196,7 @@ function buildLinks(links: ContentLink[]): RenderedLink[] {
     return {
       key: `${link.kind}-${index}`,
       label: suffix ? `${presentation.label} (${suffix})` : presentation.label,
-      href: link.kind === "email" ? `mailto:${link.url}` : link.url,
+      href,
       icon: presentation.icon,
       hoverClass: presentation.hoverClass,
     };

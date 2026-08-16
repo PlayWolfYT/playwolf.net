@@ -1,6 +1,7 @@
-import type { FieldAccess, GlobalConfig } from "payload";
+import type { FieldAccess, GlobalConfig, TextFieldSingleValidation } from "payload";
 
 import { sendNotification } from "../../lib/notify";
+import { isSecureUrl } from "../../lib/safe-url";
 import { anyone, authenticated } from "../access";
 import { richTextEditor } from "../editor";
 import { linksField } from "../fields/links";
@@ -9,6 +10,17 @@ import { revalidateGlobalAfterChange } from "../hooks/revalidate";
 
 /** Secrets stay off unauthenticated reads (REST/GraphQL/local without a user). */
 const authenticatedField: FieldAccess = ({ req }) => Boolean(req.user);
+
+/**
+ * The ntfy access token rides this URL as a bearer header, so plaintext http is
+ * only acceptable when the request never leaves the machine.
+ */
+const validateNtfyServerUrl: TextFieldSingleValidation = (value) => {
+  if (typeof value !== "string" || !value.trim()) return true;
+  return isSecureUrl(value)
+    ? true
+    : "Use an https URL — the access token is sent as a bearer header (http is only allowed on localhost).";
+};
 
 /**
  * Site-wide switches and copy. Maintenance mode lives here so that flipping it
@@ -164,6 +176,7 @@ export const SiteSettings: GlobalConfig = {
                     {
                       name: "serverUrl",
                       type: "text",
+                      validate: validateNtfyServerUrl,
                       admin: {
                         description: "e.g. https://ntfy.sh",
                         placeholder: "https://ntfy.sh",
