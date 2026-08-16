@@ -22,6 +22,7 @@ import { getSiteSettings } from "@/lib/references";
 export const metadata: Metadata = {
   title: "Links",
   description: "Where else to find playwolf.",
+  alternates: { canonical: "/links" },
 };
 
 export default async function LinksPage() {

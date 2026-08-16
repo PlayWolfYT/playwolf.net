@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { ArrowRightIcon, ArrowUpRightIcon, PencilIcon } from "lucide-react";
 import Link from "next/link";
 
@@ -6,6 +7,7 @@ import { Canvas } from "@/components/canvasui/Canvas";
 import { BlurText } from "@/components/motion/BlurText";
 import { Reveal } from "@/components/motion/Reveal";
 import { CharacterCard } from "@/components/ref/CharacterCard";
+import { EmptyState } from "@/components/site/EmptyState";
 import { LinkRow } from "@/components/site/LinkRow";
 import { ProjectCard } from "@/components/site/ProjectCard";
 import { buttonVariants } from "@/components/ui/button";
@@ -26,12 +28,29 @@ import {
 } from "@/components/ui/empty";
 import { Separator } from "@/components/ui/separator";
 import { getCharacters, getProjects, getSiteSettings } from "@/lib/references";
-import { RichTextContent } from "@/lib/rich-text";
+import { RichTextContent, truncateForMetaDescription } from "@/lib/rich-text";
 import { cn } from "@/lib/utils";
 
 const FALLBACK_TITLE = "A little corner for my characters, art, and side projects.";
 const FALLBACK_TAGLINE =
   "I keep the things I care about here: character references, favorite art, and whatever I happen to be making.";
+
+/**
+ * The landing page describes itself with the same hero copy a visitor sees,
+ * so editing it in the admin updates the search result and the embed too.
+ * `heroTitle` goes through the `%s · playwolf.net` template rather than
+ * replacing it, keeping the domain in the title where it is the brand.
+ */
+export async function generateMetadata(): Promise<Metadata> {
+  const { heroTitle, heroTagline } = await getSiteSettings();
+
+  return {
+    // Absent rather than `undefined` so the layout's default still applies.
+    ...(heroTitle ? { title: heroTitle } : {}),
+    description: truncateForMetaDescription(heroTagline ?? FALLBACK_TAGLINE),
+    alternates: { canonical: "/" },
+  };
+}
 
 function SectionHeading({
   id,

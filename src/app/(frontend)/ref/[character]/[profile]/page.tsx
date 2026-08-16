@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { CharacterProfiles } from "@/components/ref/CharacterProfiles";
 import { buildImageMetadata } from "@/lib/embed";
-import { richTextToPlainText } from "@/lib/rich-text";
+import { richTextToMetaDescription } from "@/lib/rich-text";
 import {
   getCharacter,
   getMainArt,
@@ -31,24 +31,24 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   // Prefer the profile sheet image; WIP placeholders fall back to main art.
   const embedImage = getSheetImage(profile.sheet) ?? getMainArt(character);
 
-  const description = richTextToPlainText(profile.description);
+  const description = richTextToMetaDescription(profile.description);
 
-  const metadata: Metadata = embedImage
-    ? buildImageMetadata({
-        title,
-        image: embedImage.src,
-        alt: embedImage.alt,
-        description,
-        pagePath: `/ref/${character.slug}/${profileParam}`,
-      })
-    : { title, description };
+  // `/ref/<char>` is the canonical home of the SFW profile; After Dark is a page
+  // in its own right. `og:url` follows the canonical rather than the requested
+  // path so the two never disagree about which address represents the page.
+  const pagePath = isNsfw ? `/ref/${character.slug}/nsfw` : `/ref/${character.slug}`;
 
-  if (profileParam === "sfw") {
-    // /ref/<char> is the canonical home of the SFW profile.
-    metadata.alternates = { canonical: `/ref/${character.slug}` };
+  if (!embedImage) {
+    return { title, description, alternates: { canonical: pagePath } };
   }
 
-  return metadata;
+  return buildImageMetadata({
+    title,
+    image: embedImage.src,
+    alt: embedImage.alt,
+    description,
+    pagePath,
+  });
 }
 
 export default async function ProfilePage({ params }: PageProps) {

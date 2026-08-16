@@ -80,5 +80,11 @@ fails at _upload time_, so the app still boots and renders without Garage runnin
   `seed:fresh`, starting Next is sufficient.
 - **No email adapter** is configured, so Payload logs "No email adapter provided" and writes
   emails to the console — harmless in dev.
+- **`force-dynamic` in `src/app/(frontend)/layout.tsx` is permanent** — five separate blockers
+  are listed above it. The one that bites hardest if you try anyway: `NsfwConsentProvider`
+  calls `useSearchParams()`, and because the root layout wraps every route in it, a prerender
+  fails with `useSearchParams() should be wrapped in a suspense boundary` naming **the page**,
+  not the provider. Wrapping the provider in `Suspense` is not the fix — `children` is passed
+  in as a prop, so the prerendered HTML would be the fallback and the page would ship empty.
 - **Lint/test/build need no services**: `bun run lint`, `bun run format:check`, `bun test`,
   `bun run typecheck`, and `bun run build` all run without Postgres or Garage.
