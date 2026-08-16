@@ -151,7 +151,7 @@ export default async function ExamplePage({ params }: PageProps) {
           <ArtworkChips example={example} />
         </RefImage>
       ) : showGenerated && example.wipPlaceholder ? (
-        <section className="mx-auto max-w-5xl px-4 py-10">
+        <section className="mx-auto max-w-3xl px-4 py-10">
           <SheetPlaceholder
             sheet={{
               kind: "wip",

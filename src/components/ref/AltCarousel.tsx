@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
-import { ArtworkCard, frameFor } from "@/components/ref/ArtworkCard";
+import { ArtworkCard } from "@/components/ref/ArtworkCard";
 import { OpenImageLink } from "@/components/ref/OpenImageLink";
 import { useNsfwConsent } from "@/components/site/NsfwConsent";
 import { Badge } from "@/components/ui/badge";
@@ -38,11 +38,18 @@ type AltCarouselProps = {
   alts: AltSlide[];
 };
 
+const CHEVRON_CLASS =
+  "absolute top-1/2 z-20 -translate-y-1/2 rounded-full border-glow-500/40 bg-background/80 text-glow-300 shadow-[0_0_24px_-10px_rgb(var(--accent-500)/0.9)] hover:border-glow-400/70 hover:bg-glow-500/15 hover:text-glow-300 active:not-aria-[haspopup]:-translate-y-1/2";
+
 /**
  * The artwork plus its alternate versions as one swappable image. The main
  * image is always the first slide; inline alt images and linked counterpart
  * artworks follow. Owns the "Open full image" link so it can follow the
  * active slide's original upload.
+ *
+ * Every slide uses the main file's frame. Alts are contained inside that
+ * box so the card — and the chevrons on it — never change size. Swaps
+ * dissolve in place (see `ArtworkStageSwap`).
  *
  * Cross-rating counterparts (`slide.profile === "nsfw"` on a SFW page) render
  * blurred — thumbnail and main image — until the visitor clicks the reveal
@@ -73,12 +80,22 @@ export function AltCarousel({ alt, main, alts }: AltCarouselProps) {
   ];
 
   const [index, setIndex] = useState(0);
+  const [direction, setDirection] = useState<1 | -1>(1);
   const [revealed, setRevealed] = useState<ReadonlySet<number>>(new Set());
   const { confirmNsfw } = useNsfwConsent();
 
   const current = slides[Math.min(index, slides.length - 1)];
   const count = slides.length;
   const currentBlurred = current.gated && !revealed.has(index);
+
+  const goTo = (next: number) => {
+    const wrapped = ((next % count) + count) % count;
+    if (wrapped === index) return;
+    const forward = (wrapped - index + count) % count;
+    const backward = (index - wrapped + count) % count;
+    setDirection(forward <= backward ? 1 : -1);
+    setIndex(wrapped);
+  };
 
   const reveal = async (slideIndex: number) => {
     if (!(await confirmNsfw())) return;
@@ -87,20 +104,20 @@ export function AltCarousel({ alt, main, alts }: AltCarouselProps) {
 
   return (
     <div className="w-full">
-      <div className={`relative mx-auto w-full ${frameFor(current.image).className}`}>
-        <ArtworkCard
-          src={current.image}
-          alt={current.label ? `${alt} — ${current.label}` : alt}
-          artist={current.artist}
-          isWip={current.isWip}
-          imageClassName={currentBlurred ? "scale-110 blur-3xl" : undefined}
-        />
-
+      <ArtworkCard
+        src={current.image}
+        stage={main.src}
+        alt={current.label ? `${alt} — ${current.label}` : alt}
+        artist={current.artist}
+        isWip={current.isWip}
+        swapDirection={direction}
+        imageClassName={currentBlurred ? "scale-125 blur-[5rem]" : undefined}
+      >
         {currentBlurred ? (
           <button
             type="button"
             onClick={() => void reveal(index)}
-            className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-4 rounded-3xl bg-void/40 px-6 text-center backdrop-blur-xs focus-visible:outline-solid focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-coral-soft"
+            className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-4 bg-void/60 px-6 text-center backdrop-blur-md focus-visible:outline-solid focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-coral-soft"
           >
             <Badge variant="destructive">18+ / reveal</Badge>
             <span className="font-display text-lg font-semibold tracking-tight text-parchment sm:text-xl">
@@ -118,9 +135,9 @@ export function AltCarousel({ alt, main, alts }: AltCarouselProps) {
               type="button"
               variant="outline"
               size="icon"
-              onClick={() => setIndex((value) => (value - 1 + count) % count)}
+              onClick={() => goTo(index - 1)}
               aria-label="Previous version"
-              className="absolute left-3 top-1/2 z-20 -translate-y-1/2 rounded-full border-glow-500/40 bg-background/80 text-glow-300 shadow-[0_0_24px_-10px_rgb(var(--accent-500)/0.9)] hover:border-glow-400/70 hover:bg-glow-500/15 hover:text-glow-300"
+              className={`${CHEVRON_CLASS} left-3`}
             >
               <ChevronLeft aria-hidden />
             </Button>
@@ -128,15 +145,15 @@ export function AltCarousel({ alt, main, alts }: AltCarouselProps) {
               type="button"
               variant="outline"
               size="icon"
-              onClick={() => setIndex((value) => (value + 1) % count)}
+              onClick={() => goTo(index + 1)}
               aria-label="Next version"
-              className="absolute right-3 top-1/2 z-20 -translate-y-1/2 rounded-full border-glow-500/40 bg-background/80 text-glow-300 shadow-[0_0_24px_-10px_rgb(var(--accent-500)/0.9)] hover:border-glow-400/70 hover:bg-glow-500/15 hover:text-glow-300"
+              className={`${CHEVRON_CLASS} right-3`}
             >
               <ChevronRight aria-hidden />
             </Button>
           </>
         ) : null}
-      </div>
+      </ArtworkCard>
 
       <div className="mt-6 flex flex-col items-center gap-3">
         {/* While a gated slide is still blurred, its untouched original must
@@ -179,12 +196,12 @@ export function AltCarousel({ alt, main, alts }: AltCarouselProps) {
                 <button
                   key={slideIndex}
                   type="button"
-                  onClick={() => setIndex(slideIndex)}
+                  onClick={() => goTo(slideIndex)}
                   aria-label={`Show version ${slideIndex + 1} of ${count}${
                     slide.label ? ` — ${slide.label}` : ""
                   }${slide.gated ? " (18+)" : ""}`}
                   aria-current={active}
-                  className={`relative h-20 w-20 overflow-hidden rounded-xl border transition focus-visible:outline-solid focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-glow-500 ${
+                  className={`relative h-20 w-20 overflow-hidden rounded-xl border transition-[border-color,opacity] focus-visible:outline-solid focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-glow-500 ${
                     active
                       ? "border-glow-500/70 shadow-glow-sm"
                       : "border-glow-500/20 opacity-70 hover:border-glow-400/55 hover:opacity-100"
@@ -197,12 +214,12 @@ export function AltCarousel({ alt, main, alts }: AltCarouselProps) {
                     loading="lazy"
                     placeholder={placeholderFor(slide.image)}
                     sizes="80px"
-                    className={`object-cover${blurred ? " scale-125 blur-xl" : ""}`}
+                    className={`object-cover${blurred ? " scale-150 blur-3xl" : ""}`}
                   />
                   {blurred ? (
                     <span
                       aria-hidden
-                      className="absolute inset-0 z-10 flex items-center justify-center bg-void/30"
+                      className="absolute inset-0 z-10 flex items-center justify-center bg-void/50"
                     >
                       <span className="rounded-full border border-coral-soft/50 bg-void/80 px-1.5 py-0.5 font-mono text-[0.6rem] tracking-widest text-coral-soft">
                         18+
