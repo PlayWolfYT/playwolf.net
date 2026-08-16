@@ -80,7 +80,9 @@ export function RefImage({
         </>
       ) : (
         <>
-          <ArtworkCard src={src} alt={alt} artist={artist} isWip={isWip} />
+          {/* The artwork is what the visitor came for and the page's largest
+              element, so it is the LCP candidate on every detail route. */}
+          <ArtworkCard src={src} alt={alt} artist={artist} isWip={isWip} priority />
 
           <div className="mt-6 flex flex-col items-center gap-3">
             {children}

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useId, useRef } from "react";
+import { useRef } from "react";
 
 import { useNsfwConsent } from "@/components/site/NsfwConsent";
 import { Badge } from "@/components/ui/badge";
@@ -28,6 +28,15 @@ function keyFromPathname(pathname: string): ProfileKey {
   return segment && isProfileKey(segment) ? segment : "sfw";
 }
 
+/**
+ * Because these are two URLs rather than two panels, the switch is a `nav`
+ * landmark with `aria-current="page"` — not a `tablist`. The ARIA tabs pattern
+ * expects a roving `tabIndex`, which took After Dark out of the tab order
+ * entirely even though it is an ordinary link to an ordinary page, and
+ * `role="tab"` promises a `tabpanel` that does not exist. The `aria-label`
+ * keeps this landmark apart from `SiteHeader`'s "Primary" nav, which the `/ref`
+ * layout renders above it.
+ */
 export function ProfileSwitcher({
   characterName,
   species,
@@ -36,7 +45,6 @@ export function ProfileSwitcher({
   const pathname = usePathname();
   const router = useRouter();
   const { confirmNsfw } = useNsfwConsent();
-  const baseId = useId();
   const tabRefs = useRef<Partial<Record<ProfileKey, HTMLAnchorElement | null>>>({});
 
   if (tabs.length === 0) return null;
@@ -50,6 +58,9 @@ export function ProfileSwitcher({
     router.push(tab.href, { scroll: true });
   };
 
+  // Arrow keys still move between the two profiles without a click, so the 18+
+  // warning has to be asked for here as well — the provider's click gate never
+  // sees these.
   const onKeyDown = (event: React.KeyboardEvent, index: number) => {
     const delta = event.key === "ArrowRight" ? 1 : event.key === "ArrowLeft" ? -1 : 0;
     if (delta === 0) return;
@@ -79,8 +90,7 @@ export function ProfileSwitcher({
         </div>
 
         {tabs.length > 1 ? (
-          <div
-            role="tablist"
+          <nav
             aria-label="Character profiles"
             className="flex flex-wrap items-center gap-2"
           >
@@ -94,10 +104,7 @@ export function ProfileSwitcher({
                   }}
                   href={tab.href}
                   scroll
-                  role="tab"
-                  id={`${baseId}-tab-${tab.key}`}
-                  aria-selected={selected}
-                  tabIndex={selected ? 0 : -1}
+                  aria-current={selected ? "page" : undefined}
                   onKeyDown={(event) => onKeyDown(event, index)}
                   className={cn(
                     buttonVariants({
@@ -126,7 +133,7 @@ export function ProfileSwitcher({
                 </Link>
               );
             })}
-          </div>
+          </nav>
         ) : (
           <Badge
             variant="outline"

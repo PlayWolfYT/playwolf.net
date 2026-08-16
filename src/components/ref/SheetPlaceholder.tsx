@@ -344,7 +344,7 @@ export async function SheetPlaceholder({ sheet }: SheetPlaceholderProps) {
 
               {/* The content remains in flow so long quotes and progress details
                   can grow a wide aspect frame instead of being clipped. */}
-              <div className="relative z-10 flex min-h-full w-full flex-col items-center justify-center text-center">
+              <div className="relative z-10 flex min-h-full w-full flex-col items-center justify-center text-center my-auto">
                 <h2
                   className={`w-full wrap-break-word bg-clip-text font-display text-2xl font-medium tracking-tight text-transparent sm:text-3xl ${
                     tinted

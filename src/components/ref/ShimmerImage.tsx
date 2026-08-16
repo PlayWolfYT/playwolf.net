@@ -12,7 +12,14 @@ import { useEffect, useRef, useState } from "react";
  * The overlay is absolutely positioned, so callers must provide a positioned
  * (`relative`) ancestor that matches the image bounds.
  */
-export function ShimmerImage({ alt, onLoad, loading, ...props }: ImageProps) {
+export function ShimmerImage({
+  alt,
+  onLoad,
+  loading,
+  priority,
+  fetchPriority,
+  ...props
+}: ImageProps) {
   const ref = useRef<HTMLImageElement>(null);
   const [loaded, setLoaded] = useState(false);
 
@@ -28,9 +35,17 @@ export function ShimmerImage({ alt, onLoad, loading, ...props }: ImageProps) {
         {...props}
         alt={alt}
         ref={ref}
+        priority={priority}
+        // `priority` only emits the preload link and drops the lazy default —
+        // `next/image` forwards `fetchPriority` verbatim rather than deriving
+        // it, so without this the LCP candidate reaches the browser at the
+        // same request priority as everything else.
+        fetchPriority={fetchPriority ?? (priority ? "high" : undefined)}
         // Default to lazy so gallery/overview art does not contend with
         // first paint; callers can still opt into eager via `loading`.
-        loading={loading ?? "lazy"}
+        // `priority` already implies eager, and `next/image` warns when both
+        // are supplied, so it has to win outright.
+        loading={priority ? undefined : (loading ?? "lazy")}
         onLoad={(event) => {
           setLoaded(true);
           onLoad?.(event);

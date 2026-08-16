@@ -55,7 +55,10 @@ function chipClass(selected: boolean) {
       variant: selected ? "default" : "outline",
       size: "sm",
     }),
-    "rounded-full",
+    // `min-h-11` overrides the size's `h-9` to reach the 44px touch target
+    // `ExampleNav` and `SkipToContent` already use, without disturbing the
+    // padding and type scale the rest of the redesigned controls share.
+    "min-h-11 rounded-full",
   );
 }
 
@@ -73,9 +76,21 @@ function FacetRow({
   const options = facetOptions(items, facetKey, filter);
   if (options.length === 0) return null;
 
+  // Server component, so no `useId` — the facet key is unique per bar anyway.
+  const labelId = `facet-${facetKey}-label`;
+
   return (
-    <div className="grid gap-3 py-4 sm:grid-cols-[7rem_1fr] sm:items-start">
-      <span className="pt-2 font-mono text-[0.58rem] uppercase tracking-[0.2em] text-muted-foreground">
+    // A labelled group, so the row's category is announced with its chips
+    // instead of the chips reading as a flat list of unrelated links.
+    <div
+      role="group"
+      aria-labelledby={labelId}
+      className="grid gap-3 py-4 sm:grid-cols-[7rem_1fr] sm:items-start"
+    >
+      <span
+        id={labelId}
+        className="pt-2 font-mono text-[0.58rem] uppercase tracking-[0.2em] text-muted-foreground"
+      >
         {FACET_LABELS[facetKey]}
       </span>
       <div className="flex flex-wrap gap-2">
@@ -88,7 +103,10 @@ function FacetRow({
                 ...filter,
                 [facetKey]: selected ? undefined : option.slug,
               })}
-              aria-pressed={selected}
+              // These are links, not buttons: `aria-pressed` is only defined for
+              // `role="button"`, so the applied facet is marked with
+              // `aria-current` instead.
+              aria-current={selected ? "true" : undefined}
               className={chipClass(selected)}
             >
               {option.label}
@@ -149,13 +167,15 @@ export function FacetBar({
           </div>
 
           <Separator className="mb-4" />
+          {/* The visible label already flips to "Showing …", so `aria-current`
+              only has to mark which of these links is the applied state. */}
           <div className="flex flex-wrap items-center gap-2">
             <Link
               href={galleryHref({
                 ...filter,
                 includeNsfw: !filter.includeNsfw,
               })}
-              aria-pressed={filter.includeNsfw}
+              aria-current={filter.includeNsfw ? "true" : undefined}
               className={chipClass(Boolean(filter.includeNsfw))}
             >
               {filter.includeNsfw ? "Showing 18+" : "Show 18+"}
@@ -165,7 +185,7 @@ export function FacetBar({
                 ...filter,
                 includeWip: !filter.includeWip,
               })}
-              aria-pressed={filter.includeWip}
+              aria-current={filter.includeWip ? "true" : undefined}
               className={chipClass(Boolean(filter.includeWip))}
             >
               {filter.includeWip ? "Showing WIP" : "Show WIP"}

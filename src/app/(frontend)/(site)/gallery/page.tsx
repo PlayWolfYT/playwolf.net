@@ -14,6 +14,8 @@ import { cn } from "@/lib/utils";
 export const metadata: Metadata = {
   title: "Gallery",
   description: "Every commission and reference in one place, filterable.",
+  // Filters live in query parameters, so every combination folds back to here.
+  alternates: { canonical: "/gallery" },
 };
 
 type PageProps = {

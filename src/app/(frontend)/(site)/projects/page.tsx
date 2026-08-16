@@ -15,6 +15,7 @@ import { getProjects } from "@/lib/references";
 export const metadata: Metadata = {
   title: "Projects",
   description: "Things built, in progress, and planned.",
+  alternates: { canonical: "/projects" },
 };
 
 export default async function ProjectsPage() {

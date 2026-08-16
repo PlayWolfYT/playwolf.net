@@ -14,6 +14,7 @@ import { getCharacters } from "@/lib/references";
 export const metadata: Metadata = {
   title: "References",
   description: "Character reference sheets and art examples.",
+  alternates: { canonical: "/ref" },
 };
 
 export default async function RefHome() {

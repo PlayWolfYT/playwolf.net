@@ -164,6 +164,9 @@ export const Artworks: CollectionConfig = {
           type: "select",
           required: true,
           defaultValue: "sfw",
+          // Every public artwork query filters on this, on its own or paired
+          // with `character`.
+          index: true,
           options: [
             { label: "SFW", value: "sfw" },
             { label: "After Dark", value: "nsfw" },
@@ -176,6 +179,9 @@ export const Artworks: CollectionConfig = {
       name: "lifecycle",
       type: "select",
       defaultValue: "complete",
+      // Filtered by the WIP/complete split on the public pages and by the
+      // reminder cron's due query.
+      index: true,
       options: [
         { label: "Complete", value: "complete" },
         { label: "In progress", value: "in_progress" },
@@ -405,6 +411,9 @@ export const Artworks: CollectionConfig = {
             name: "nextAt",
             type: "date",
             label: "Next reminder",
+            // The reminder cron's only range predicate. Sparse in practice —
+            // set on in-progress commissions and nothing else.
+            index: true,
             admin: {
               date: { pickerAppearance: "dayAndTime" },
               description: "Filled automatically when reminders are enabled.",
@@ -487,6 +496,9 @@ export const Artworks: CollectionConfig = {
       name: "order",
       type: "number",
       defaultValue: 0,
+      // Every listing sorts on it, and an unindexed sort key is a full sort of
+      // the collection on each request.
+      index: true,
       admin: {
         description: "Lower sorts first within the profile's gallery.",
         position: "sidebar",
