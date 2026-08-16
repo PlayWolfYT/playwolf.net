@@ -7,8 +7,19 @@ import { Card, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { profileThemeVars } from "@/lib/accent";
 import { getMainArt, placeholderFor, type Character } from "@/lib/content";
 
-export function CharacterCard({ character }: { character: Character }) {
+type CharacterCardProps = {
+  character: Character;
+  /**
+   * Heading rank for the character's name. Defaults to 2, which is right on
+   * `/ref` where the cards sit directly under the page `h1`; the landing page
+   * nests them under a section `h2` and passes 3.
+   */
+  headingLevel?: 2 | 3 | 4;
+};
+
+export function CharacterCard({ character, headingLevel = 2 }: CharacterCardProps) {
   const mainArt = getMainArt(character);
+  const Heading = `h${headingLevel}` as const;
   const accent = (character.profiles.sfw ?? character.profiles.nsfw)?.accentColor;
 
   return (
@@ -53,9 +64,9 @@ export function CharacterCard({ character }: { character: Character }) {
 
           <CardHeader className="border-t border-glow-500/25 bg-glow-500/[0.07] py-(--card-spacing)">
             <CardTitle>
-              <h2 className="font-display text-2xl font-bold tracking-[-0.055em] text-glow-300 drop-shadow-[0_0_18px_rgb(var(--accent-500)/0.28)]">
+              <Heading className="font-display text-2xl font-bold tracking-[-0.055em] text-glow-300 drop-shadow-[0_0_18px_rgb(var(--accent-500)/0.28)]">
                 {character.name}
-              </h2>
+              </Heading>
             </CardTitle>
           </CardHeader>
 

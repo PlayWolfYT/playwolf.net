@@ -1,5 +1,6 @@
 import type { Field } from "payload";
 
+import { validateAccentColor } from "@/lib/accent";
 import { DEFAULT_WIP_SUBTITLE } from "@/lib/sheet-wip";
 import { richTextEditor } from "../editor";
 import { withAdminCondition } from "./adminCondition";
@@ -209,6 +210,10 @@ export function profileField(name: "nsfw" | "sfw", label: string): Field {
             name: "accentColor",
             type: "text",
             defaultValue: "#3abef9",
+            // The ramp in `src/lib/accent.ts` lifts anything that would fail
+            // WCAG contrast on the near-black stage, so this only has to stop
+            // colours dark enough that what renders is nothing like the pick.
+            validate: validateAccentColor,
             admin: {
               components: { Field: COLOR_PICKER },
               width: "35%",

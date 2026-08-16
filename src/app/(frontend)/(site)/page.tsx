@@ -242,7 +242,7 @@ export default async function Home() {
             <ul className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
               {shownProjects.map((project) => (
                 <li key={project.slug}>
-                  <ProjectCard project={project} />
+                  <ProjectCard project={project} headingLevel={3} />
                 </li>
               ))}
             </ul>
@@ -268,7 +268,7 @@ export default async function Home() {
                     key={character.slug}
                     className="basis-[86%] sm:basis-1/2 lg:basis-1/3"
                   >
-                    <CharacterCard character={character} />
+                    <CharacterCard character={character} headingLevel={3} />
                   </CarouselItem>
                 ))}
               </CarouselContent>
