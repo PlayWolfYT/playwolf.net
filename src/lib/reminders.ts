@@ -64,6 +64,12 @@ type ReminderArtwork = {
     number | { id?: number; name?: string | null; slug?: string | null } | null;
 };
 
+/**
+ * One run's page size. Anything due beyond it waits for the next run, which is
+ * fine — but it has to be said out loud, or a backlog looks like an empty queue.
+ */
+const REMINDER_BATCH_SIZE = 100;
+
 function characterLabel(character: ReminderArtwork["character"]): string {
   if (character && typeof character === "object") {
     return character.name || character.slug || "character";
@@ -82,6 +88,7 @@ export async function processCommissionReminders(
 ): Promise<{ sent: number; errors: string[] }> {
   const errors: string[] = [];
   let sent = 0;
+  let skipped = 0;
 
   const settings = await payload.findGlobal({
     slug: "siteSettings",
@@ -99,12 +106,15 @@ export async function processCommissionReminders(
       ],
     },
     depth: 1,
-    limit: 100,
+    limit: REMINDER_BATCH_SIZE,
     overrideAccess: true,
   });
 
   for (const artwork of due.docs as ReminderArtwork[]) {
-    if (!isReminderDue(artwork.reminder, now)) continue;
+    if (!isReminderDue(artwork.reminder, now)) {
+      skipped += 1;
+      continue;
+    }
 
     const interval = artwork.reminder?.interval ?? 1;
     const unit = artwork.reminder?.unit ?? "weeks";
@@ -146,6 +156,33 @@ export async function processCommissionReminders(
       const message = error instanceof Error ? error.message : String(error);
       errors.push(`${artwork.slug}: ${message}`);
     }
+  }
+
+  // Both counts below report through `errors` on purpose: the cron route
+  // derives `ok` from it, and a run that left work behind did not fully
+  // succeed.
+
+  /**
+   * A document SQL called due that `isReminderDue` then refused. The two
+   * disagree only over an unparseable `nextAt`, which the Postgres column type
+   * (`timestamp(3) with time zone`) makes unreachable today — but the failure
+   * mode if that ever changes is silence, not an error: the document is
+   * selected on every run, never sent, and never advanced. Counting the skip is
+   * what makes it visible. The route's watchdog covers the other half of the
+   * same blind spot, a reminder enabled with a NULL `nextAt`, which the due
+   * query never returns at all.
+   */
+  if (skipped > 0) {
+    errors.push(
+      `${skipped} reminder(s) were selected as due but rejected on re-check (unusable reminder.nextAt) and will repeat every run`,
+    );
+  }
+
+  const deferred = Math.max(due.totalDocs - due.docs.length, 0);
+  if (deferred > 0) {
+    errors.push(
+      `${deferred} further reminder(s) were due but deferred past this run's limit of ${REMINDER_BATCH_SIZE}`,
+    );
   }
 
   return { sent, errors };

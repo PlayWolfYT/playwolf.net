@@ -26,6 +26,8 @@ const image: ImageRef = {
   original: { url: "/media/art.png", width: 4000, height: 3000 },
 };
 
+const stamp = "2026-08-01T00:00:00.000Z";
+
 function character(slug: string, name: string): Character {
   return { slug, name, profiles: {} };
 }
@@ -41,6 +43,7 @@ function item(
     example: {
       slug,
       title: slug,
+      updatedAt: stamp,
       src: image,
       isWip: false,
       overviewDisplay: "generated",
@@ -200,6 +203,7 @@ describe("sortExamples", () => {
       {
         slug: "a",
         title: "a",
+        updatedAt: stamp,
         src: image,
         isWip: false,
         overviewDisplay: "generated",
@@ -211,6 +215,7 @@ describe("sortExamples", () => {
       {
         slug: "b",
         title: "b",
+        updatedAt: stamp,
         isWip: true,
         overviewDisplay: "generated",
         wipImages: [],
@@ -221,6 +226,7 @@ describe("sortExamples", () => {
       {
         slug: "c",
         title: "c",
+        updatedAt: stamp,
         src: image,
         isWip: false,
         overviewDisplay: "generated",
@@ -242,6 +248,7 @@ describe("exampleThumb", () => {
       exampleThumb({
         slug: "x",
         title: "x",
+        updatedAt: stamp,
         src: image,
         overviewImage: overview,
         isWip: true,
@@ -256,6 +263,7 @@ describe("exampleThumb", () => {
       exampleThumb({
         slug: "x",
         title: "x",
+        updatedAt: stamp,
         overviewImage: overview,
         isWip: true,
         overviewDisplay: "wipImage",
@@ -269,6 +277,7 @@ describe("exampleThumb", () => {
       exampleThumb({
         slug: "x",
         title: "x",
+        updatedAt: stamp,
         isWip: true,
         overviewDisplay: "generated",
         wipImages: [{ src: sketch }],

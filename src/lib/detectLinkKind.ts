@@ -1,3 +1,4 @@
+import { EMAIL_ADDRESS } from "@/lib/safe-url";
 import type { LinkKind } from "@/payload/fields/links";
 
 /**
@@ -25,8 +26,6 @@ const HOSTS: Record<Exclude<LinkKind, "website" | "email">, readonly string[]> =
   discord: ["discord.gg", "discord.com", "discordapp.com"],
 };
 
-const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
 function hostMatches(hostname: string, suffix: string): boolean {
   return hostname === suffix || hostname.endsWith(`.${suffix}`);
 }
@@ -51,7 +50,7 @@ export function detectLinkKind(raw: string): LinkKind {
   const trimmed = raw.trim();
   if (!trimmed) return "website";
 
-  if (/^mailto:/i.test(trimmed) || EMAIL.test(trimmed)) return "email";
+  if (/^mailto:/i.test(trimmed) || EMAIL_ADDRESS.test(trimmed)) return "email";
 
   const url = parseCandidate(trimmed);
   if (!url) return "website";

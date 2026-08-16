@@ -15,13 +15,27 @@ type SpotlightCardProps = {
  */
 export function SpotlightCard({ children, className = "", style }: SpotlightCardProps) {
   const cardRef = useRef<HTMLDivElement>(null);
+  // Measured once when the pointer arrives. `getBoundingClientRect()` on every
+  // `pointermove` forced a synchronous layout per event, on a card that is
+  // simultaneously being animated by the hover spring.
+  const boundsRef = useRef<DOMRect | null>(null);
   const reducedMotion = useReducedMotion();
   const [spotlightOpacity, setSpotlightOpacity] = useState(0);
 
+  function enter() {
+    boundsRef.current = cardRef.current?.getBoundingClientRect() ?? null;
+    setSpotlightOpacity(1);
+  }
+
+  function leave() {
+    boundsRef.current = null;
+    setSpotlightOpacity(0);
+  }
+
   function moveSpotlight(event: React.PointerEvent<HTMLDivElement>) {
     const card = cardRef.current;
-    if (!card) return;
-    const bounds = card.getBoundingClientRect();
+    const bounds = boundsRef.current;
+    if (!card || !bounds) return;
     card.style.setProperty("--spotlight-x", `${event.clientX - bounds.left}px`);
     card.style.setProperty("--spotlight-y", `${event.clientY - bounds.top}px`);
   }
@@ -32,8 +46,8 @@ export function SpotlightCard({ children, className = "", style }: SpotlightCard
       className={`relative h-full rounded-3xl ${className}`}
       style={style}
       onPointerMove={moveSpotlight}
-      onPointerEnter={() => setSpotlightOpacity(1)}
-      onPointerLeave={() => setSpotlightOpacity(0)}
+      onPointerEnter={enter}
+      onPointerLeave={leave}
       onFocusCapture={() => setSpotlightOpacity(0.8)}
       onBlurCapture={() => setSpotlightOpacity(0)}
       whileHover={reducedMotion ? undefined : { y: -7, scale: 1.012 }}

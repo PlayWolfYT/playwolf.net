@@ -47,7 +47,9 @@ export function WipSlideshow({
         </p>
       </header>
 
-      <Carousel opts={{ loop: slides.length > 1 }}>
+      {/* shadcn marks this `role="region" aria-roledescription="carousel"` but
+          leaves it unnamed, which reads as a bare "carousel" landmark. */}
+      <Carousel aria-label={title} opts={{ loop: slides.length > 1 }}>
         <CarouselContent>
           {slides.map((slide, index) => (
             <CarouselItem key={`${slide.src.src}-${index}`}>
@@ -72,10 +74,18 @@ export function WipSlideshow({
             </CarouselItem>
           ))}
         </CarouselContent>
+        {/* The stock "Previous slide" / "Next slide" repeat the artwork page's
+            other controls verbatim, so the name says what actually moves. */}
         {slides.length > 1 ? (
           <div className="mt-5 flex gap-2">
-            <CarouselPrevious className="static translate-x-0 translate-y-0 border-glow-500/30 bg-glow-500/8 text-glow-300 hover:border-glow-400/60 hover:bg-glow-500/15 hover:text-glow-300" />
-            <CarouselNext className="static translate-x-0 translate-y-0 border-glow-500/30 bg-glow-500/8 text-glow-300 hover:border-glow-400/60 hover:bg-glow-500/15 hover:text-glow-300" />
+            <CarouselPrevious
+              aria-label="Previous sketch"
+              className="static translate-x-0 translate-y-0 border-glow-500/30 bg-glow-500/8 text-glow-300 hover:border-glow-400/60 hover:bg-glow-500/15 hover:text-glow-300"
+            />
+            <CarouselNext
+              aria-label="Next sketch"
+              className="static translate-x-0 translate-y-0 border-glow-500/30 bg-glow-500/8 text-glow-300 hover:border-glow-400/60 hover:bg-glow-500/15 hover:text-glow-300"
+            />
           </div>
         ) : null}
       </Carousel>

@@ -1,3 +1,16 @@
+import Script from "next/script";
+
+/** The tracker's origin, so the connection is warm before the script is asked for. */
+function scriptOrigin(src: string): string | null {
+  try {
+    // Deliberately no `crossOrigin`: the tracker is fetched as a plain script,
+    // and a CORS preconnect would open a connection it cannot reuse.
+    return new URL(src).origin;
+  } catch {
+    return null;
+  }
+}
+
 /**
  * Umami's tracker, rendered only when the deployment has been pointed at one.
  *
@@ -11,5 +24,15 @@ export function Analytics() {
   const websiteId = process.env.UMAMI_WEBSITE_ID;
   if (!src || !websiteId) return null;
 
-  return <script defer src={src} data-website-id={websiteId} />;
+  const origin = scriptOrigin(src);
+
+  return (
+    <>
+      {origin ? <link rel="preconnect" href={origin} /> : null}
+      {/* Analytics is never worth delaying the page for, so it waits for the
+          load event. Umami hooks the History API itself, so it still records
+          client-side navigations after it arrives. */}
+      <Script src={src} data-website-id={websiteId} strategy="lazyOnload" />
+    </>
+  );
 }

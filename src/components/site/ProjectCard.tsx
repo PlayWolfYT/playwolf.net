@@ -24,7 +24,19 @@ const BADGE_VARIANT: Record<
   archived: "ghost",
 };
 
-export function ProjectCard({ project }: { project: Project }) {
+type ProjectCardProps = {
+  project: Project;
+  /**
+   * Heading rank for the project title. Defaults to 2, which is right on
+   * `/projects` where the cards sit directly under the page `h1`; the landing
+   * page nests them under a section `h2` and passes 3.
+   */
+  headingLevel?: 2 | 3 | 4;
+};
+
+export function ProjectCard({ project, headingLevel = 2 }: ProjectCardProps) {
+  const Heading = `h${headingLevel}` as const;
+
   return (
     <SpotlightCard>
       <Link
@@ -57,9 +69,9 @@ export function ProjectCard({ project }: { project: Project }) {
 
           <CardHeader className="border-t border-border pt-(--card-spacing)">
             <CardTitle>
-              <h2 className="font-display text-xl font-bold tracking-[-0.045em]">
+              <Heading className="font-display text-xl font-bold tracking-[-0.045em]">
                 {project.title}
-              </h2>
+              </Heading>
             </CardTitle>
             <CardAction>
               <Badge variant={BADGE_VARIANT[project.status]}>

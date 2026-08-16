@@ -96,6 +96,8 @@ export const Projects: CollectionConfig = {
       name: "order",
       type: "number",
       defaultValue: 0,
+      // Sort key for /projects and the landing page's work grid.
+      index: true,
       admin: {
         description: "Lower sorts first.",
         position: "sidebar",

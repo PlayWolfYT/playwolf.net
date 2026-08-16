@@ -33,7 +33,14 @@ export function ProfileView({ profile, profileKey, basePath }: ProfileViewProps)
         <SheetPlaceholder sheet={sheet} />
       ) : sheet && isImageSheet(sheet) ? (
         <>
-          <ArtworkCard src={sheet.src} alt={sheet.title} artist={sheet.artist} />
+          {/* The reference sheet opens the page and is by far its largest
+              element, so it is this route's LCP candidate. */}
+          <ArtworkCard
+            src={sheet.src}
+            alt={sheet.title}
+            artist={sheet.artist}
+            priority
+          />
           <div className="mt-6 flex justify-center">
             <OpenImageLink image={sheet.src} />
           </div>
