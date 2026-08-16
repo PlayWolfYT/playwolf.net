@@ -126,11 +126,7 @@ export function ArtworkCard({
       <div className="relative overflow-hidden">
         <div
           className={framed ? "relative w-full bg-void" : "relative"}
-          style={
-            framed
-              ? { aspectRatio: `${box.width} / ${box.height}` }
-              : undefined
-          }
+          style={framed ? { aspectRatio: `${box.width} / ${box.height}` } : undefined}
         >
           {image}
           {isWip ? <WipTape /> : null}
