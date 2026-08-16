@@ -1,6 +1,8 @@
 "use client";
 
-import { motion, useReducedMotion } from "motion/react";
+import { motion } from "motion/react";
+
+import { useScrollReveal } from "@/components/motion/useScrollReveal";
 
 type RevealProps = {
   children: React.ReactNode;
@@ -9,21 +11,25 @@ type RevealProps = {
   distance?: number;
 };
 
+const SHOWN = { opacity: 1, y: 0 };
+const INSTANT = { duration: 0 };
+
 /** Reusable, one-shot viewport reveal for server-rendered page sections. */
 export function Reveal({ children, className, delay = 0, distance = 24 }: RevealProps) {
-  const reducedMotion = useReducedMotion();
+  const { ref, hidden, animating } = useScrollReveal<HTMLDivElement>();
 
   return (
     <motion.div
+      ref={ref}
       className={className}
-      initial={reducedMotion ? false : { opacity: 0, y: distance }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, amount: 0.12 }}
-      transition={{
-        delay: reducedMotion ? 0 : delay,
-        duration: reducedMotion ? 0 : 0.7,
-        ease: [0.22, 1, 0.36, 1],
-      }}
+      // `initial={false}` is deliberate: it keeps the hidden state out of the
+      // server HTML so the section can paint before hydration. `hidden` takes
+      // over once the reveal is armed — see `useScrollReveal`.
+      initial={false}
+      animate={hidden ? { opacity: 0, y: distance } : SHOWN}
+      transition={
+        animating ? { delay, duration: 0.7, ease: [0.22, 1, 0.36, 1] } : INSTANT
+      }
     >
       {children}
     </motion.div>

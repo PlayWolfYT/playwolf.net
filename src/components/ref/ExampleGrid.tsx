@@ -63,6 +63,9 @@ export function ExampleGrid({
             const thumbSrc = exampleThumb(example);
             const thumbSizes =
               "(max-width: 640px) 50vw, (max-width: 1024px) 33vw, (max-width: 1280px) 25vw, 20vw";
+            // No `loading` prop: the grid always sits below a reference sheet,
+            // so lazy — `next/image`'s default — is right for every tile, and
+            // spelling it out would collide with `priority` if that ever changed.
 
             return (
               <li key={example.slug}>
@@ -83,7 +86,6 @@ export function ExampleGrid({
                             alt=""
                             aria-hidden
                             fill
-                            loading="lazy"
                             placeholder={placeholderFor(thumbSrc)}
                             sizes={thumbSizes}
                             className="scale-110 object-cover blur-2xl opacity-65"
@@ -92,7 +94,6 @@ export function ExampleGrid({
                             src={thumbSrc}
                             alt={example.title}
                             fill
-                            loading="lazy"
                             placeholder={placeholderFor(thumbSrc)}
                             sizes={thumbSizes}
                             className="relative z-10 object-contain transition duration-500 group-hover:scale-[1.035]"
