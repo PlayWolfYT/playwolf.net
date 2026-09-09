@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { IBM_Plex_Mono, Manrope, Syne } from "next/font/google";
+import { Bricolage_Grotesque, IBM_Plex_Mono, Manrope } from "next/font/google";
 import { cookies } from "next/headers";
 import { NsfwConsentProvider } from "@/components/site/NsfwConsent";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -19,10 +19,10 @@ const ibmPlexMono = IBM_Plex_Mono({
   weight: ["400", "500", "600"],
 });
 
-const syne = Syne({
-  variable: "--font-syne",
+const bricolageGrotesque = Bricolage_Grotesque({
+  variable: "--font-bricolage",
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800"],
+  weight: ["200", "300", "400", "500", "600", "700", "800"],
 });
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://playwolf.net";
@@ -135,7 +135,7 @@ export default async function RootLayout({
   return (
     <html
       lang="en"
-      className={`${manrope.variable} ${ibmPlexMono.variable} ${syne.variable} scroll-smooth`}
+      className={`${manrope.variable} ${ibmPlexMono.variable} ${bricolageGrotesque.variable} scroll-smooth`}
       suppressHydrationWarning
     >
       <body className="font-sans" suppressHydrationWarning>
