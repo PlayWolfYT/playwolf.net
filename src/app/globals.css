@@ -40,8 +40,8 @@
   --color-signal-ink: #06141b;
 
   --font-sans: var(--font-manrope), system-ui, sans-serif;
-  --font-display: var(--font-syne), system-ui, sans-serif;
-  --font-heading: var(--font-syne), system-ui, sans-serif;
+  --font-display: var(--font-bricolage), system-ui, sans-serif;
+  --font-heading: var(--font-bricolage), system-ui, sans-serif;
   --font-mono: var(--font-ibm-plex-mono), ui-monospace, monospace;
 
   --shadow-glow-sm: 0 1px 0 rgb(255 255 255 / 0.06), 0 14px 34px rgb(0 0 0 / 0.24);
