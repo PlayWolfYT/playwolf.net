@@ -1,7 +1,10 @@
 # syntax=docker/dockerfile:1
 
 # --- Install & build (Bun matches local toolchain) ---
-FROM oven/bun:1.3-alpine AS builder
+# Bun 1.4+ is required: Next 16.3 Turbopack tears down worker_threads after
+# `next build`, and Bun 1.3.x then SIGSEGVs (Docker exit 139). Fixed in
+# oven-sh/bun#34067 / #36866.
+FROM oven/bun:1.4-alpine AS builder
 
 WORKDIR /app
 
