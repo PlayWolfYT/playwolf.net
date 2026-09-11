@@ -377,11 +377,13 @@ migrations against production is the accident this prevents.
 | Health Check Path   | `/`                                                                                   |
 | Auto Deploy         | On                                                                                    |
 
-The repository's [`Dockerfile`](../Dockerfile) is a two-stage build: `oven/bun:1.3-alpine`
+The repository's [`Dockerfile`](../Dockerfile) is a two-stage build: `oven/bun:1.4-alpine`
 installs dependencies and runs `next build`, then `node:22-alpine` runs the standalone
 output as `node server.js` on port 3000 as a non-root user. Bun is the package manager and
 build toolchain; Node is the runtime, which is what Payload officially supports. Do not
-switch the build pack to Nixpacks — it will not reproduce this split.
+switch the build pack to Nixpacks — it will not reproduce this split. The builder image
+must stay on Bun 1.4 or newer: Next 16.3's Turbopack worker teardown segfaults under
+Bun 1.3.x (`bun run build` exits 139).
 
 **Build resources.** `next build` with sharp is the heaviest thing this VM does. If builds
 get OOM-killed on a 4 GB VM, either raise the VM to 8 GB or switch to the prebuilt-image
