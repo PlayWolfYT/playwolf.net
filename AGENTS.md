@@ -2,7 +2,7 @@
 
 ## Cursor Cloud specific instructions
 
-This is a single Next.js 16 + Payload CMS 3.86 app (`playwolf.net`). Bun is the package
+This is a single Next.js 16 + Payload CMS 3.89 app (`playwolf.net`). Bun is the package
 manager/build tool (`node` is only the production runtime). Standard commands live in
 [`package.json`](package.json) `scripts` and the [`README.md`](README.md); the
 production/prod-style stack is described in [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md).
