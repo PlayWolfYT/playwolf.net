@@ -469,7 +469,9 @@ Coolify and NPM.
 
 ```nginx
 # Artwork originals are large. Nginx's 1 MB default rejects them with a 413
-# long before Payload sees the request.
+# long before Payload sees the request. Keep this in step with
+# `experimental.proxyClientMaxBodySize` in `next.config.ts` — Next.js silently
+# truncates the body at 10 MB otherwise, and Payload throws "Unexpected end of form".
 client_max_body_size 64m;
 
 # Big uploads and sharp derivative generation both take longer than the 60s default.
@@ -866,6 +868,7 @@ docker system prune -af --filter 'until=168h'   # images unused for a week
 | 502 Bad Gateway from NPM                                  | Container down, or the port mapping changed. `curl http://<VM_IP>:3000/` from the NPM host                                      |
 | Admin panel loads but hangs / reconnect loop              | Websocket support off on the NPM proxy host ([6.2](#62-npm-proxy-host--playwolfnet))                                            |
 | 413 on upload                                             | `client_max_body_size` not set in NPM's Advanced tab                                                                            |
+| "Unexpected end of form" / body exceeded 10MB on upload   | Next.js `experimental.proxyClientMaxBodySize` below Nginx's 64m (`next.config.ts`)                                              |
 | Upload times out on large files                           | `proxy_read_timeout` / `proxy_send_timeout` still at 60s                                                                        |
 | Uploads succeed, images never appear                      | The Garage key lacks read/write/owner on the bucket, or `S3_BUCKET` names a bucket that does not exist                          |
 | Garage returns "no partitions available"                  | Layout never assigned/applied ([section 7](#7-garage-object-storage))                                                           |

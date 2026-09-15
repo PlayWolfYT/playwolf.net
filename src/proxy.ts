@@ -20,6 +20,11 @@ import { PATHNAME_HEADER } from "@/lib/maintenance";
  *
  * A proxy always runs on the Node.js runtime, which is what lets the env read
  * below happen at runtime and the counters below survive between requests.
+ *
+ * Next.js clones the request body for every matched route so the handler can
+ * still read it. The clone is capped by `experimental.proxyClientMaxBodySize`
+ * in `next.config.ts` (64 MB, matching Nginx). Leave that in step with
+ * artwork uploads, or Payload sees a truncated multipart body.
  */
 
 const MINUTE = 60_000;
