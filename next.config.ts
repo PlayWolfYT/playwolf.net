@@ -26,6 +26,15 @@ const nextConfig: NextConfig = {
   /** Slim runtime image when using the bundled Dockerfile */
   output: "standalone",
   /**
+   * `src/proxy.ts` clones every matched request body so the route handler can
+   * still read it. The default 10 MB cap truncates artwork uploads; busboy then
+   * throws "Unexpected end of form". Keep this at or above Nginx
+   * `client_max_body_size 64m` (`docs/DEPLOYMENT.md` §6.2).
+   */
+  experimental: {
+    proxyClientMaxBodySize: "64mb",
+  },
+  /**
    * `cacheComponents` stays off: Payload does not support it yet. Content
    * freshness comes from the `revalidateTag` calls in
    * `src/payload/hooks/revalidate.ts` instead.
