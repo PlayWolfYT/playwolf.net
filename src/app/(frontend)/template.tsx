@@ -1,41 +1,28 @@
-import { headers } from "next/headers";
-
 import { MaintenancePathGate } from "@/components/MaintenancePathGate";
-import { MaintenanceScreen } from "@/components/MaintenanceScreen";
 import { Analytics } from "@/components/site/Analytics";
 import { SkipToContent } from "@/components/site/SkipToContent";
-import { isPathExcludedFromMaintenance, PATHNAME_HEADER } from "@/lib/maintenance";
 import { getSiteSettings } from "@/lib/references";
 
 /**
- * Server gate for full loads + props for the client path gate. Templates
- * remount on navigation; the client gate covers soft navigations out of an
- * excluded prefix even when the RSC shell is reused.
+ * Always pass the page through. Swapping this template's output for the
+ * maintenance screen (and dropping `children`) makes the App Router treat the
+ * two responses as different trees. A client transition then updates the URL
+ * from the predicted route and keeps the screen on display until a full load
+ * fetches the document again.
+ *
+ * `MaintenancePathGate` is a client component, so it can follow `usePathname()`
+ * on soft navigations and reveal the page that was already in this slot.
  */
 export default async function FrontendTemplate({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const [settings, headerStore] = await Promise.all([getSiteSettings(), headers()]);
   const {
     maintenanceMode = false,
     maintenanceMessage,
     maintenanceExcludedPaths = [],
-  } = settings;
-  const pathname = headerStore.get(PATHNAME_HEADER) ?? "/";
-  const showMaintenance =
-    Boolean(maintenanceMode) &&
-    !isPathExcludedFromMaintenance(pathname, maintenanceExcludedPaths);
-
-  if (showMaintenance) {
-    return (
-      <MaintenanceScreen
-        message={maintenanceMessage}
-        excludedPaths={maintenanceExcludedPaths}
-      />
-    );
-  }
+  } = await getSiteSettings();
 
   return (
     <MaintenancePathGate

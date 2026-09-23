@@ -10,16 +10,16 @@ export const DEFAULT_MAINTENANCE_EXCLUDED_PATHS: readonly MaintenanceExcludedPat
 ] as const;
 
 /**
- * Header set by `src/proxy.ts` so the root layout can see the request path.
- * App Router layouts do not receive the pathname otherwise.
- *
  * Maintenance mode is a *presentation* state, not access control. Everything it
  * parks stays reachable: the REST and GraphQL APIs answer normally, and so do
  * the upload file routes, which is deliberate — an embedded image must not go
  * dark because the site is being worked on. Nothing here may be relied on to
  * keep content private; that is what collection `access` is for.
+ *
+ * Which page is parked is decided in the client path gate from the live URL.
+ * The server template always renders the page slot, so a soft navigation can
+ * leave the maintenance screen without a second document load.
  */
-export const PATHNAME_HEADER = "x-pathname";
 
 function normalizePath(path: string): string {
   const trimmed = path.trim();

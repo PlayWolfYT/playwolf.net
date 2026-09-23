@@ -1,10 +1,8 @@
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
-import { PATHNAME_HEADER } from "@/lib/maintenance";
-
 /**
- * Runs on every request that is not a static asset. Three jobs, in order:
+ * Runs on every request that is not a static asset. Two jobs, in order:
  *
  * 1. Rate-limit the few endpoints where an unauthenticated caller can cost
  *    something — an admin lockout, an email, a push notification.
@@ -13,10 +11,10 @@ import { PATHNAME_HEADER } from "@/lib/maintenance";
  *    `src/components/site/Analytics.tsx`) while `headers()` there is baked at
  *    build time, and the site and the Payload admin need different policies,
  *    which only a per-request hook can tell apart.
- * 3. Forward the request pathname so the frontend template can honour
- *    maintenance-mode path exclusions. Maintenance itself is decided in
- *    `app/(frontend)/template.tsx` (where site settings are loaded), which
- *    remounts on every soft navigation.
+ *
+ * Maintenance exclusions are not decided here. The client path gate follows
+ * the live URL, so a soft navigation from the maintenance screen can reveal
+ * an excluded page without a second document load.
  *
  * A proxy always runs on the Node.js runtime, which is what lets the env read
  * below happen at runtime and the counters below survive between requests.
@@ -233,18 +231,7 @@ export function proxy(request: NextRequest) {
     }
   }
 
-  const requestHeaders = new Headers(request.headers);
-  // A client is free to send its own `x-pathname`, and everything downstream
-  // treats this header as the real path. Dropping it before writing keeps that
-  // true no matter how the value is written afterwards.
-  requestHeaders.delete(PATHNAME_HEADER);
-  requestHeaders.set(PATHNAME_HEADER, pathname);
-
-  const response = NextResponse.next({
-    request: {
-      headers: requestHeaders,
-    },
-  });
+  const response = NextResponse.next();
 
   /**
    * Report-only on purpose. The policy is one nonce pipeline short of being
@@ -262,7 +249,8 @@ export const config = {
   matcher: [
     /*
      * Skip Next internals and files with an extension (favicons, images, etc.).
-     * Admin/API also get the header; they do not use the frontend layout.
+     * Admin and API requests are included so they get the rate limit and CSP.
+     * They do not use the frontend layout.
      */
     "/((?!_next/static|_next/image|favicon.ico|.*\\..*).*)",
   ],
