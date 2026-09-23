@@ -101,6 +101,11 @@ export type Project = {
   featured: boolean;
 };
 
+export type MaintenanceExcludedPath = {
+  path: string;
+  label?: string;
+};
+
 /** Site-wide switches and copy, edited as a Payload global. */
 export type SiteSettings = {
   maintenanceMode: boolean;
@@ -109,7 +114,7 @@ export type SiteSettings = {
    * Path prefixes left reachable during maintenance. Missing/null falls back
    * to `/ref`; an explicit empty list excludes nothing.
    */
-  maintenanceExcludedPaths: string[];
+  maintenanceExcludedPaths: MaintenanceExcludedPath[];
   heroTitle?: string;
   heroTagline?: string;
   about?: RichTextValue;
@@ -125,7 +130,7 @@ export type SiteSettings = {
 export const DEFAULT_SITE_SETTINGS: SiteSettings = {
   maintenanceMode: false,
   // Keep in sync with `SiteSettings.maintenanceExcludedPaths` defaultValue.
-  maintenanceExcludedPaths: ["/ref"],
+  maintenanceExcludedPaths: [{ path: "/ref", label: "Character References" }],
   links: [],
 };
 

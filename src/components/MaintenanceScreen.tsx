@@ -15,6 +15,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import type { MaintenanceExcludedPath } from "@/lib/content";
 import { cn } from "@/lib/utils";
 
 export function MaintenanceScreen({
@@ -22,7 +23,7 @@ export function MaintenanceScreen({
   excludedPaths = [],
 }: {
   message?: string;
-  excludedPaths?: readonly string[];
+  excludedPaths?: readonly MaintenanceExcludedPath[];
 }) {
   return (
     <main className="relative isolate min-h-svh bg-background">
@@ -137,16 +138,16 @@ export function MaintenanceScreen({
                     While we work, you can still access:
                   </p>
                   <div className="flex flex-wrap gap-2">
-                    {excludedPaths.map((path) => (
+                    {excludedPaths.map((entry) => (
                       <Link
-                        key={path}
-                        href={path}
+                        key={entry.path}
+                        href={entry.path}
                         className={cn(
                           buttonVariants({ variant: "outline", size: "sm" }),
                           "rounded-xl border-glow-500/30 bg-glow-500/10 hover:border-glow-400/50 hover:bg-glow-500/20",
                         )}
                       >
-                        {path}
+                        {entry.label || entry.path}
                       </Link>
                     ))}
                   </div>

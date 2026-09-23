@@ -527,7 +527,7 @@ async function clearDatabaseContent(payload: Payload): Promise<void> {
       heroTagline: null,
       heroTitle: null,
       links: [],
-      maintenanceExcludedPaths: ["/ref"],
+      maintenanceExcludedPaths: [{ path: "/ref", label: "Character References" }],
       maintenanceMessage: null,
       maintenanceMode: false,
       notifications: {
@@ -1783,7 +1783,7 @@ async function seedDatabase(
       maintenanceMode: false,
       maintenanceMessage:
         "Seeded maintenance message — toggle maintenance mode to test it.",
-      maintenanceExcludedPaths: ["/ref"],
+      maintenanceExcludedPaths: [{ path: "/ref", label: "Character References" }],
       heroTitle: "Seed Scenario Matrix",
       heroTagline:
         "A descriptive matrix of full, partial, empty, SFW, NSFW, image-ref, WIP-ref, and no-ref fixtures.",

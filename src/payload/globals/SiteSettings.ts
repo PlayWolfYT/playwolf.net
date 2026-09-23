@@ -89,13 +89,31 @@ export const SiteSettings: GlobalConfig = {
             withAdminCondition(
               {
                 name: "maintenanceExcludedPaths",
-                type: "text",
-                hasMany: true,
-                defaultValue: ["/ref"],
+                type: "array",
+                defaultValue: [{ path: "/ref", label: "Character References" }],
                 admin: {
                   description:
-                    "Path prefixes that stay reachable during maintenance (exact match or subpaths). Defaults to /ref. Clear the list to put every public route behind the screen.",
+                    "Path prefixes that stay reachable during maintenance (exact match or subpaths). Clear the list to put every public route behind the screen.",
+                  initCollapsed: true,
                 },
+                fields: [
+                  {
+                    name: "path",
+                    type: "text",
+                    required: true,
+                    admin: {
+                      description: "URL path, e.g. /ref or /projects",
+                    },
+                  },
+                  {
+                    name: "label",
+                    type: "text",
+                    admin: {
+                      description:
+                        "Display label for the link. If empty, the path is used.",
+                    },
+                  },
+                ],
               },
               (data) => Boolean(data?.maintenanceMode),
             ),
