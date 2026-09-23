@@ -38,4 +38,18 @@ describe("isPathExcludedFromMaintenance", () => {
       isPathExcludedFromMaintenance("/ref/wuff", DEFAULT_MAINTENANCE_EXCLUDED_PATHS),
     ).toBe(true);
   });
+
+  test("works with object format paths", () => {
+    expect(isPathExcludedFromMaintenance("/ref", [{ path: "/ref" }])).toBe(true);
+    expect(
+      isPathExcludedFromMaintenance("/ref/wuff", [
+        { path: "/ref", label: "References" },
+      ]),
+    ).toBe(true);
+    expect(
+      isPathExcludedFromMaintenance("/projects", [
+        { path: "/ref", label: "References" },
+      ]),
+    ).toBe(false);
+  });
 });

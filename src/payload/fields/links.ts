@@ -53,9 +53,9 @@ const LINK_URL_FIELD = "@/payload/components/LinkUrlField#LinkUrlField";
  * The stored value goes straight into an `href` (see `LinkRow`), so the scheme
  * is the thing to pin down: `javascript:` here would be a stored XSS on every
  * page that renders the row. What counts as valid depends on `kind` — `email`
- * holds a bare address and gets its `mailto:` at render time, while every other
- * kind needs an absolute http(s) URL, since a bare `playwolf.net` would resolve
- * against the current page.
+ * holds a bare address and gets its `mailto:` at render time, and `discord`
+ * holds a bare username (no URL), while every other kind needs an absolute
+ * http(s) URL, since a bare `playwolf.net` would resolve against the current page.
  */
 const validateLinkUrl: TextFieldSingleValidation = (value, options) => {
   if (typeof value !== "string" || !value.trim()) return "A URL is required.";
@@ -66,6 +66,10 @@ const validateLinkUrl: TextFieldSingleValidation = (value, options) => {
     return isEmailAddress(url)
       ? true
       : "Email links store a bare address, e.g. `hi@playwolf.net` (no `mailto:`).";
+  }
+
+  if (kind === "discord") {
+    return url.length > 0 ? true : "Discord links store a username.";
   }
 
   return isHttpUrl(url)
@@ -98,7 +102,8 @@ export function linksField(label?: string): Field {
         required: true,
         validate: validateLinkUrl,
         admin: {
-          description: "Full URL, or a bare address when the kind is Email.",
+          description:
+            "Full URL, or a bare address for Email, or a bare username for Discord.",
           components: {
             Field: LINK_URL_FIELD,
           },

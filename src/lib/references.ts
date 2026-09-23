@@ -368,17 +368,19 @@ function toFeatured(artwork: LoadedArtwork): Featured[] {
 }
 
 function toWipImages(entries: LoadedArtwork["wipImages"]): Example["wipImages"] {
-  return (entries ?? []).flatMap((entry) => {
-    const src = toImageRef(entry.image);
-    if (!src) return [];
-    return [
-      {
-        src,
-        caption: entry.caption ?? undefined,
-        addedAt: entry.addedAt ?? undefined,
-      },
-    ];
-  });
+  return (entries ?? [])
+    .flatMap((entry) => {
+      const src = toImageRef(entry.image);
+      if (!src) return [];
+      return [
+        {
+          src,
+          caption: entry.caption ?? undefined,
+          addedAt: entry.addedAt ?? undefined,
+        },
+      ];
+    })
+    .reverse();
 }
 
 /**
@@ -755,9 +757,16 @@ async function loadSiteSettings(): Promise<SiteSettings> {
     // `null`/missing means "never configured" → keep `/ref` reachable.
     // An explicit empty array means the admin cleared every exception.
     maintenanceExcludedPaths: Array.isArray(settings.maintenanceExcludedPaths)
-      ? settings.maintenanceExcludedPaths.filter(
-          (path): path is string => typeof path === "string" && path.trim().length > 0,
-        )
+      ? settings.maintenanceExcludedPaths
+          .filter((entry) => typeof entry === "object" && entry !== null)
+          .map((entry) => ({
+            path: typeof entry.path === "string" ? entry.path : "",
+            label:
+              typeof entry.label === "string" && entry.label.trim()
+                ? entry.label
+                : undefined,
+          }))
+          .filter((entry) => entry.path.trim().length > 0)
       : DEFAULT_SITE_SETTINGS.maintenanceExcludedPaths,
     heroTitle: settings.heroTitle ?? undefined,
     heroTagline: settings.heroTagline ?? undefined,

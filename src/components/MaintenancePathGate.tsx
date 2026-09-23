@@ -4,12 +4,13 @@ import { usePathname } from "next/navigation";
 import { createContext, useContext, useEffect, useState } from "react";
 
 import { MaintenanceScreen } from "@/components/MaintenanceScreen";
+import type { MaintenanceExcludedPath } from "@/lib/content";
 import { isPathExcludedFromMaintenance } from "@/lib/maintenance";
 
 type MaintenanceStatus = {
   maintenanceMode: boolean;
   maintenanceMessage?: string;
-  maintenanceExcludedPaths: string[];
+  maintenanceExcludedPaths: MaintenanceExcludedPath[];
 };
 
 const MaintenanceStatusContext = createContext<MaintenanceStatus | null>(null);
@@ -59,7 +60,9 @@ export function MaintenancePathGate({
           maintenanceMode: Boolean(data.maintenanceMode),
           maintenanceMessage: data.maintenanceMessage,
           maintenanceExcludedPaths: Array.isArray(data.maintenanceExcludedPaths)
-            ? data.maintenanceExcludedPaths.map(String)
+            ? data.maintenanceExcludedPaths.map((entry) =>
+                typeof entry === "string" ? { path: entry } : entry,
+              )
             : [],
         });
       })
@@ -76,7 +79,12 @@ export function MaintenancePathGate({
     !isPathExcludedFromMaintenance(pathname, status.maintenanceExcludedPaths);
 
   if (blocked) {
-    return <MaintenanceScreen message={status.maintenanceMessage} />;
+    return (
+      <MaintenanceScreen
+        message={status.maintenanceMessage}
+        excludedPaths={status.maintenanceExcludedPaths}
+      />
+    );
   }
 
   return (
