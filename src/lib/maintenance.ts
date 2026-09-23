@@ -1,9 +1,13 @@
+import type { MaintenanceExcludedPath } from "@/lib/content";
+
 /**
  * Path prefixes that stay reachable when maintenance mode is on, unless the
  * admin clears the list. `/ref` is the product default so character sheets
  * remain shareable while the rest of the site is parked.
  */
-export const DEFAULT_MAINTENANCE_EXCLUDED_PATHS = ["/ref"] as const;
+export const DEFAULT_MAINTENANCE_EXCLUDED_PATHS: readonly MaintenanceExcludedPath[] = [
+  { path: "/ref", label: "Character References" },
+] as const;
 
 /**
  * Header set by `src/proxy.ts` so the root layout can see the request path.
@@ -32,12 +36,13 @@ function normalizePath(path: string): string {
  */
 export function isPathExcludedFromMaintenance(
   pathname: string,
-  excludedPaths: readonly string[],
+  excludedPaths: readonly MaintenanceExcludedPath[] | readonly string[],
 ): boolean {
   const normalizedPath = normalizePath(pathname);
   if (!normalizedPath) return false;
 
-  return excludedPaths.some((raw) => {
+  return excludedPaths.some((entry) => {
+    const raw = typeof entry === "string" ? entry : entry.path;
     const prefix = normalizePath(raw);
     if (!prefix) return false;
     return normalizedPath === prefix || normalizedPath.startsWith(`${prefix}/`);

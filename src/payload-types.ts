@@ -1909,9 +1909,21 @@ export interface SiteSetting {
   maintenanceMode?: boolean | null;
   maintenanceMessage?: string | null;
   /**
-   * Path prefixes that stay reachable during maintenance (exact match or subpaths). Defaults to /ref. Clear the list to put every public route behind the screen.
+   * Path prefixes that stay reachable during maintenance (exact match or subpaths). Clear the list to put every public route behind the screen.
    */
-  maintenanceExcludedPaths?: string[] | null;
+  maintenanceExcludedPaths?:
+    | {
+        /**
+         * URL path, e.g. /ref or /projects
+         */
+        path: string;
+        /**
+         * Display label for the link. If empty, the path is used.
+         */
+        label?: string | null;
+        id?: string | null;
+      }[]
+    | null;
   heroTitle?: string | null;
   heroTagline?: string | null;
   about?: {
@@ -2008,7 +2020,13 @@ export interface SiteSetting {
 export interface SiteSettingsSelect<T extends boolean = true> {
   maintenanceMode?: T;
   maintenanceMessage?: T;
-  maintenanceExcludedPaths?: T;
+  maintenanceExcludedPaths?:
+    | T
+    | {
+        path?: T;
+        label?: T;
+        id?: T;
+      };
   heroTitle?: T;
   heroTagline?: T;
   about?: T;
