@@ -1,4 +1,5 @@
 import { ConstructionIcon } from "lucide-react";
+import Link from "next/link";
 
 import { BrandBackdrop, SparkStar } from "@/components/BrandBackdrop";
 import { Blaze } from "@/components/canvasui/Blaze";
@@ -6,6 +7,7 @@ import { FlameWrap } from "@/components/canvasui/FlameWrap";
 import { MaintenanceBackButton } from "@/components/MaintenanceBackButton";
 import { Wordmark } from "@/components/site/Wordmark";
 import { Badge } from "@/components/ui/badge";
+import { buttonVariants } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -13,8 +15,15 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 
-export function MaintenanceScreen({ message }: { message?: string }) {
+export function MaintenanceScreen({
+  message,
+  excludedPaths = [],
+}: {
+  message?: string;
+  excludedPaths?: readonly string[];
+}) {
   return (
     <main className="relative isolate min-h-svh bg-background">
       {/* `fixed` + `100lvh` keeps the blaze/backdrop stable when mobile browser
@@ -121,6 +130,29 @@ export function MaintenanceScreen({ message }: { message?: string }) {
                   </div>
                 </div>
               </div>
+
+              {excludedPaths.length > 0 ? (
+                <div className="space-y-3">
+                  <p className="text-sm font-medium text-muted-foreground">
+                    While we work, you can still access:
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {excludedPaths.map((path) => (
+                      <Link
+                        key={path}
+                        href={path}
+                        className={cn(
+                          buttonVariants({ variant: "outline", size: "sm" }),
+                          "rounded-xl border-glow-500/30 bg-glow-500/10 hover:border-glow-400/50 hover:bg-glow-500/20",
+                        )}
+                      >
+                        {path}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              ) : null}
+
               <MaintenanceBackButton />
             </CardContent>
 

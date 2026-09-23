@@ -76,7 +76,12 @@ export function MaintenancePathGate({
     !isPathExcludedFromMaintenance(pathname, status.maintenanceExcludedPaths);
 
   if (blocked) {
-    return <MaintenanceScreen message={status.maintenanceMessage} />;
+    return (
+      <MaintenanceScreen
+        message={status.maintenanceMessage}
+        excludedPaths={status.maintenanceExcludedPaths}
+      />
+    );
   }
 
   return (

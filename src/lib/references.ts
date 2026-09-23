@@ -368,17 +368,19 @@ function toFeatured(artwork: LoadedArtwork): Featured[] {
 }
 
 function toWipImages(entries: LoadedArtwork["wipImages"]): Example["wipImages"] {
-  return (entries ?? []).flatMap((entry) => {
-    const src = toImageRef(entry.image);
-    if (!src) return [];
-    return [
-      {
-        src,
-        caption: entry.caption ?? undefined,
-        addedAt: entry.addedAt ?? undefined,
-      },
-    ];
-  });
+  return (entries ?? [])
+    .flatMap((entry) => {
+      const src = toImageRef(entry.image);
+      if (!src) return [];
+      return [
+        {
+          src,
+          caption: entry.caption ?? undefined,
+          addedAt: entry.addedAt ?? undefined,
+        },
+      ];
+    })
+    .reverse();
 }
 
 /**

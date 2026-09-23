@@ -29,7 +29,12 @@ export default async function FrontendTemplate({
     !isPathExcludedFromMaintenance(pathname, maintenanceExcludedPaths);
 
   if (showMaintenance) {
-    return <MaintenanceScreen message={maintenanceMessage} />;
+    return (
+      <MaintenanceScreen
+        message={maintenanceMessage}
+        excludedPaths={maintenanceExcludedPaths}
+      />
+    );
   }
 
   return (

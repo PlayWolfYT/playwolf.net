@@ -537,7 +537,7 @@ export interface Artist {
   links?:
     | {
         /**
-         * Full URL, or a bare address when the kind is Email.
+         * Full URL, or a bare address for Email, or a bare username for Discord.
          */
         url: string;
         /**
@@ -603,7 +603,7 @@ export interface Friend {
   links?:
     | {
         /**
-         * Full URL, or a bare address when the kind is Email.
+         * Full URL, or a bare address for Email, or a bare username for Discord.
          */
         url: string;
         /**
@@ -1042,7 +1042,7 @@ export interface Project {
   links?:
     | {
         /**
-         * Full URL, or a bare address when the kind is Email.
+         * Full URL, or a bare address for Email, or a bare username for Discord.
          */
         url: string;
         /**
@@ -1936,7 +1936,7 @@ export interface SiteSetting {
   links?:
     | {
         /**
-         * Full URL, or a bare address when the kind is Email.
+         * Full URL, or a bare address for Email, or a bare username for Discord.
          */
         url: string;
         /**
