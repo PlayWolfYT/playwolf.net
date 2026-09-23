@@ -90,22 +90,20 @@ export const viewport: Viewport = {
 
 /**
  * Every public page is rendered per request. Permanent, not provisional: the
- * static-rendering spike found five independent blockers, each enough on its own
+ * static-rendering spike found four independent blockers, each enough on its own
  * to stop any `(frontend)` route prerendering.
  *
- * 1. `headers()` in `template.tsx`, reading the `x-pathname` the proxy injects
- *    to drive the maintenance gate.
- * 2. `cookies()` below, for the 18+ consent.
- * 3. `getAdminUser()` on the artwork route — `headers()` plus a live
+ * 1. `cookies()` below, for the 18+ consent.
+ * 2. `getAdminUser()` on the artwork route — `headers()` plus a live
  *    `payload.auth()`. That route is both the most numerous on the site and the
  *    one whose URLs get sent to artists, so it could only go static by moving
  *    commission metadata behind an authenticated client fetch.
- * 4. `useSearchParams()` in `NsfwConsent`, which this layout wraps every route
+ * 3. `useSearchParams()` in `NsfwConsent`, which this layout wraps every route
  *    in. With `cacheComponents` off a prerender throws `BailoutToCSRError`, and
  *    reports it against the *page* rather than this provider. Suspense is not
  *    the fix: `children` arrives as a prop, so the prerender would emit the
  *    fallback and the page would ship empty.
- * 5. `getCharacters()`/`getProjects()` do not swallow an unreachable database
+ * 4. `getCharacters()`/`getProjects()` do not swallow an unreachable database
  *    the way `getSiteSettings()` does, and the `Dockerfile` builds with no
  *    `DATABASE_URL`, so prerendering `/`, `/projects` or `/ref` throws outright.
  *

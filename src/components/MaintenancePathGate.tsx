@@ -33,9 +33,13 @@ type MaintenancePathGateProps = MaintenanceStatus & {
 };
 
 /**
- * Client-side gate so soft navigations out of an excluded prefix (e.g. `/ref`
- * → `/projects`) still honour maintenance mode. The server template covers
- * full loads; this covers App Router client transitions via `usePathname`.
+ * Shows the maintenance screen, or the page, from the live URL.
+ *
+ * The server template always mounts this gate and always passes `children`.
+ * Soft navigations therefore keep one tree shape: the URL change updates
+ * `usePathname()`, and an excluded path reveals the page already in the slot.
+ * Replacing the whole template with the screen (and dropping `children`) makes
+ * the router update the address bar and leave the screen in place until reload.
  */
 export function MaintenancePathGate({
   maintenanceMode: initialMode,
