@@ -132,6 +132,10 @@ const PRESENTATION: Record<LinkKind, Presentation> = {
 function inferHandle(kind: LinkKind, url: string): string | undefined {
   if (kind === "email") return url;
 
+  if (kind === "discord") {
+    return url.trim();
+  }
+
   let segment: string | undefined;
   try {
     const parts = new URL(url).pathname.split("/").filter(Boolean);
@@ -148,7 +152,7 @@ function inferHandle(kind: LinkKind, url: string): string | undefined {
 type RenderedLink = {
   key: string;
   label: string;
-  href: string;
+  href?: string;
   icon: ReactNode;
   hoverClass: string;
 };
@@ -160,32 +164,32 @@ type RenderedLink = {
  *
  * The `mailto:` strip is for the same reason: `detectLinkKind` classifies a
  * pasted `mailto:` as `email`, which used to render as `mailto:mailto:…`.
+ *
+ * Discord usernames are stored bare (no URL) since Discord doesn't provide
+ * profile URLs, so they render as unclickable text.
  */
 function hrefFor(link: ContentLink): string | undefined {
   if (link.kind === "email") {
     const address = link.url.trim().replace(/^mailto:/i, "");
     return address ? `mailto:${address}` : undefined;
   }
+  if (link.kind === "discord") {
+    return undefined;
+  }
   return safeHref(link.url);
 }
 
 function buildLinks(links: ContentLink[]): RenderedLink[] {
-  const usable = links
-    .map((link) => ({ href: hrefFor(link), link }))
-    .filter((entry): entry is { href: string; link: ContentLink } =>
-      Boolean(entry.href),
-    );
-
   // Two Telegrams with neither a description nor a distinguishable handle would
-  // otherwise render as two identical tooltips, so they get numbered. Counted
-  // over the usable rows so the numbering has no gaps.
+  // otherwise render as two identical tooltips, so they get numbered.
   const totals = new Map<LinkKind, number>();
-  for (const { link } of usable) {
+  for (const link of links) {
     totals.set(link.kind, (totals.get(link.kind) ?? 0) + 1);
   }
   const seen = new Map<LinkKind, number>();
 
-  return usable.map(({ href, link }, index) => {
+  return links.map((link, index) => {
+    const href = hrefFor(link);
     const presentation = PRESENTATION[link.kind];
     const position = (seen.get(link.kind) ?? 0) + 1;
     seen.set(link.kind, position);
@@ -226,25 +230,32 @@ export function LinkRow({
     return (
       <div className={cn("grid gap-3 sm:grid-cols-2", className)}>
         {rendered.map((link) => {
-          const isMail = link.href.startsWith("mailto:");
+          const isMail = link.href?.startsWith("mailto:");
+          const isClickable = Boolean(link.href);
+          const Component = isClickable ? "a" : "div";
+
           return (
-            <a
+            <Component
               key={link.key}
-              href={link.href}
-              target={isMail ? undefined : "_blank"}
-              rel={isMail ? undefined : "noreferrer"}
+              {...(isClickable && link.href
+                ? {
+                    href: link.href,
+                    target: isMail ? undefined : "_blank",
+                    rel: isMail ? undefined : "noreferrer",
+                  }
+                : {})}
               className={cn(
                 buttonVariants({ variant: "outline", size: "lg" }),
                 "h-auto min-h-16 justify-between rounded-xl px-5 whitespace-normal",
-                link.hoverClass,
+                isClickable ? link.hoverClass : "cursor-default",
               )}
             >
               <span className="flex min-w-0 items-center gap-3">
                 {link.icon}
                 <span className="truncate text-left">{link.label}</span>
               </span>
-              <ArrowUpRightIcon data-icon="inline-end" />
-            </a>
+              {isClickable ? <ArrowUpRightIcon data-icon="inline-end" /> : null}
+            </Component>
           );
         })}
       </div>
@@ -262,20 +273,27 @@ export function LinkRow({
       )}
     >
       {rendered.map((link) => {
-        const isMail = link.href.startsWith("mailto:");
+        const isMail = link.href?.startsWith("mailto:");
+        const isClickable = Boolean(link.href);
+        const Component = isClickable ? "a" : "span";
+
         return (
           <Tooltip key={link.key}>
             <TooltipTrigger
               render={
-                <a
-                  href={link.href}
-                  target={isMail ? undefined : "_blank"}
-                  rel={isMail ? undefined : "noreferrer"}
+                <Component
+                  {...(isClickable && link.href
+                    ? {
+                        href: link.href,
+                        target: isMail ? undefined : "_blank",
+                        rel: isMail ? undefined : "noreferrer",
+                      }
+                    : {})}
                   aria-label={link.label}
                   className={cn(
                     buttonVariants({ variant: "outline", size: "icon" }),
                     "rounded-xl bg-background/70 text-muted-foreground",
-                    link.hoverClass,
+                    isClickable ? link.hoverClass : "cursor-default",
                   )}
                 />
               }
